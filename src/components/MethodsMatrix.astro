@@ -1,0 +1,47 @@
+---
+import { methods } from '../data/site';
+---
+<div class="matrix-wrap">
+  <table class="matrix">
+    <caption class="vh">Methods used in each project. A dot marks a method the project uses.</caption>
+    <thead>
+      <tr>
+        <th scope="col">Method</th>
+        {methods.projects.map((p) => (
+          <th scope="col" class:list={{ feat: p.featured }}><a href={p.href}>{p.short}</a></th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {methods.rows.map((row) => (
+        <tr>
+          <th scope="row">{row.method}</th>
+          {methods.projects.map((_, i) => (
+            <td>{row.uses.includes(i) && <><span class="dot"></span><span class="vh">Yes</span></>}</td>
+          ))}
+        </tr>
+      ))}
+      <tr class="impl">
+        <th scope="row">Implementation</th>
+        {methods.implementation.map((lang) => <td>{lang}</td>)}
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<style>
+  /* position: relative contains the visually hidden labels, which would otherwise widen the page */
+  .matrix-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { border-collapse: collapse; font: 400 14px/1.45 var(--sans); font-variant-numeric: tabular-nums; width: 100%; min-width: 560px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+  thead th { font-weight: 500; text-align: center; vertical-align: bottom; border-bottom-color: var(--ink); white-space: nowrap; }
+  thead th:first-child { text-align: left; }
+  tbody th { text-align: left; font-weight: 400; white-space: nowrap; }
+  td { text-align: center; }
+  th:first-child { position: sticky; left: 0; background: var(--paper); z-index: 1; }
+  .impl th, .impl td { color: var(--graphite); border-bottom: 0; padding-top: 12px; }
+  .feat { color: var(--ink); }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); vertical-align: middle; }
+  a { color: inherit; text-decoration-color: var(--rule); }
+  a:hover { color: var(--survey); text-decoration-color: currentColor; }
+</style>

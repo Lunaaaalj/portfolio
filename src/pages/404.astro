@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { person } from '../data/site';
+---
+<Base title={`Page not found · ${person.name}`} description="The requested page does not exist.">
+  <main class="page">
+    <div class="missing">
+      <h1>Page not found</h1>
+      <p>The address does not match any page on this site. Selected work is listed on the <a href="/">home page</a>.</p>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .missing { padding: 120px 0; max-width: var(--main); }
+  h1 { font-size: 36px; line-height: 1.2; margin-bottom: 16px; }
+</style>

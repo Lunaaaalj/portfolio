@@ -1,0 +1,103 @@
+---
+import { person } from '../data/site';
+---
+<header class="hero">
+  <canvas class="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <div class="top">
+      <nav aria-label="Sections">
+        <a href="#work">Selected work</a>
+        <a href="#methods">Methods</a>
+        <a href="#further">Further work</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <button class="theme-btn" type="button">Dark theme</button>
+    </div>
+    <div class="hero-title">
+      <h1 class="name">{person.name}</h1>
+      <p class="role">{person.role}</p>
+      <p class="affil">{person.affiliation}</p>
+    </div>
+    <p class="hero-cap">
+      A logarithmic spiral, <i>r</i>&#8239;=&#8239;<i>a</i>&#8202;e<sup><i>b&theta;</i></sup>, traced by its tangent lines.
+      Every tangent meets the radius at the same angle, so the curve looks the same at every scale.
+    </p>
+  </div>
+</header>
+
+<script>
+  import { mountSpiral } from '../scripts/spiral';
+
+  mountSpiral(document.querySelector<HTMLCanvasElement>('.hero-canvas')!);
+
+  const root = document.documentElement;
+  const btn = document.querySelector<HTMLButtonElement>('.theme-btn')!;
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  const current = () => root.dataset.theme || (mq.matches ? 'dark' : 'light');
+  const label = () => { btn.textContent = current() === 'dark' ? 'Light theme' : 'Dark theme'; };
+  btn.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch {}
+    label();
+  });
+  mq.addEventListener('change', label);
+  label();
+</script>
+
+<style>
+  .hero { position: relative; z-index: 2; overflow: hidden; border-bottom: 1px solid var(--rule); background: var(--paper); }
+  .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  /* Keeps the name and the navigation readable over the lines */
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      linear-gradient(180deg, var(--paper) 0, color-mix(in srgb, var(--paper) 80%, transparent) 56px, transparent 110px),
+      linear-gradient(90deg, var(--paper) 0%, color-mix(in srgb, var(--paper) 88%, transparent) 30%, transparent 60%);
+  }
+  .hero-inner {
+    position: relative; z-index: 2;
+    min-height: min(100svh, 1000px);
+    display: grid; grid-template-rows: auto 1fr auto;
+    padding: 0 16px 28px var(--inset);
+  }
+
+  .top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
+    max-width: calc(var(--main) + var(--gap) + var(--margin));
+    padding: 20px 0 0;
+    font: 400 14px/1.45 var(--sans); color: var(--graphite);
+  }
+  .top nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+  .top a { color: var(--graphite); text-decoration: none; }
+  .top a:hover { color: var(--ink); text-decoration: underline; }
+  .theme-btn {
+    font: inherit; color: var(--graphite); background: none; border: 0; padding: 4px 0; cursor: pointer;
+    text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 0.25em;
+  }
+  .theme-btn:hover { color: var(--ink); text-decoration-color: currentColor; }
+
+  .hero-title { align-self: center; padding: 64px 0; }
+  .name { font-size: clamp(52px, 7.4vw, 112px); font-weight: 600; line-height: 0.98; letter-spacing: -0.022em; max-width: 7.6em; }
+  .role { margin: 24px 0 0; font: italic 400 clamp(20px, 1.9vw, 26px)/1.35 var(--serif); }
+  .affil { margin: 4px 0 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .hero-cap { margin: 0; max-width: 46ch; font: 400 13px/1.45 var(--sans); color: var(--graphite); }
+  .hero-cap sup { font-size: 0.72em; }
+
+  @media (max-width: 1099px) {
+    .top { max-width: var(--main); }
+  }
+  @media (max-width: 760px) {
+    .hero::before {
+      background:
+        linear-gradient(180deg, var(--paper) 0, var(--paper) 72px, transparent 130px),
+        linear-gradient(0deg, var(--paper) 0%, var(--paper) 30%, color-mix(in srgb, var(--paper) 70%, transparent) 50%, transparent 72%);
+    }
+    .hero-inner { min-height: max(640px, 92svh); }
+    .hero-title { align-self: end; padding: 32px 0 24px; }
+    .name { font-size: clamp(44px, 12.5vw, 64px); }
+  }
+  @media (max-width: 640px) {
+    .top { flex-direction: column; gap: 8px; }
+  }
+</style>

@@ -63,6 +63,7 @@ Carried over from `assets/build.py` `THEMES`, so the README and the site match.
 | `ramp` | `#DCE6F0 #A9C3DE #6E9CCB #3A6FAE #1D4E89` | `#1A2A3D #24476E #3468A3 #5A8FD0 #8FB8EC` | Sequential data only |
 | `hazard` | `#A23B2A` | `#F2766B` | Extreme or adverse values only; never decorative |
 | `genus` | `#3D7A5B #8A9A2B #7A4E2D #C08A1E` | `#6CBF94 #B9C95A #C08A62 #E5B84B` | Categorical (Fig. 2 species) |
+| `line-accent` | `#6E5A5F` | `#B39CA1` | Muted mauve, from the line-art reference. Generative line figures only (§6 Envelope figures) |
 
 The theme follows `prefers-color-scheme`, with a manual toggle stored per visitor.
 
@@ -70,10 +71,10 @@ The theme follows `prefers-color-scheme`, with a manual toggle stored per visito
 
 | Role | Typeface | Notes |
 |---|---|---|
-| Text, headings | **Source Serif 4** (variable, optical sizes) | Drawn for long technical reading. Use the `opsz` axis so headings and small notes are each tuned. |
+| Text, headings | **STIX Two Text** (variable weight) | Drawn for scientific publishing; shares its design with STIX Two Math, so text and equations match. |
 | Margin notes, captions, labels, navigation | **IBM Plex Sans** | Tabular figures (`font-variant-numeric: tabular-nums`) in tables and legends |
 | Title block | **IBM Plex Sans Condensed** | Only inside title blocks |
-| Mathematics | **KaTeX** default (Computer Modern / Latin Modern) | Matches the LaTeX reports |
+| Mathematics | **STIX Two Math** via MathJax, rendered at build time | KaTeX cannot use STIX Two Math. Chosen over Computer Modern, which looks thin beside the text. |
 
 All fonts are self-hosted as WOFF2 and subset to Latin plus Latin Extended (the Spanish place names need accented letters).
 
@@ -81,7 +82,7 @@ All fonts are self-hosted as WOFF2 and subset to Latin plus Latin Extended (the 
 
 | Size | Use |
 |---|---|
-| 48 | Name on the home page |
+| 52–112 (fluid) | Name on the home title screen |
 | 36 | Project title |
 | 24 | Section heading |
 | 21 | Subsection heading |
@@ -130,6 +131,24 @@ All fonts are self-hosted as WOFF2 and subset to Latin plus Latin Extended (the 
 ### Further-work table
 
 Columns: project, one-line description, Report (PDF), Repository. Report cells are empty (not "N/A") when no report exists. Rows are not cards.
+
+### Envelope figures (home page)
+
+The home page's signature. Every figure is made only of straight lines, and the curve appears as their envelope, so the decoration is itself a piece of mathematics.
+
+- **Title screen:** a logarithmic spiral *r* = *a*e^(*bθ*) through 150 tangent segments per arm, on two arms (the second at 42% strength). Segments are 3.2 × the radius long and taper to transparent at both tips. The caption beneath the title states what it is.
+- **Sections:** one quieter construction per section, drawn on a fixed canvas in the free space to the right of the text, with a fade so nothing draws under the main or margin columns. Each has a small label, shown only when it fits at its natural width.
+
+| Section | Construction | Scroll changes |
+|---|---|---|
+| Summary | Astroid (sliding ladder, mirrored) | Ladder length |
+| Selected work | Parabola (string art between two arms) | Angle between the arms |
+| Methods | Chords *k* → *m·k* on a circle | *m* from 2 (cardioid) to 3 (nephroid); the label shows *m* |
+| Further work | Chords *k* → −2*k* (deltoid) | Rotation |
+| Contact | Circle from its tangents | Rotation |
+
+- Colours: `graphite`, `rule`, `line-accent` and `survey` at low alpha; the title spiral uses `ink` as well.
+- Below 1100 px the section figures are not drawn; the title spiral moves above the name on phones.
 
 ## 7. Pages
 
@@ -180,9 +199,10 @@ The thumbnails are static versions of each project's figure, and the whole entry
 
 ## 8. Motion
 
-- Nothing moves on load.
-- Motion only answers the visitor: switching the lattice assignment eases the edge colours over about 200 ms; switching the hex-map year cross-fades the fills.
-- Respect `prefers-reduced-motion` (changes become instant).
+- **One authored, continuous motion: the home title screen.** A logarithmic spiral is traced by a pen on first load (about 3.6 s) and then flows outward along its tangents; the pointer rotates it and tightens or loosens it; scrolling opens and fades it. It pauses when off screen or when the tab is hidden.
+- **Section figures draw once and then move only with scroll** (§6 Envelope figures). Nothing else moves on load.
+- Everything else answers the visitor: switching the lattice assignment eases the edge colours over about 200 ms; switching the hex-map year cross-fades the fills.
+- Respect `prefers-reduced-motion`: the spiral and the section figures render as still, complete drawings, and changes become instant.
 
 ## 9. Accessibility floor
 
@@ -196,7 +216,8 @@ The thumbnails are static versions of each project's figure, and the whole entry
 - **Astro**, static output. Interactive figures are islands of plain TypeScript and SVG (or a small canvas for the hex map if performance requires it); no UI framework unless one is needed. KaTeX rendered at build time.
 - **Data:** figures are generated from versioned data by scripts in the repository and never edited by hand.
 - **Hosting:** Vercel, where the other project demos live.
-- **Repository:** a separate repo (proposed `Lunaaaalj/portfolio`), not the profile repository. Move this file there when it is created.
+- **Repository:** `Lunaaaalj/portfolio`, separate from the profile repository. Fonts are self-hosted through Fontsource packages.
+- **Data:** every fact on the home page lives in `src/data/site.ts`.
 
 ## 11. Build process
 
@@ -208,8 +229,9 @@ The thumbnails are static versions of each project's figure, and the whole entry
 
 ## 12. Open decisions
 
-- [ ] Displayed name: "Angel Eduardo Luna" (matching LinkedIn) is assumed here; the README header currently says "Eduardo Luna".
-- [ ] CV download: include only if a PDF is provided.
+- [x] Displayed name: "Angel Eduardo Luna". The profile README header ("Eduardo Luna") still needs updating to match.
+- [x] CV download: none for now; the site does not reference a CV.
 - [ ] Domain: a Vercel subdomain or a custom domain.
 - [ ] Which further-work projects to list, and which of them have a PDF report.
 - [ ] Verified coordinates and partner wording for each title block.
+- [ ] Featured entries link to their repositories until the project pages exist; switch them to `/geostats`, `/reforestation` and `/casa-monarca` then.

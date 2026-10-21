@@ -1,0 +1,36 @@
+---
+import { further } from '../data/site';
+---
+<table class="further">
+  <thead>
+    <tr><th scope="col">Project</th><th scope="col">Subject</th><th scope="col">Report (PDF)</th><th scope="col">Repository</th></tr>
+  </thead>
+  <tbody>
+    {further.map((f) => (
+      <tr>
+        <td>{f.title}</td>
+        <td>{f.subject}</td>
+        <td>{f.report && <a href={f.report}>Report (PDF)</a>}</td>
+        <td><a href={f.href}>{f.repo}</a></td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<style>
+  .further { width: 100%; border-collapse: collapse; font: 400 14px/1.45 var(--sans); }
+  th, td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  thead th { font-weight: 500; border-bottom-color: var(--ink); color: var(--ink); white-space: nowrap; }
+  td:first-child { font: 400 16px/1.45 var(--serif); color: var(--ink); width: 30%; }
+  td:nth-child(2) { color: var(--graphite); }
+  td:nth-child(3), td:nth-child(4) { white-space: nowrap; }
+
+  @media (max-width: 640px) {
+    .further, tbody, tr, td { display: block; width: auto !important; }
+    thead { display: none; }
+    tr { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+    td { border: 0; padding: 0; white-space: normal !important; }
+    td:nth-child(2) { margin: 4px 0 6px; }
+    td:empty { display: none; }
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import type { Featured } from '../data/site';
+
+interface Props { entry: Featured; sheet: number; of: number }
+const { entry, sheet, of } = Astro.props;
+const [w, h] = entry.figureSize;
+---
+<li class="entry">
+  <a href={entry.href}>
+    <div class="entry-body">
+      <figure class="thumb">
+        <img class="on-light" src={`/figures/thumb-${entry.figure}-light.svg`} alt={entry.alt} width={w} height={h} />
+        <img class="on-dark" src={`/figures/thumb-${entry.figure}-dark.svg`} alt="" width={w} height={h} />
+      </figure>
+      <div>
+        <h3><span>{entry.title}</span></h3>
+        <p>{entry.problem}</p>
+        <p class="method">{entry.method}</p>
+      </div>
+    </div>
+    <dl class="tb">
+      <div class="full"><dt>Repository</dt><dd>{entry.repo}</dd></div>
+      {entry.cells.map((c, i) => (
+        <div class:list={[{ full: c.full, b: !c.full && i % 2 === 1 }]}><dt>{c.label}</dt><dd>{c.value}</dd></div>
+      ))}
+      <div class="full sheet"><dt>Sheet</dt><dd>{sheet} of {of}</dd></div>
+    </dl>
+  </a>
+</li>
+
+<style>
+  .entry > a {
+    display: grid;
+    grid-template-columns: minmax(0, var(--main)) var(--margin);
+    column-gap: var(--gap);
+    color: inherit; text-decoration: none;
+    padding: 28px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .entry:last-child > a { border-bottom: 1px solid var(--rule); }
+  .entry-body { display: grid; grid-template-columns: 248px minmax(0, 1fr); column-gap: 28px; align-items: start; }
+  .thumb {
+    aspect-ratio: 31 / 20; margin: 0; padding: 10px;
+    border: 1px solid var(--rule); background: var(--paper);
+    display: grid; place-items: center;
+    transition: border-color 160ms ease-out;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  h3 { font-size: 21px; line-height: 1.3; }
+  h3 span {
+    text-decoration: underline; text-decoration-color: transparent;
+    text-decoration-thickness: 1px; text-underline-offset: 0.18em;
+    transition: text-decoration-color 160ms ease-out;
+  }
+  p { margin: 8px 0 0; font-size: 17px; line-height: 1.55; }
+  .method { color: var(--graphite); font: 400 14px/1.45 var(--sans); margin-top: 10px; }
+  a:hover .thumb { border-color: var(--survey); }
+  a:hover h3 span { text-decoration-color: var(--survey); }
+  a:focus-visible { outline-offset: 6px; }
+
+  /* Reduced title block */
+  .tb {
+    margin: 0; align-self: start;
+    font: 400 14px/1.35 var(--cond);
+    border: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr 1fr;
+  }
+  .tb div { padding: 7px 10px 8px; border-top: 1px solid var(--rule); min-width: 0; }
+  .tb div:first-child { border-top: 0; }
+  .tb .full { grid-column: 1 / -1; }
+  .tb .b { border-left: 1px solid var(--rule); }
+  dt { color: var(--graphite); font-size: 12px; letter-spacing: 0.01em; }
+  dd { margin: 1px 0 0; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
+  .sheet dd { font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 1099px) {
+    .entry > a { grid-template-columns: minmax(0, var(--main)); }
+    .tb { margin-top: 20px; display: flex; flex-wrap: wrap; }
+    .tb div { flex: 1 1 auto; border-top: 0; border-left: 1px solid var(--rule); }
+    .tb div:first-child { border-left: 0; flex-grow: 2; }
+  }
+  @media (max-width: 640px) {
+    .entry-body { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
+    .tb { display: grid; }
+    .tb div { border-left: 0; border-top: 1px solid var(--rule); }
+    .tb div:first-child { border-top: 0; }
+    .tb .b { border-left: 1px solid var(--rule); }
+  }
+</style>

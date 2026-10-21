@@ -1,5 +1,6 @@
 ---
 import { person } from '../data/site';
+import ThemeToggle from './ThemeToggle.astro';
 ---
 <header class="hero">
   <canvas class="hero-canvas" aria-hidden="true"></canvas>
@@ -11,7 +12,7 @@ import { person } from '../data/site';
         <a href="#further">Further work</a>
         <a href="#contact">Contact</a>
       </nav>
-      <button class="theme-btn" type="button">Dark theme</button>
+      <ThemeToggle />
     </div>
     <div class="hero-title">
       <h1 class="name">{person.name}</h1>
@@ -29,20 +30,6 @@ import { person } from '../data/site';
   import { mountSpiral } from '../scripts/spiral';
 
   mountSpiral(document.querySelector<HTMLCanvasElement>('.hero-canvas')!);
-
-  const root = document.documentElement;
-  const btn = document.querySelector<HTMLButtonElement>('.theme-btn')!;
-  const mq = matchMedia('(prefers-color-scheme: dark)');
-  const current = () => root.dataset.theme || (mq.matches ? 'dark' : 'light');
-  const label = () => { btn.textContent = current() === 'dark' ? 'Light theme' : 'Dark theme'; };
-  btn.addEventListener('click', () => {
-    const next = current() === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = next;
-    try { localStorage.setItem('theme', next); } catch {}
-    label();
-  });
-  mq.addEventListener('change', label);
-  label();
 </script>
 
 <style>
@@ -71,11 +58,6 @@ import { person } from '../data/site';
   .top nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
   .top a { color: var(--graphite); text-decoration: none; }
   .top a:hover { color: var(--ink); text-decoration: underline; }
-  .theme-btn {
-    font: inherit; color: var(--graphite); background: none; border: 0; padding: 4px 0; cursor: pointer;
-    text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 0.25em;
-  }
-  .theme-btn:hover { color: var(--ink); text-decoration-color: currentColor; }
 
   .hero-title { align-self: center; padding: 64px 0; }
   .name { font-size: clamp(52px, 7.4vw, 112px); font-weight: 600; line-height: 0.98; letter-spacing: -0.022em; max-width: 7.6em; }

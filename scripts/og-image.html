@@ -1,0 +1,56 @@
+<!doctype html>
+<!-- Social preview card, 1200 × 630. Rendered to public/og.png by scripts/og-image.sh.
+     The same logarithmic spiral as the title screen, drawn once and still. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "STIX Two Text"; font-weight: 400 700; src: url("../node_modules/@fontsource-variable/stix-two-text/files/stix-two-text-latin-wght-normal.woff2"); }
+  @font-face { font-family: "STIX Two Text"; font-style: italic; font-weight: 400 700; src: url("../node_modules/@fontsource-variable/stix-two-text/files/stix-two-text-latin-wght-italic.woff2"); }
+  @font-face { font-family: "IBM Plex Sans"; font-weight: 400; src: url("../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2"); }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #FFFFFF; }
+  canvas { position: absolute; inset: 0; width: 1200px; height: 630px; }
+  .veil { position: absolute; inset: 0; background: linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,.92) 34%, rgba(255,255,255,0) 62%); }
+  .text { position: absolute; left: 84px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; color: #1B2430; }
+  h1 { margin: 0; font: 600 92px/0.98 "STIX Two Text", serif; letter-spacing: -0.022em; }
+  .role { margin: 26px 0 0; font: italic 400 34px/1.3 "STIX Two Text", serif; }
+  .affil { margin: 10px 0 0; font: 400 22px/1.4 "IBM Plex Sans", sans-serif; color: #5B6675; }
+  .work { position: absolute; left: 84px; bottom: 52px; font: 400 20px/1.4 "IBM Plex Sans", sans-serif; color: #5B6675; }
+</style>
+</head>
+<body>
+<canvas width="2400" height="1260"></canvas>
+<div class="veil"></div>
+<div class="text">
+  <h1>Angel<br>Eduardo Luna</h1>
+  <p class="role">Applied mathematics and data science</p>
+  <p class="affil">Tecnológico de Monterrey</p>
+</div>
+<p class="work">Spatial risk, resource allocation and stochastic planning, with CONAFOR and Casa Monarca</p>
+<script>
+  // r = a·e^(bθ) through its tangent lines, tapered at both tips (see src/scripts/spiral.ts)
+  const ctx = document.querySelector('canvas').getContext('2d');
+  ctx.scale(2, 2);
+  const W = 1200, H = 630, N = 150, b = 0.18, S = H;
+  const cx = W * 0.74, cy = H * 0.5, rMin = S * 0.006, rMax = S * 0.95;
+  const span = Math.log(rMax / rMin) / b, step = span / N;
+  const tones = [['27,36,48', 0.6, 1.2], ['91,102,117', 0.55, 1.05], ['110,90,95', 0.5, 1.15], ['201,209,218', 1, 1.35], ['29,78,137', 0.32, 1.05]];
+  const smooth = (e0, e1, x) => { x = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return x * x * (3 - 2 * x); };
+  for (let arm = 0; arm < 2; arm++) {
+    const off = 0.4 + arm * Math.PI, armA = arm ? 0.42 : 1;
+    for (let k = 0; k < N; k++) {
+      const t = k * step, r = rMin * Math.exp(b * t), ang = t + off, c = Math.cos(ang), s = Math.sin(ang);
+      let dx = b * c - s, dy = b * s + c; const len = Math.hypot(dx, dy); dx /= len; dy /= len;
+      const half = Math.min(Math.hypot(W, H), r * 3.2), w = smooth(rMin * 3, rMin * 14, r) * (1 - smooth(rMax * 0.7, rMax, r));
+      const [rgb, a, lw] = tones[((k * 7 + arm * 3) % 5 + 5) % 5], al = a * w * armA;
+      if (al < 0.004) continue;
+      const px = cx + r * c, py = cy + r * s, x0 = px - dx * half, y0 = py - dy * half, x1 = px + dx * half, y1 = py + dy * half;
+      const g = ctx.createLinearGradient(x0, y0, x1, y1);
+      g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(0.2, `rgba(${rgb},${al * 0.35})`);
+      g.addColorStop(0.5, `rgba(${rgb},${al})`); g.addColorStop(0.8, `rgba(${rgb},${al * 0.35})`); g.addColorStop(1, `rgba(${rgb},0)`);
+      ctx.strokeStyle = g; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    }
+  }
+</script>
+</body>
+</html>

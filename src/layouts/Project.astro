@@ -1,0 +1,97 @@
+---
+// Featured project page (DESIGN.md §7): title block, title and abstract, then the page's own
+// sections, then links and the next/previous sheet.
+import Base from './Base.astro';
+import TitleBlock from '../components/TitleBlock.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import RunningHead from '../components/RunningHead.astro';
+import { person, featured } from '../data/site';
+
+interface Props { slug: string; abstract: string }
+const { slug, abstract } = Astro.props;
+const index = featured.findIndex((f) => f.page === `/${slug}`);
+const entry = featured[index];
+const prev = featured[(index + featured.length - 1) % featured.length];
+const next = featured[(index + 1) % featured.length];
+const sheetOf = (f: typeof entry) => featured.indexOf(f) + 1;
+---
+<Base title={`${entry.title} · ${person.name}`} description={abstract}>
+  <RunningHead title={entry.title} after=".head" />
+  <div class="page project-page">
+    <header class="bar">
+      <a href="/" class="home">{person.name}</a>
+      <nav aria-label="Site">
+        <a href="/#work">Selected work</a>
+        <ThemeToggle />
+      </nav>
+    </header>
+
+    <main>
+      <div class="r"><div class="wide"><TitleBlock entry={entry} sheet={index + 1} of={featured.length} /></div></div>
+      <div class="r head">
+        <div class="m">
+          <h1>{entry.title}</h1>
+          <p class="abstract">{abstract}</p>
+        </div>
+      </div>
+
+      <slot />
+
+      <section aria-labelledby="links-h">
+        <div class="r"><h2 class="m" id="links-h">Links</h2></div>
+        <div class="r">
+          <ul class="m links">
+            {entry.links.map((l) => <li><a href={l.href}>{l.label}</a>{l.note && <span> {l.note}</span>}</li>)}
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <nav class="sheets" aria-label="Featured projects">
+      <a href={prev.page} rel="prev"><span>Sheet {sheetOf(prev)} of {featured.length}, previous</span>{prev.title}</a>
+      <a href={next.page} rel="next"><span>Sheet {sheetOf(next)} of {featured.length}, next</span>{next.title}</a>
+    </nav>
+  </div>
+</Base>
+
+<style>
+  .project-page { padding-bottom: 56px; }
+  .bar {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 24px;
+    max-width: calc(var(--main) + var(--gap) + var(--margin));
+    padding: 20px 0 48px;
+    font: 400 14px/1.45 var(--sans); color: var(--graphite);
+  }
+  .bar a { color: var(--graphite); text-decoration: none; }
+  .bar a:hover { color: var(--ink); text-decoration: underline; }
+  .bar .home { color: var(--ink); font-weight: 500; }
+  .bar nav { display: flex; gap: 20px; align-items: baseline; }
+  .bar a, .bar :global(.theme-btn) { white-space: nowrap; }
+
+  .head { margin-top: 40px; }
+  h1 { font-size: 36px; line-height: 1.15; letter-spacing: -0.01em; }
+  .abstract { margin: 20px 0 0; font-size: 21px; line-height: 1.5; }
+
+  .links { list-style: none; margin: 0; padding: 0; }
+  .links li { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+  .links li:first-child { border-top: 1px solid var(--rule); }
+  .links span { font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+
+  .sheets {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    max-width: calc(var(--main) + var(--gap) + var(--margin));
+    margin-top: 96px; padding-top: 20px; border-top: 1px solid var(--rule);
+  }
+  .sheets a { color: var(--ink); text-decoration: none; font-size: 18px; line-height: 1.35; }
+  .sheets a[rel="next"] { text-align: right; }
+  .sheets a:hover { color: var(--survey); }
+  .sheets span { display: block; margin-bottom: 4px; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 30px; }
+    .abstract { font-size: 19px; }
+    .bar { padding-bottom: 32px; flex-wrap: wrap; row-gap: 4px; }
+    .sheets { grid-template-columns: 1fr; }
+    .sheets a[rel="next"] { text-align: left; }
+  }
+</style>

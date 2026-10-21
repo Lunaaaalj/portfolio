@@ -1,0 +1,170 @@
+---
+// Fig. 1 on the GeoStats page: recorded traffic incidents per hexagonal cell, by year, on the
+// project's own 2,241-cell grid (src/data/geostats.json, from scripts/extract-geostats.mjs).
+// Drawn at build time for the default year; the script swaps the year and reads out cells.
+import geo from '../data/geostats.json';
+
+interface Props { compact?: boolean }  // compact: the home-page preview, no controls
+const { compact = false } = Astro.props;
+
+const years = Object.keys(geo.years);           // '2019' … '2024'
+const layers: Record<string, number[]> = { ...geo.years, '2027': geo.p2027 };
+const DEFAULT = '2024';
+const N = geo.i.length, S3 = Math.sqrt(3);
+
+// Cell centres, flat-top, odd columns shifted half a cell (as in the analysis)
+const xs = geo.i.map((i) => i * 1.5);
+const ys = geo.i.map((i, k) => geo.j[k] * S3 + (i % 2 ? S3 / 2 : 0));
+const maxY = Math.max(...ys);
+
+// Frame the cells that hold 99% of all incidents, as the project's presentation does
+const pooled = xs.map((_, k) => years.reduce((s, y) => s + layers[y][k], 0));
+const order = pooled.map((v, k) => [v, k]).sort((a, b) => b[0] - a[0]);
+const total = pooled.reduce((a, b) => a + b, 0);
+let acc = 0, x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+for (const [v, k] of order) {
+  if (acc / total >= 0.99) break;
+  acc += v;
+  x0 = Math.min(x0, xs[k]); x1 = Math.max(x1, xs[k]);
+  y0 = Math.min(y0, maxY - ys[k]); y1 = Math.max(y1, maxY - ys[k]);
+}
+const vb = [x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4];
+
+// One set of class breaks for every year, so colours compare across years: log-spaced from 1
+// to the 99th percentile of all cell-years; the top 1% take the hazard colour.
+const all = years.flatMap((y) => layers[y]).filter((v) => v > 0).sort((a, b) => a - b);
+const top = all[Math.floor(all.length * 0.99)];
+const breaks = [1, 2, 3, 4].map((k) => Math.round(Math.exp((Math.log(top) * k) / 5)));
+const cls = (v: number) => (v <= 0 ? 0 : v >= top ? 6 : 1 + breaks.filter((b) => v >= b).length);
+const classes = Object.fromEntries(Object.entries(layers).map(([y, a]) => [y, a.map(cls).join('')]));
+
+const fmt = (n: number) => n.toLocaleString('en-GB');
+const legend = [
+  `1–${fmt(breaks[0] - 1)}`,
+  ...breaks.slice(0, 3).map((b, k) => `${fmt(b)}–${fmt(breaks[k + 1] - 1)}`),
+  `${fmt(breaks[3])}–${fmt(top - 1)}`,
+  `${fmt(top)} or more (top 1%)`,
+];
+const totals = { ...geo.totalPorAnio } as Record<string, number>;
+const data = JSON.stringify({ layers, classes, mun: geo.municipality, names: geo.municipalities });
+---
+{compact ? (
+  <div class="preview hex-preview" data-preview="hex" data-classes={JSON.stringify(Object.fromEntries(years.map((y) => [y, classes[y]])))}>
+    <svg viewBox={vb.join(' ')} aria-hidden="true">
+      <defs><path id="hx-p" d="M.94 0L.47 .814L-.47 .814L-.94 0L-.47 -.814L.47 -.814Z" /></defs>
+      <g class="cells">
+        {xs.map((x, k) => <use href="#hx-p" x={x.toFixed(2)} y={(maxY - ys[k]).toFixed(2)} class={`c${classes[DEFAULT][k]}`} />)}
+      </g>
+    </svg>
+    <span class="tag">{DEFAULT}</span>
+  </div>
+) : (
+<div class="r hexmap" data-hexmap={data}>
+  <figure class="m fig">
+    <svg viewBox={vb.join(' ')} role="img" aria-labelledby="hex-cap">
+      <defs><path id="hx" d="M.94 0L.47 .814L-.47 .814L-.94 0L-.47 -.814L.47 -.814Z" /></defs>
+      <g class="cells">
+        {xs.map((x, k) => <use href="#hx" x={x.toFixed(2)} y={(maxY - ys[k]).toFixed(2)} class={`c${classes[DEFAULT][k]}`} data-k={k} />)}
+      </g>
+      <use class="focus-cell" href="#hx" x="-99" y="-99" />
+    </svg>
+    <figcaption id="hex-cap">
+      <b>Fig. 1.</b> Traffic incidents recorded by INEGI (ATUS) in each hexagonal cell of the Monterrey metropolitan
+      area, <span class="cap-year">in 2024</span>. Cells are 500 m a side, about one kilometre across; only the 2,241
+      cells with at least one incident in six years are drawn. The 2027 layer is the model’s forecast, the posterior
+      median of each cell’s expected count. The view is cropped to the cells that hold 99% of incidents.
+    </figcaption>
+  </figure>
+
+  <aside class="note legend">
+    <fieldset class="years">
+      <legend>Year</legend>
+      {[...years, '2027'].map((y) => (
+        <label><input type="radio" name="hex-year" value={y} checked={y === DEFAULT} /><span>{y === '2027' ? '2027 forecast' : y}</span></label>
+      ))}
+    </fieldset>
+    <p class="readout" aria-live="polite">Point at a cell to read its count.</p>
+    <p class="key-title">Incidents per cell</p>
+    <ul class="key">
+      {legend.map((l, k) => <li><span class={`sw c${k + 1}`}></span>{l}</li>)}
+    </ul>
+    <table class="data totals">
+      <caption>Incidents recorded in the metropolitan area</caption>
+      <tbody>
+        {years.map((y) => <tr><th scope="row">{y}</th><td class="n">{fmt(totals[y])}</td></tr>)}
+        <tr><th scope="row">2027 forecast</th><td class="n">73,577</td></tr>
+      </tbody>
+    </table>
+  </aside>
+</div>
+)}
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-hexmap]')) {
+    const d = JSON.parse(root.dataset.hexmap!) as {
+      layers: Record<string, number[]>; classes: Record<string, string>; mun: number[]; names: string[];
+    };
+    const cells = [...root.querySelectorAll<SVGUseElement>('.cells use')];
+    const focus = root.querySelector<SVGUseElement>('.focus-cell')!;
+    const out = root.querySelector<HTMLElement>('.readout')!;
+    const capYear = root.querySelector<HTMLElement>('.cap-year')!;
+    let year = '2024';
+
+    function setYear(y: string) {
+      year = y;
+      const c = d.classes[y];
+      cells.forEach((u, k) => u.setAttribute('class', `c${c[k]}`));
+      capYear.textContent = y === '2027' ? 'as forecast for 2027' : `in ${y}`;
+    }
+    function read(k: number | null) {
+      if (k === null) { focus.setAttribute('x', '-99'); out.textContent = 'Point at a cell to read its count.'; return; }
+      const u = cells[k];
+      focus.setAttribute('x', u.getAttribute('x')!); focus.setAttribute('y', u.getAttribute('y')!);
+      const v = d.layers[year][k], n = v.toLocaleString('en-GB');
+      out.textContent = year === '2027'
+        ? `${d.names[d.mun[k]]}: about ${n} incident${v === 1 ? '' : 's'} expected in 2027.`
+        : `${d.names[d.mun[k]]}: ${n} incident${v === 1 ? '' : 's'} recorded in ${year}.`;
+    }
+
+    for (const r of root.querySelectorAll<HTMLInputElement>('input[name="hex-year"]')) {
+      r.addEventListener('change', () => { if (r.checked) setYear(r.value); });
+    }
+    const g = root.querySelector('.cells')!;
+    g.addEventListener('pointerover', (e) => {
+      const k = (e.target as Element).getAttribute('data-k');
+      if (k !== null) read(Number(k));
+    });
+    root.querySelector('svg')!.addEventListener('pointerleave', () => read(null));
+  }
+</script>
+
+<style>
+  svg { display: block; width: 100%; height: auto; max-height: 78vh; }
+  .cells use { transition: fill 220ms ease-out; }
+  .c0 { fill: color-mix(in srgb, var(--rule) 45%, transparent); }
+  .c1 { fill: var(--ramp-1); } .c2 { fill: var(--ramp-2); } .c3 { fill: var(--ramp-3); }
+  .c4 { fill: var(--ramp-4); } .c5 { fill: var(--ramp-5); } .c6 { fill: var(--hazard); }
+  .focus-cell { fill: none; stroke: var(--ink); stroke-width: 0.28; pointer-events: none; }
+
+  .legend { padding-top: 4px; }
+  .years { border: 0; margin: 0 0 14px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  .years legend { padding: 0; margin-bottom: 6px; color: var(--ink); font-weight: 500; }
+  .years label { position: relative; cursor: pointer; }
+  .years input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .years span {
+    display: inline-block; padding: 3px 8px; border: 1px solid var(--rule); border-radius: 2px;
+    color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .years input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .years input:focus-visible + span { outline: 2px solid var(--survey); outline-offset: 2px; }
+  .years label:hover span { border-color: var(--graphite); }
+  .readout { margin: 0 0 16px; min-height: 2.9em; color: var(--ink); }
+  .key-title { margin: 0 0 6px; color: var(--ink); font-weight: 500; }
+  .key { list-style: none; margin: 0 0 18px; padding: 0; font-variant-numeric: tabular-nums; }
+  .key li { display: flex; align-items: center; gap: 10px; padding: 2px 0; }
+  .sw { width: 18px; height: 12px; flex: none; }
+  .sw.c1 { background: var(--ramp-1); } .sw.c2 { background: var(--ramp-2); } .sw.c3 { background: var(--ramp-3); }
+  .sw.c4 { background: var(--ramp-4); } .sw.c5 { background: var(--ramp-5); } .sw.c6 { background: var(--hazard); }
+  .totals caption { text-align: left; color: var(--ink); font-weight: 500; padding-bottom: 6px; }
+  .totals th, .totals td { padding: 3px 0; }
+</style>

@@ -1,89 +1,146 @@
 ---
+// One featured project on the home page. The figure is the project page's own Fig. 1 in its
+// compact form, large in the main column; pointing at the entry previews that figure's
+// interaction. The reduced title block sits beside it in the margin column.
 import type { Featured } from '../data/site';
+import HexMapFigure from './HexMapFigure.astro';
+import MosaicFigure from './MosaicFigure.astro';
+import SparsityFigure from './SparsityFigure.astro';
 
 interface Props { entry: Featured; sheet: number; of: number }
 const { entry, sheet, of } = Astro.props;
-const [w, h] = entry.figureSize;
+const hint: Record<string, string> = {
+  geostats: 'Point at the map to step through 2019 to 2024.',
+  lattice: 'Point at the tile to see the competition-aware arrangement.',
+  sparsity: 'Point at the matrix to step through its constraint families.',
+};
 ---
 <li class="entry">
-  <a href={entry.href}>
-    <div class="entry-body">
-      <figure class="thumb">
-        <img class="on-light" src={`/figures/thumb-${entry.figure}-light.svg`} alt={entry.alt} width={w} height={h} />
-        <img class="on-dark" src={`/figures/thumb-${entry.figure}-dark.svg`} alt="" width={w} height={h} />
-      </figure>
-      <div>
-        <h3><span>{entry.title}</span></h3>
-        <p>{entry.problem}</p>
-        <p class="method">{entry.method}</p>
-      </div>
-    </div>
+  <a href={entry.page}>
+    <h3><span>{entry.title}</span></h3>
+    <figure class={`plate plate-${entry.figure}`} role="img" aria-label={entry.alt}>
+      {entry.figure === 'geostats' && <HexMapFigure compact />}
+      {entry.figure === 'lattice' && <MosaicFigure compact />}
+      {entry.figure === 'sparsity' && <SparsityFigure compact />}
+    </figure>
     <dl class="tb">
-      <div class="full"><dt>Repository</dt><dd>{entry.repo}</dd></div>
-      {entry.cells.map((c, i) => (
-        <div class:list={[{ full: c.full, b: !c.full && i % 2 === 1 }]}><dt>{c.label}</dt><dd>{c.value}</dd></div>
-      ))}
-      <div class="full sheet"><dt>Sheet</dt><dd>{sheet} of {of}</dd></div>
+      <div><dt>Repository</dt><dd>{entry.repo}</dd></div>
+      {entry.cells.map((c) => <div><dt>{c.label}</dt><dd>{c.value}</dd></div>)}
+      <div><dt>Sheet</dt><dd class="num">{sheet} of {of}</dd></div>
     </dl>
+    <div class="text">
+      <p class="hint">{hint[entry.figure]}</p>
+      <p>{entry.problem}</p>
+      <p class="method">{entry.method}</p>
+    </div>
   </a>
 </li>
 
+<script>
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  for (const entry of document.querySelectorAll<HTMLAnchorElement>('.entry > a')) {
+    const hex = entry.querySelector<HTMLElement>('[data-preview="hex"]');
+    const sp = entry.querySelector<HTMLElement>('[data-preview="sparsity"]');
+    let timer = 0;
+
+    let start = () => {}, stop = () => {};
+    if (hex) {
+      const classes = JSON.parse(hex.dataset.classes!) as Record<string, string>;
+      const years = Object.keys(classes), cells = [...hex.querySelectorAll<SVGUseElement>('use')];
+      const tag = hex.querySelector<HTMLElement>('.tag')!;
+      const show = (y: string) => { cells.forEach((u, k) => u.setAttribute('class', `c${classes[y][k]}`)); tag.textContent = y; };
+      let i = 0;
+      start = () => { if (still.matches) return; i = 0; show(years[0]); timer = window.setInterval(() => { i = (i + 1) % years.length; show(years[i]); }, 650); };
+      stop = () => { clearInterval(timer); show(years[years.length - 1]); };
+    }
+    if (sp) {
+      const bands = JSON.parse(sp.dataset.bands!) as [string, number, number][];
+      const rect = sp.querySelector<SVGRectElement>('.band')!, tag = sp.querySelector<HTMLElement>('.tag')!;
+      const base = tag.textContent;
+      const show = (k: number) => { rect.setAttribute('y', String(bands[k][1])); rect.setAttribute('height', String(bands[k][2])); tag.textContent = bands[k][0]; };
+      let i = 0;
+      start = () => { i = 0; show(0); if (!still.matches) timer = window.setInterval(() => { i = (i + 1) % bands.length; show(i); }, 800); };
+      stop = () => { clearInterval(timer); rect.setAttribute('height', '0'); tag.textContent = base; };
+    }
+    entry.addEventListener('pointerenter', () => start());
+    entry.addEventListener('pointerleave', () => stop());
+    entry.addEventListener('focus', () => start());
+    entry.addEventListener('blur', () => stop());
+  }
+</script>
+
 <style>
+  /* Heading over the figure; the figure in the main column, the title block beside it in the
+     margin; the text beneath the figure. */
   .entry > a {
     display: grid;
     grid-template-columns: minmax(0, var(--main)) var(--margin);
     column-gap: var(--gap);
+    max-width: calc(var(--main) + var(--gap) + var(--margin));
+    align-items: start;
     color: inherit; text-decoration: none;
-    padding: 28px 0;
+    padding: 36px 0 44px;
     border-top: 1px solid var(--rule);
   }
   .entry:last-child > a { border-bottom: 1px solid var(--rule); }
-  .entry-body { display: grid; grid-template-columns: 248px minmax(0, 1fr); column-gap: 28px; align-items: start; }
-  .thumb {
-    aspect-ratio: 31 / 20; margin: 0; padding: 10px;
-    border: 1px solid var(--rule); background: var(--paper);
-    display: grid; place-items: center;
-    transition: border-color 160ms ease-out;
-  }
-  .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
-  h3 { font-size: 21px; line-height: 1.3; }
+  h3 { grid-column: 1; font-size: 24px; line-height: 1.25; margin-bottom: 18px; }
   h3 span {
     text-decoration: underline; text-decoration-color: transparent;
     text-decoration-thickness: 1px; text-underline-offset: 0.18em;
     transition: text-decoration-color 160ms ease-out;
   }
-  p { margin: 8px 0 0; font-size: 17px; line-height: 1.55; }
-  .method { color: var(--graphite); font: 400 14px/1.45 var(--sans); margin-top: 10px; }
-  a:hover .thumb { border-color: var(--survey); }
-  a:hover h3 span { text-decoration-color: var(--survey); }
+  .plate {
+    grid-column: 1; grid-row: 2; position: relative;
+    margin: 0;
+    border: 1px solid var(--rule); background: var(--paper);
+    transition: border-color 160ms ease-out;
+  }
+  /* Each plate takes its figure's proportions, so the figure fills it at every width */
+  .plate-geostats { aspect-ratio: 1.15; max-height: 520px; }
+  .plate-lattice { aspect-ratio: 2.7; }
+  .plate-sparsity { aspect-ratio: 1.42; }
+  /* The preview fills the plate's inner box; each SVG's viewBox fits itself inside it */
+  .plate :global(.preview) { position: absolute; inset: 20px 20px 30px; }
+  .plate :global(.preview svg) { display: block; width: 100%; height: 100%; max-height: none; min-width: 0; }
+  .plate :global(.tag) {
+    position: absolute; right: -12px; bottom: -26px;
+    font: 400 13px/1.3 var(--sans); color: var(--graphite); font-variant-numeric: tabular-nums;
+    background: var(--paper); padding: 2px 4px;
+  }
+  .tb { grid-column: 2; grid-row: 2; }
+  .text { grid-column: 1; grid-row: 3; }
+  .hint { margin: 10px 0 0; font: 400 13px/1.45 var(--sans); color: var(--graphite); }
+  p { margin: 14px 0 0; max-width: 60ch; }
+  .method { color: var(--graphite); font: 400 14px/1.5 var(--sans); margin-top: 8px; max-width: 64ch; }
+  a:hover .plate, a:focus-visible .plate { border-color: var(--survey); }
+  a:hover h3 span, a:focus-visible h3 span { text-decoration-color: var(--survey); }
   a:focus-visible { outline-offset: 6px; }
 
-  /* Reduced title block */
+  /* Reduced title block: a column of drawing-sheet cells; 1px gaps over the rule colour draw the dividers */
   .tb {
-    margin: 0; align-self: start;
+    margin: 0;
     font: 400 14px/1.35 var(--cond);
-    border: 1px solid var(--rule);
-    display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--rule); background: var(--rule);
+    display: grid; gap: 1px;
   }
-  .tb div { padding: 7px 10px 8px; border-top: 1px solid var(--rule); min-width: 0; }
-  .tb div:first-child { border-top: 0; }
-  .tb .full { grid-column: 1 / -1; }
-  .tb .b { border-left: 1px solid var(--rule); }
-  dt { color: var(--graphite); font-size: 12px; letter-spacing: 0.01em; }
+  .tb div { padding: 7px 12px 8px; background: var(--paper); min-width: 0; }
+  dt { color: var(--graphite); font-size: 12px; }
   dd { margin: 1px 0 0; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
-  .sheet dd { font-variant-numeric: tabular-nums; }
+  .num { font-variant-numeric: tabular-nums; }
 
   @media (max-width: 1099px) {
-    .entry > a { grid-template-columns: minmax(0, var(--main)); }
-    .tb { margin-top: 20px; display: flex; flex-wrap: wrap; }
-    .tb div { flex: 1 1 auto; border-top: 0; border-left: 1px solid var(--rule); }
-    .tb div:first-child { border-left: 0; flex-grow: 2; }
+    .entry > a { grid-template-columns: minmax(0, var(--main)); max-width: var(--main); }
+    .tb { grid-column: 1; grid-row: 4; margin-top: 18px; display: flex; flex-wrap: wrap; }
+    .tb div { flex: 1 1 auto; }
   }
   @media (max-width: 640px) {
-    .entry-body { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
-    .tb { display: grid; }
-    .tb div { border-left: 0; border-top: 1px solid var(--rule); }
-    .tb div:first-child { border-top: 0; }
-    .tb .b { border-left: 1px solid var(--rule); }
+    .entry > a { padding: 28px 0 32px; }
+    h3 { font-size: 21px; }
+    .plate :global(.preview) { inset: 10px 10px 24px; }
+    /* The tile is too wide to read at phone width: show its left part at a legible size */
+    .plate-lattice { aspect-ratio: 1.5; overflow: hidden; }
+    .plate-lattice :global(.preview svg) { width: 210%; }
+    .hint { display: none; }
+    .tb div { flex-basis: 40%; }
   }
 </style>

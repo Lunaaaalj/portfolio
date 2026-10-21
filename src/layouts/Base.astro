@@ -6,10 +6,13 @@ import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-sans/600.css';
 import '@fontsource/ibm-plex-sans-condensed/400.css';
 import '@fontsource/ibm-plex-sans-condensed/500.css';
+import '@fontsource/stix-two-math/400.css';
 import '../styles/global.css';
 
 interface Props { title: string; description: string }
 const { title, description } = Astro.props;
+// Social previews need absolute URLs; they come from `site` in astro.config.mjs once the domain is set
+const abs = (path: string) => (Astro.site ? new URL(path, Astro.site).href : path);
 ---
 <!doctype html>
 <html lang="en">
@@ -19,6 +22,16 @@ const { title, description } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={abs('/og.png')} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Angel Eduardo Luna, applied mathematics and data science, Tecnológico de Monterrey, over a logarithmic spiral drawn by its tangent lines." />
+    {Astro.site && <meta property="og:url" content={abs(Astro.url.pathname)} />}
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- Apply a stored theme before first paint, so there is no flash -->
     <script is:inline>
       try {
@@ -27,7 +40,7 @@ const { title, description } = Astro.props;
       } catch (e) {}
     </script>
   </head>
-  <body>
+  <body id="top">
     <slot />
   </body>
 </html>

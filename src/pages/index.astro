@@ -4,10 +4,12 @@ import Hero from '../components/Hero.astro';
 import FeaturedEntry from '../components/FeaturedEntry.astro';
 import MethodsMatrix from '../components/MethodsMatrix.astro';
 import FurtherWork from '../components/FurtherWork.astro';
+import RunningHead from '../components/RunningHead.astro';
 import { person, summary, featured, methods } from '../data/site';
 ---
 <Base title={person.name} description={summary.lead}>
   <Hero />
+  <RunningHead title={person.name} after=".hero" />
 
   <canvas class="bg-canvas" aria-hidden="true"></canvas>
 
@@ -52,16 +54,20 @@ import { person, summary, featured, methods } from '../data/site';
       <div class="r"><h2 class="m" id="contact-h">Contact</h2></div>
       <div class="r">
         <dl class="m contact">
-          <dt>Email</dt><dd><a href={`mailto:${person.email}`}>{person.email}</a></dd>
-          <dt>LinkedIn</dt><dd><a href={person.linkedin}>angel-eduardo-luna</a></dd>
-          <dt>GitHub</dt><dd><a href={person.github}>Lunaaaalj</a></dd>
+          <div><dt>Email</dt><dd><a href={`mailto:${person.email}`}>{person.email}</a></dd></div>
+          <div><dt>LinkedIn</dt><dd><a href={person.linkedin}>angel-eduardo-luna</a></dd></div>
+          <div><dt>GitHub</dt><dd><a href={person.github}>Lunaaaalj</a></dd></div>
         </dl>
+        <aside class="note colophon">
+          <p><b>Colophon.</b> The figures are drawn when the site is built, from each project’s own data: the GeoStats grid, the competition matrix of the reforestation study and the Casa Monarca model specification.</p>
+          <p>The background lines are decorative: each curve is the envelope of straight lines (astroid, parabola, cardioid to nephroid, deltoid, circle). Set in STIX Two and IBM Plex.</p>
+        </aside>
       </div>
     </section>
 
     <footer>
-      Figures are generated from versioned data by <code>assets/build.py</code> in the
-      <a href="https://github.com/Lunaaaalj/Lunaaaalj">profile repository</a>.
+      <span>{person.name}, {person.affiliation}</span>
+      <a href="#top">Back to top</a>
     </footer>
   </main>
 </Base>
@@ -72,16 +78,13 @@ import { person, summary, featured, methods } from '../data/site';
   mountEnvelopes(
     document.querySelector<HTMLCanvasElement>('.bg-canvas')!,
     [
-      { selector: '#summary', kind: 'astroid', label: 'Astroid: the envelope of a sliding ladder' },
-      { selector: '#work', kind: 'parabola', label: 'Parabola: lines joining evenly spaced points on two arms' },
-      {
-        selector: '#methods', kind: 'times', m0: 2, m1: 3, n: 140,
-        label: (p) => `Cardioid to nephroid: chords from k to m·k, m = ${(2 + p).toFixed(2)}`,
-      },
-      { selector: '#further', kind: 'times', m0: -2, m1: -2, n: 120, spin: Math.PI / 3, label: 'Deltoid: chords from k to −2k' },
-      { selector: '#contact', kind: 'circle', label: 'Circle: the envelope of its tangents' },
+      { selector: '#summary', kind: 'astroid' },
+      { selector: '#work', kind: 'parabola' },
+      { selector: '#methods', kind: 'times', m0: 2, m1: 3 },
+      { selector: '#further', kind: 'times', m0: -2, m1: -2, spin: Math.PI / 3 },
+      { selector: '#contact', kind: 'circle' },
     ],
-    document.querySelector<HTMLElement>('.anchor')!,
+    document.querySelector<HTMLElement>('.anchor > .note')!, // right edge of the margin column
   );
 </script>
 
@@ -91,9 +94,15 @@ import { person, summary, featured, methods } from '../data/site';
   .libs { margin-top: 20px; font: 400 14px/1.6 var(--sans); color: var(--graphite); }
   .libs b { color: var(--ink); font-weight: 500; }
   .scroll-hint { display: none; }
-  .contact { font-size: 18px; margin: 0; }
+  .contact { margin: 0; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 12px 40px; }
   .contact dt { font: 400 14px/1.45 var(--sans); color: var(--graphite); }
-  .contact dd { margin: 0 0 14px; }
+  .contact dd { margin: 2px 0 0; font-size: 21px; line-height: 1.35; }
+  .colophon b { color: var(--ink); font-weight: 500; }
+  footer { display: flex; justify-content: space-between; gap: 24px; }
+  footer a { color: var(--graphite); }
+  @media (max-width: 760px) {
+    .contact { grid-template-columns: 1fr; }
+  }
   @media (max-width: 640px) {
     .scroll-hint { display: inline; }
   }

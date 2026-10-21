@@ -1,0 +1,190 @@
+---
+// Sources: Lunaaaalj/Stochastic_RefInit: PRODUCT.md (decisions, users, site), reports/e2
+// (purchasing model, spatial model, results), data/processed (species, competition matrix,
+// polygon map). The exact-model comparison is pending in the report and is reported as such.
+import Project from '../layouts/Project.astro';
+import TeX from '../components/TeX.astro';
+import MosaicFigure from '../components/MosaicFigure.astro';
+---
+<Project
+  slug="reforestation"
+  abstract="Two decisions for CONAFOR’s reforestation of 30 polygons along the Dominica–Charcas transmission line in San Luis Potosí: how many plants of each of ten native species to buy so that every polygon meets its planting target with probability at least 1 − α, and how to arrange the species on the planting grid so that neighbouring plants compete as little as possible. At the budget of MXN 12,500 per hectare no polygon is feasible; the minimum is MXN 14,496 per hectare."
+>
+  <section class="fig-section" aria-label="Figure 1">
+    <MosaicFigure />
+  </section>
+
+  <section aria-labelledby="problem-h">
+    <div class="r"><h2 class="m" id="problem-h">Problem</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          The site is 30 polygons, from 1.28 to 8 ha and 183.01 ha in all, along the Dominica–Charcas power
+          transmission line in San Luis Potosí. The plan calls for 658 plants per hectare of ten native species,
+          four agaves, four prickly pears, mesquite and yucca, set out on a staggered grid.
+        </p>
+        <p>
+          Two decisions follow. The first is how many plants of each species to buy for each polygon. It is made
+          without knowing how many plants are already established in each polygon, or how many of the new ones will
+          survive their first year. The second is where each plant goes, so that neighbours compete as little as
+          possible for water and space. The project’s desktop tool, <code>refor_gui</code>, is designed for CONAFOR’s
+          planning technicians to run themselves.
+        </p>
+      </div>
+      <aside class="note">
+        <p>Buy too few and the polygon falls short of its target once plants die; buy too many and the budget runs out. The question is how many to buy so that falling short is unlikely.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="buy-h">
+    <div class="r"><h2 class="m" id="buy-h">Formulation: purchasing</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          For polygon <TeX tex="i" /> of area <TeX tex="A_i" /> and species <TeX tex="s" />, the plants already
+          present are <TeX tex={String.raw`E_{is} \sim \operatorname{Poisson}(\lambda_s A_i)`} />, and the survivors
+          of <TeX tex="x" /> new plants are <TeX tex={String.raw`S_{is}(x) \sim \operatorname{Bin}(x, q_s)`} />. The
+          decisions are the target <TeX tex={String.raw`n_{is}`} /> and the purchase <TeX tex={String.raw`x_{is}`} />,
+          both integer.
+        </p>
+      </div>
+      <aside class="note"><p>Existing plants are scattered at random over each polygon; each new plant survives its first year independently with its species’ observed probability.</p></aside>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Objective</p>
+        <div class="eq"><TeX display tex={String.raw`\min_{n,\,x}\; (1+\theta)\sum_s c_s x_{is} + \sum_s c^R_s\, \mathbb{E}\!\left[D_{is}\right]`} /><span class="eqn">(1)</span></div>
+      </div>
+      <aside class="note"><p>The cost of the plants, with logistics, plus the expected cost of replacing those that die. <TeX tex={String.raw`D_{is}`} /> is the shortfall after the first year.</p></aside>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Constraints</p>
+        <div class="eq"><TeX display tex={String.raw`\sum_s n_{is} = 658\,A_i, \qquad \left|n_{is} - n^0_s A_i\right| \le \delta\, n^0_s A_i`} /><span class="eqn">(2)</span></div>
+        <div class="eq"><TeX display tex={String.raw`(1+\theta)\sum_s c_s x_{is} \le B\,A_i`} /><span class="eqn">(3)</span></div>
+        <div class="eq"><TeX display tex={String.raw`\mathbb{P}\!\left(E_{is} + S_{is}(x_{is}) \ge n_{is}\right) \ge 1 - \alpha`} /><span class="eqn">(4)</span></div>
+      </div>
+      <aside class="note">
+        <p>The total density is fixed, and each species may move at most 10% from the plan. Spending stays within the budget per hectare.</p>
+        <p>The chance constraint: each species reaches its target with probability at least 95% (<TeX tex={String.raw`\alpha = 0.05`} />).</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="space-h">
+    <div class="r"><h2 class="m" id="space-h">Formulation: arrangement</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          The ground is a graph whose vertices are planting positions and whose edges join neighbours. A symmetric
+          matrix <TeX tex="W" /> gives the penalty for each pair of species side by side; the arrangement minimises the
+          total penalty over neighbouring pairs, respecting the number of plants of each species.
+        </p>
+      </div>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Competition matrix</p>
+        <div class="eq"><TeX display tex={String.raw`W_{ab} = \gamma^{\,\mathbf{1}[a=b]}\; T_{ab}\, N_{ab} - \phi\, F_{ab}`} /><span class="eqn">(5)</span></div>
+      </div>
+      <aside class="note">
+        <p><TeX tex={String.raw`T_{ab}`} />: how much of the spacing the two adult canopies cover. <TeX tex={String.raw`N_{ab}`} />: how much their roots draw on the same soil layer. <TeX tex={String.raw`\gamma = 1.5`} /> makes two plants of the same species compete more; <TeX tex={String.raw`\phi = 0.3`} /> credits mesquite as a nurse plant for the succulents.</p>
+      </aside>
+    </div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          Plant-by-plant coordinates, which pair-correlation methods need, are not in the data, and the counts per
+          polygon carry no signal about interactions between neighbours (only 4 of 45 species-pair correlations are
+          significant at 5%). The matrix is therefore built from species traits, and its robustness is checked with
+          400 alternative matrices, varying each canopy diameter by ±30%, <TeX tex={String.raw`\gamma`} /> in
+          [1, 2] and <TeX tex={String.raw`\phi`} /> in [0, 0.6]; the order of the entries holds (mean Spearman
+          correlation 0.93).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="method-h">
+    <div class="r"><h2 class="m" id="method-h">Method</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          Species are coupled only through the total density and the budget, so purchasing is solved in two stages. For
+          each species and each candidate target, 10,000 Monte Carlo scenarios estimate the probability of meeting it;
+          because that probability does not decrease with the purchase, the minimum purchase that reaches <TeX tex={String.raw`1-\alpha`} /> is found by bisection, with common random numbers across candidates. Choosing
+          one target per species is then a multiple-choice knapsack, solved exactly. The procedure is a sample average
+          approximation; 10,000 scenarios give a 95% interval of half-width 0.005 around a probability of 0.95.
+        </p>
+        <p>
+          The arrangement is optimised on a tile of 52 positions with periodic borders, which a planting crew repeats over
+          the polygon as a table of species codes. A memetic algorithm combines a genetic algorithm, with a crossover
+          adapted from GPX that preserves each species’ count, and tabu search over swaps of two positions. An integer
+          program with 520 binary variables, solved with HiGHS, is set up to bound the memetic algorithm’s distance from
+          the optimum. Everything is written in C++20 and is reproducible: the same seed gives the same result on any
+          platform and any number of threads.
+        </p>
+      </div>
+      <aside class="note">
+        <p>Simulation answers “how likely is this purchase to be enough?”; the knapsack picks the cheapest combination of species that keeps every answer at 95% or better.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="results-h">
+    <div class="r"><h2 class="m" id="results-h">Results</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          With MXN 12,500 per hectare, no polygon is feasible. The minimum budget that satisfies every constraint is, on
+          average weighted by area, MXN 14,496 per hectare (from 14,361 to 14,934), 16% more than is available. The
+          shortfall is structural and is not closed by accepting more risk: the minimum budget falls only from MXN 14,664
+          at <TeX tex={String.raw`\alpha = 0.01`} /> to 14,117 at <TeX tex={String.raw`\alpha = 0.50`} />, under 4% for a
+          fiftyfold increase in the probability of falling short.
+        </p>
+        <p>
+          Without the budget constraint, the purchase is 108,680 plants for MXN 2.65 million, 594 plants per hectare.
+          With the 129 per hectare already established, planting density is 723 per hectare, 10% over target: the
+          overplanting that absorbs first-year mortality at the required reliability. The composition moves to the edge
+          of the 10% band in the direction of cost per surviving plant: the four prickly pears rise 10%, mesquite, yucca
+          and <i>A. scabra</i> fall 10%.
+        </p>
+        <p>
+          Rounded to 52 positions, the 30 polygons reduce to six distinct tiles. The memetic algorithm reduces
+          competition by 14.5% to 16.3% against a random arrangement of the same composition, with a standard deviation
+          over 30 runs of at most 0.006. Same-species neighbours disappear except for one or two pairs of
+          <i>A. salmiana</i>, which fills 27–29% of positions, out of 156 neighbouring pairs; mesquite never sits next to
+          its own species and acts as a separator.
+        </p>
+      </div>
+      <aside class="note">
+        <p>The binding cost is the shortfall itself, the plants needed to reach 658 per hectare, not the safety margin. That is why accepting more risk saves so little.</p>
+      </aside>
+    </div>
+    <div class="r">
+      <div class="m">
+        <table class="data">
+          <caption class="vh">Planting tiles of 52 positions and the memetic algorithm's results.</caption>
+          <thead><tr><th scope="col">Tile</th><th scope="col" class="n">Polygons</th><th scope="col" class="n">Best competition</th><th scope="col" class="n">Mean ± s.d., 30 runs</th><th scope="col" class="n">Coefficient</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">1</th><td class="n">18</td><td class="n">78.18</td><td class="n">78.19 ± 0.01</td><td class="n">0.838</td></tr>
+            <tr><th scope="row">2</th><td class="n">5</td><td class="n">77.37</td><td class="n">77.39 ± 0.01</td><td class="n">0.838</td></tr>
+            <tr><th scope="row">3</th><td class="n">1</td><td class="n">81.29</td><td class="n">81.29 ± 0.00</td><td class="n">0.855</td></tr>
+            <tr><th scope="row">4</th><td class="n">1</td><td class="n">76.77</td><td class="n">76.78 ± 0.01</td><td class="n">0.837</td></tr>
+            <tr><th scope="row">5</th><td class="n">4</td><td class="n">76.80</td><td class="n">76.80 ± 0.00</td><td class="n">0.837</td></tr>
+            <tr><th scope="row">6</th><td class="n">1</td><td class="n">81.85</td><td class="n">81.85 ± 0.00</td><td class="n">0.853</td></tr>
+          </tbody>
+        </table>
+        <p class="table-note">From the second report. The coefficient is competition divided by its expected value under a random arrangement.</p>
+      </div>
+      <aside class="note"><p>The comparison with the exact integer program, its lower bound and the memetic algorithm’s gap, is still pending in the report.</p></aside>
+    </div>
+  </section>
+</Project>
+
+<style>
+  .fig-section { margin-top: 56px; }
+  .table-note { margin: 8px 0 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  code { font-size: 0.85em; }
+</style>

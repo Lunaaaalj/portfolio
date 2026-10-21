@@ -1,0 +1,193 @@
+---
+// Fig. 1 on the Casa Monarca page: the constraint matrix of the mixed-integer program. Drawn at
+// build time, so it reads without JavaScript; the script only adds the highlighting.
+import { buildSparsity } from '../lib/casaMonarca';
+
+interface Props { numbers?: Record<string, number>; compact?: boolean }  // numbers: equation of each family
+const { numbers = {}, compact = false } = Astro.props;
+const { blocks, families, rows, nnz, counts } = buildSparsity();
+const nCols = blocks.at(-1)!.end, nRows = rows.length;
+
+const W = 600, H = 384, L = 94, T = 28;
+const pw = W - L - 2, ph = H - T - 2, sx = pw / nCols, sy = ph / nRows;
+
+// One rect per horizontal run of lit pixels
+const lit = new Map<number, Set<number>>();
+rows.forEach((cols, r) => {
+  const py = Math.floor(r * sy);
+  const set = lit.get(py) ?? new Set<number>();
+  for (const c of cols) set.add(Math.floor(c * sx));
+  lit.set(py, set);
+});
+const runs: string[] = [];
+for (const [py, set] of lit) {
+  const xs = [...set].sort((a, b) => a - b);
+  let start = xs[0], prev = xs[0];
+  for (const px of [...xs.slice(1), Infinity]) {
+    if (px === prev + 1) { prev = px; continue; }
+    runs.push(`M${L + start} ${T + py}h${prev - start + 1.3}v1.5h${-(prev - start + 1.3)}z`);
+    start = prev = px;
+  }
+}
+
+const symbols: Record<string, string> = { z: 'z', y: 'y', x: 'x', 'γ': 'γ', 'μ': 'μ' };
+const data = JSON.stringify({ L, T, sx, sy, blocks, families, counts, numbers });
+const fmt = (n: number) => n.toLocaleString('en-GB');
+---
+{compact ? (
+  <div class="preview sp-preview" data-preview="sparsity" data-bands={JSON.stringify(families.map((f) => [f.name, T + f.start * sy, Math.max(2, (f.end - f.start) * sy)]))}>
+    <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+      <g class="frame">
+        <rect x={L - 0.5} y={T - 0.5} width={pw + 1} height={ph + 1} />
+        {blocks.slice(1).map((b) => <line x1={L + b.start * sx} y1={T} x2={L + b.start * sx} y2={T + ph} />)}
+        {families.slice(1).map((f) => <line x1={L} y1={T + f.start * sy} x2={L + pw} y2={T + f.start * sy} />)}
+      </g>
+      <rect class="hl band" x={L} y="0" width={pw} height="0" />
+      <path class="nz" d={runs.join('')} />
+      <g class="labels">
+        {blocks.map((b) => <text class="sym" x={L + ((b.start + b.end) / 2) * sx} y={T - 10}>{symbols[b.key]}</text>)}
+        {families.filter((f) => f.end - f.start > 20).map((f) => (
+          <text class="fam" x={L - 8} y={T + ((f.start + f.end) / 2) * sy + 4}>{f.name}</text>
+        ))}
+      </g>
+    </svg>
+    <span class="tag">{fmt(nCols)} × {fmt(nRows)}</span>
+  </div>
+) : (
+<div class="r sparsity" data-sparsity={data}>
+  <figure class="m fig">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="fig1-cap">
+      <g class="frame">
+        <rect x={L - 0.5} y={T - 0.5} width={pw + 1} height={ph + 1} />
+        {blocks.slice(1).map((b) => <line x1={L + b.start * sx} y1={T} x2={L + b.start * sx} y2={T + ph} />)}
+        {families.slice(1).map((f) => <line x1={L} y1={T + f.start * sy} x2={L + pw} y2={T + f.start * sy} />)}
+      </g>
+      <rect class="hl hl-row" x={L} y="0" width={pw} height="0" />
+      <rect class="hl hl-col" x="0" y={T} width="0" height={ph} />
+      <path class="nz" d={runs.join('')} />
+      <g class="labels">
+        {blocks.map((b) => <text class="sym" x={L + ((b.start + b.end) / 2) * sx} y={T - 10}>{symbols[b.key]}</text>)}
+        {families.filter((f) => f.end - f.start > 20).map((f) => (
+          <text class="fam" x={L - 8} y={T + ((f.start + f.end) / 2) * sy + 4}>{f.name}</text>
+        ))}
+      </g>
+      <rect class="hit" x={L} y={T} width={pw} height={ph} />
+    </svg>
+    <figcaption id="fig1-cap">
+      <b>Fig. 1.</b> Constraint matrix of the purchasing model: {fmt(nCols)} variables (columns) by {fmt(nRows)} constraints
+      (rows). Each mark is a nonzero coefficient. Built from the formulation and the recipe table in the repository’s
+      model specification; columns and rows follow the order of the formulation below.
+    </figcaption>
+  </figure>
+
+  <aside class="note legend">
+    <dl class="stats">
+      <div><dt>Variables</dt><dd>{fmt(nCols)}</dd></div>
+      <div><dt>Constraints</dt><dd>{fmt(nRows)}</dd></div>
+      <div><dt>Nonzeros</dt><dd>{fmt(nnz)}</dd></div>
+      <div><dt>Density</dt><dd>{((nnz / nCols / nRows) * 100).toFixed(2)}%</dd></div>
+    </dl>
+    <p class="hint">Point at the matrix, or choose a constraint family, to see where it sits and which equation it is.</p>
+    <ul class="families">
+      {families.map((f) => (
+        <li><button type="button" data-family={f.key}><span>{f.name}</span><span class="eqn">({numbers[f.key]})</span></button></li>
+      ))}
+    </ul>
+    <p class="readout" aria-live="polite"></p>
+  </aside>
+</div>
+)}
+
+<script>
+  interface Band { key: string; name: string; start: number; end: number }
+  for (const root of document.querySelectorAll<HTMLElement>('[data-sparsity]')) {
+    const d = JSON.parse(root.dataset.sparsity!) as {
+      L: number; T: number; sx: number; sy: number; blocks: Band[]; families: Band[];
+      counts: Record<string, number>; numbers: Record<string, number>;
+    };
+    const svg = root.querySelector('svg')!;
+    const row = root.querySelector<SVGRectElement>('.hl-row')!;
+    const col = root.querySelector<SVGRectElement>('.hl-col')!;
+    const out = root.querySelector<HTMLElement>('.readout')!;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('.families button')];
+    const eqs = [...document.querySelectorAll<HTMLElement>('.eq[data-family]')];
+    const fmt = (n: number) => n.toLocaleString('en-GB');
+    const nnzOf = (f: Band) => d.blocks.reduce((s, b) => s + (d.counts[`${f.key}:${b.key}`] || 0), 0);
+
+    function show(f: Band | null, b: Band | null = null) {
+      row.setAttribute('height', f ? String(Math.max(2, (f.end - f.start) * d.sy)) : '0');
+      if (f) row.setAttribute('y', String(d.T + f.start * d.sy));
+      col.setAttribute('width', b ? String((b.end - b.start) * d.sx) : '0');
+      if (b) col.setAttribute('x', String(d.L + b.start * d.sx));
+      for (const btn of buttons) btn.classList.toggle('is-on', btn.dataset.family === f?.key);
+      for (const eq of eqs) eq.classList.toggle('is-hl', eq.dataset.family === f?.key);
+      if (!f) { out.textContent = ''; return; }
+      const rows = f.end - f.start;
+      if (b) {
+        const n = d.counts[`${f.key}:${b.key}`] || 0;
+        out.textContent = `${f.name}, equation (${d.numbers[f.key]}), against ${b.key} (${b.name.toLowerCase()}): `
+          + (n ? `${fmt(n)} nonzero${n > 1 ? 's' : ''}.` : 'no coefficients.');
+      } else {
+        out.textContent = `${f.name}, equation (${d.numbers[f.key]}): ${fmt(rows)} row${rows > 1 ? 's' : ''}, ${fmt(nnzOf(f))} nonzeros.`;
+      }
+    }
+
+    const hit = root.querySelector<SVGRectElement>('.hit')!;
+    hit.addEventListener('pointermove', (e) => {
+      const m = svg.getScreenCTM(); if (!m) return;
+      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+      const c = (p.x - d.L) / d.sx, r = (p.y - d.T) / d.sy;
+      const b = d.blocks.find((x) => c >= x.start && c < x.end) ?? null;
+      // The budget is a single row; give it a few rows of target so it can be found
+      const f = d.families.find((x) => r >= x.start - (x.end - x.start < 3 ? 4 : 0) && r < x.end + (x.end - x.start < 3 ? 4 : 0)) ?? null;
+      show(f, b);
+    });
+    hit.addEventListener('pointerleave', () => show(null));
+    for (const btn of buttons) {
+      const f = d.families.find((x) => x.key === btn.dataset.family)!;
+      btn.addEventListener('pointerenter', () => show(f));
+      btn.addEventListener('focus', () => show(f));
+      btn.addEventListener('click', () => show(f));
+      btn.addEventListener('pointerleave', () => { if (document.activeElement !== btn) show(null); });
+      btn.addEventListener('blur', () => show(null));
+    }
+    for (const eq of eqs) {
+      const f = d.families.find((x) => x.key === eq.dataset.family);
+      if (!f) continue;
+      eq.addEventListener('pointerenter', () => show(f));
+      eq.addEventListener('pointerleave', () => show(null));
+    }
+  }
+</script>
+
+<style>
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .band { transition: y 260ms ease-out, height 260ms ease-out; }
+  .frame rect { fill: none; stroke: var(--rule); }
+  .frame line { stroke: var(--rule); }
+  .nz { fill: var(--ink); }
+  .hl { fill: var(--survey); opacity: 0.14; }
+  .hit { fill: transparent; cursor: crosshair; }
+  .sym { font: italic 400 17px var(--serif); fill: var(--ink); text-anchor: middle; }
+  .fam { font: 400 11px var(--sans); fill: var(--graphite); text-anchor: end; }
+
+  .legend { padding-top: 26px; }
+  .stats { margin: 0 0 16px; }
+  .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--rule); }
+  .stats dt { color: var(--graphite); }
+  .stats dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .hint { margin: 0 0 8px; }
+  .families { list-style: none; margin: 0; padding: 0; }
+  .families button {
+    display: flex; justify-content: space-between; width: 100%; gap: 12px;
+    font: inherit; color: var(--ink); background: none; border: 0; border-radius: 2px;
+    padding: 4px 6px; margin: 0 -6px; width: calc(100% + 12px); cursor: pointer; text-align: left;
+  }
+  .families button:hover, .families button.is-on { background: color-mix(in srgb, var(--survey) 12%, transparent); }
+  .families .eqn { color: var(--graphite); font-variant-numeric: tabular-nums; }
+  .readout { margin: 12px 0 0; min-height: 4.4em; color: var(--ink); }
+
+  @media (max-width: 640px) {
+    .fam { display: none; }
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+// Drawing-sheet title block (DESIGN.md §6): project, partner and place, coordinates, sheet.
+import type { Featured } from '../data/site';
+
+interface Props { entry: Featured; sheet: number; of: number }
+const { entry, sheet, of } = Astro.props;
+const tb = entry.sheetInfo;
+---
+<dl class="title-block">
+  <div class="project"><dt>Project</dt><dd>{entry.title}<span>{entry.repo}</span></dd></div>
+  <div><dt>{tb.partnerLabel ?? 'Partner and place'}</dt><dd>{tb.partner}{tb.place.map((p) => <span>{p}</span>)}</dd></div>
+  <div><dt>Coordinates</dt><dd class="num">{tb.coords[0]}<span>{tb.coords[1]}</span></dd></div>
+  <div><dt>Sheet</dt><dd class="num">{sheet} of {of}<span>{tb.year}</span></dd></div>
+</dl>
+
+<style>
+  .title-block {
+    margin: 0;
+    display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr);
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    font: 400 14px/1.4 var(--cond);
+    max-width: calc(var(--main) + var(--gap) + var(--margin));
+  }
+  .title-block > div { background: var(--paper); padding: 8px 12px 10px; min-width: 0; }
+  dt { font-size: 12px; color: var(--graphite); }
+  dd { margin: 2px 0 0; font-weight: 500; color: var(--ink); overflow-wrap: anywhere; }
+  dd span { display: block; font-weight: 400; color: var(--graphite); }
+  .project dd span { color: var(--ink); }
+  .num { font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) {
+    .title-block { grid-template-columns: 1fr 1fr; }
+  }
+</style>

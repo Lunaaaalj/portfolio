@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LinkedIn banner</title>
+<!--
+  LinkedIn profile banner, 1584 × 396 CSS px (render at device scale 2 for a 3168 × 792 PNG).
+  Options in the query string: ?theme=light|dark  &name=1|0
+  The spiral is the same construction as the site's title screen (src/scripts/spiral.ts),
+  drawn once as a still frame.
+-->
+<style>
+  @font-face { font-family: "STIX Two Text"; font-weight: 400 700; font-style: normal;
+    src: url("../node_modules/@fontsource-variable/stix-two-text/files/stix-two-text-latin-wght-normal.woff2") format("woff2"); }
+  @font-face { font-family: "STIX Two Text"; font-weight: 400 700; font-style: italic;
+    src: url("../node_modules/@fontsource-variable/stix-two-text/files/stix-two-text-latin-wght-italic.woff2") format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans"; font-weight: 400;
+    src: url("../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); }
+
+  :root { --paper: #FFFFFF; --ink: #1B2430; --graphite: #5B6675; --rule: #C9D1DA; --survey: #1D4E89; --line-accent: #6E5A5F; }
+  :root[data-theme="dark"] { --paper: #141B24; --ink: #D3DAE3; --graphite: #8B96A5; --rule: #30363D; --survey: #8FB8EC; --line-accent: #B39CA1; }
+
+  html, body { margin: 0; background: var(--paper); }
+  .banner { position: relative; width: 1584px; height: 396px; overflow: hidden; background: var(--paper); color: var(--ink); }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* Clears the lines behind the text on the right */
+  .banner::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(270deg, var(--paper) 0%, var(--paper) 30%, color-mix(in srgb, var(--paper) 82%, transparent) 40%, transparent 56%);
+  }
+  .text { position: absolute; z-index: 1; left: 968px; right: 190px; top: 50%; transform: translateY(-50%); }
+  .name { font: 600 44px/1 "STIX Two Text", serif; letter-spacing: -0.02em; margin: 0 0 16px; white-space: nowrap; }
+  .role { font: italic 400 23px/1.3 "STIX Two Text", serif; margin: 0; }
+  .affil { font: 400 15px/1.4 "IBM Plex Sans", sans-serif; color: var(--graphite); margin: 6px 0 0; }
+  .eq { font: 400 13px/1.4 "IBM Plex Sans", sans-serif; color: var(--graphite); margin: 22px 0 0; }
+  .eq i { font-family: "STIX Two Text", serif; font-size: 15px; }
+  .eq sup { font-size: 0.72em; }
+  .no-name .role { font-size: 30px; text-wrap: balance; }
+  .no-name .affil { font-size: 16px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="banner" id="banner">
+  <canvas id="c"></canvas>
+  <div class="text">
+    <h1 class="name" id="name">Angel Eduardo Luna</h1>
+    <p class="role">Applied mathematics and data science</p>
+    <p class="affil">Tecnológico de Monterrey</p>
+    <p class="eq"><i>r</i>&#8239;=&#8239;<i>a</i>&#8202;e<sup><i>b&theta;</i></sup> &nbsp;·&nbsp; a logarithmic spiral traced by its tangent lines</p>
+  </div>
+</div>
+<script>
+  var q = new URLSearchParams(location.search);
+  if (q.get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+  if (q.get('name') === '0') { document.getElementById('name').remove(); document.getElementById('banner').classList.add('no-name'); }
+
+  var W = 1584, H = 396, cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  var cs = getComputedStyle(document.documentElement), v = function (n) { return cs.getPropertyValue(n).trim(); };
+  var dark = q.get('theme') === 'dark';
+  function rgb(hex) { var n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(','); }
+  var tones = [
+    { c: v('--ink'), a: dark ? 0.5 : 0.68, w: 1.2 },
+    { c: v('--graphite'), a: dark ? 0.6 : 0.62, w: 1.05 },
+    { c: v('--line-accent'), a: dark ? 0.5 : 0.58, w: 1.15 },
+    { c: v('--rule'), a: 1, w: 1.35 },
+    { c: v('--survey'), a: dark ? 0.42 : 0.34, w: 1.05 }
+  ].map(function (t) { t.rgb = rgb(t.c); return t; });
+  function smooth(e0, e1, x) { x = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return x * x * (3 - 2 * x); }
+
+  // Composition: the spiral's eye sits just left of centre, clear of the profile photo (lower left)
+  // and of the text (right third). Same parameters as the site, scaled to the banner's height.
+  var cx = W * 0.42, cy = H * 0.5, S = H * 1.9, D = Math.hypot(W, H);
+  var b = 0.18, N = 150, flow = 0.35, rot = 0.6;
+  var rMin = S * 0.006, rMax = S * 0.95, span = Math.log(rMax / rMin) / b, step = span / N;
+
+  // Graph-paper axes
+  ctx.strokeStyle = v('--rule'); ctx.lineWidth = 1; ctx.globalAlpha = 0.45; ctx.beginPath();
+  for (var g = -8; g <= 8; g++) {
+    var gx = Math.round(cx + g * H * 0.5) + 0.5, gy = Math.round(cy + g * H * 0.5) + 0.5;
+    ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.moveTo(0, gy); ctx.lineTo(W, gy);
+  }
+  ctx.stroke(); ctx.globalAlpha = 1;
+
+  for (var arm = 0; arm < 2; arm++) {
+    var off = rot + arm * Math.PI, armA = arm ? 0.42 : 1;
+
+    ctx.strokeStyle = arm ? v('--rule') : v('--survey'); ctx.globalAlpha = arm ? 0.6 : 0.35; ctx.beginPath();
+    for (var qq = 0; qq <= 500; qq++) {
+      var th = span * qq / 500, rr = rMin * Math.exp(b * th);
+      var x = cx + rr * Math.cos(th + off), y = cy + rr * Math.sin(th + off);
+      qq ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke(); ctx.globalAlpha = 1;
+
+    for (var k = 0; k < N; k++) {
+      var t = (k + flow) * step, r = rMin * Math.exp(b * t), ang = t + off;
+      var c = Math.cos(ang), s = Math.sin(ang), dx = b * c - s, dy = b * s + c, len = Math.hypot(dx, dy);
+      dx /= len; dy /= len;
+      var half = Math.min(D, r * 3.2);
+      var w = smooth(rMin * 3, rMin * 14, r) * (1 - smooth(rMax * 0.7, rMax, r));
+      var tn = tones[((k * 7 + arm * 3) % 5 + 5) % 5], al = tn.a * w * armA;
+      if (al < 0.004) continue;
+      var px = cx + r * c, py = cy + r * s;
+      var x0 = px - dx * half, y0 = py - dy * half, x1 = px + dx * half, y1 = py + dy * half;
+      var gr = ctx.createLinearGradient(x0, y0, x1, y1);
+      gr.addColorStop(0, 'rgba(' + tn.rgb + ',0)');
+      gr.addColorStop(0.2, 'rgba(' + tn.rgb + ',' + al * 0.35 + ')');
+      gr.addColorStop(0.5, 'rgba(' + tn.rgb + ',' + al + ')');
+      gr.addColorStop(0.8, 'rgba(' + tn.rgb + ',' + al * 0.35 + ')');
+      gr.addColorStop(1, 'rgba(' + tn.rgb + ',0)');
+      ctx.strokeStyle = gr; ctx.lineWidth = tn.w;
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    }
+  }
+</script>
+</body>
+</html>

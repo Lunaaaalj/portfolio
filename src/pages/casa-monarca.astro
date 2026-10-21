@@ -1,0 +1,195 @@
+---
+// Sources: Lunaaaalj/Optimizacion-de-recursos: README.md, reports/model_summary/main.tex
+// (formulation, parameters), reports/consolidated/main.tex and reports/resultados_sumario/main.tex
+// (context, results of the 8 March 2026 run). Nothing here is stated beyond those documents.
+import Project from '../layouts/Project.astro';
+import TeX from '../components/TeX.astro';
+import SparsityFigure from '../components/SparsityFigure.astro';
+
+const numbers = { demand: 2, calendar: 3, recipes: 4, lots: 5, budget: 6, inventory: 7, terminal: 8 };
+---
+<Project
+  slug="casa-monarca"
+  abstract="A mixed-integer linear program that sets a week of food purchasing for the Casa Monarca migrant shelter: which ingredients to buy, on which day and in what commercial lots, so that about 100 residents receive three meals a day within a fixed budget. With the data in the repository, the optimal plan costs MXN 25,995.10, 52% of the budget."
+>
+  <section class="fig-section" aria-label="Figure 1">
+    <SparsityFigure numbers={numbers} />
+  </section>
+
+  <section aria-labelledby="problem-h">
+    <div class="r"><h2 class="m" id="problem-h">Problem</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          Casa Monarca, Ayuda Humanitaria al Migrante, is a civil-society organisation in Santa Catarina, in the
+          Monterrey metropolitan area. It gives people in transit, deportees, refugees and asylum seekers temporary
+          shelter, food, primary medical care and legal advice. Food is among its most pressing and most expensive
+          needs, and it is paid for from a limited budget.
+        </p>
+        <p>
+          The decision is the week’s purchasing: how many commercial lots of each of 30 ingredients to buy on each of
+          seven days. The plan must provide three meal times a day for about 100 people, follow a weekly menu fixed in
+          advance, use the stock already in the warehouse and the donations that are scheduled, stay within the budget,
+          and end the week with no less stock than it began with.
+        </p>
+      </div>
+      <aside class="note">
+        <p>The model decides what to buy and when. The menu is set beforehand; the model only has to make it possible to cook.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="form-h">
+    <div class="r"><h2 class="m" id="form-h">Formulation</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          Indices run over ingredients <TeX tex={String.raw`i \in I`} /> (30), days <TeX tex={String.raw`t \in T`} /> (7), meal times <TeX tex={String.raw`c \in C`} /> (3) and dishes <TeX tex={String.raw`m \in M`} /> (12). The data are the unit cost <TeX tex={String.raw`c_i`} />, the lot size <TeX tex={String.raw`\ell_i`} />, the quantity of ingredient <TeX tex={String.raw`i`} /> in one
+          portion of dish <TeX tex={String.raw`m`} />, <TeX tex={String.raw`a_{i,m}`} />, the portions required <TeX tex={String.raw`d_{t,c} = 100`} />, the menu <TeX tex={String.raw`\alpha_{m,t,c} \in \{0,1\}`} />, the donations <TeX tex={String.raw`\delta_{i,t}`} />, the initial stock <TeX tex={String.raw`I_{i,0}`} /> and the budget <TeX tex={String.raw`B = 50{,}000`} /> pesos.
+        </p>
+        <p>
+          The decisions are the portions of each dish prepared, <TeX tex={String.raw`z_{m,t,c}`} />, and the lots bought, <TeX tex={String.raw`y_{i,t}`} />, both integer. The quantity bought <TeX tex={String.raw`x_{i,t}`} />, the quantity cooked <TeX tex={String.raw`\gamma_{i,t}`} /> and the stock at the end of each day <TeX tex={String.raw`\mu_{i,t}`} /> are continuous and
+          non-negative.
+        </p>
+      </div>
+      <aside class="note">
+        <p>Two kinds of decision: how much of each dish to cook, and how many packs of each ingredient to buy. Everything else follows from those.</p>
+      </aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Objective</p>
+        <div class="eq"><TeX display tex={String.raw`\min\; \Phi = \sum_{t \in T} \sum_{i \in I} c_i\, x_{i,t}`} /><span class="eqn">(1)</span></div>
+      </div>
+      <aside class="note"><p>Total spending over the week. Only purchases cost money: stock already in the warehouse and donations are free.</p></aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Demand</p>
+        <div class="eq" data-family="demand"><TeX display tex={String.raw`\sum_{m \in M} z_{m,t,c} \ge d_{t,c} \qquad \forall\, t, c`} /><span class="eqn">(2)</span></div>
+      </div>
+      <aside class="note"><p>At every meal, at least 100 portions are prepared.</p></aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Calendar</p>
+        <div class="eq" data-family="calendar"><TeX display tex={String.raw`z_{m,t,c} \le \mathcal{M}\, \alpha_{m,t,c} \qquad \forall\, m, t, c`} /><span class="eqn">(3)</span></div>
+      </div>
+      <aside class="note"><p>A dish can be cooked only where the menu schedules it. The constant <TeX tex={String.raw`\mathcal{M} = 150`} /> exceeds any meal’s needs, so it switches a slot on or off without limiting it.</p></aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Recipes</p>
+        <div class="eq" data-family="recipes"><TeX display tex={String.raw`\gamma_{i,t} = \sum_{c \in C} \sum_{m \in M} a_{i,m}\, z_{m,t,c} \qquad \forall\, i, t`} /><span class="eqn">(4)</span></div>
+      </div>
+      <aside class="note"><p>What the kitchen uses each day follows from the recipes: portions cooked times the amount of each ingredient per portion.</p></aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Lot sizes</p>
+        <div class="eq" data-family="lots"><TeX display tex={String.raw`x_{i,t} = \ell_i\, y_{i,t} \qquad \forall\, i, t`} /><span class="eqn">(5)</span></div>
+      </div>
+      <aside class="note"><p>Ingredients are bought in whole commercial units. Eggs, for example, come in trays of 30.</p></aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Budget</p>
+        <div class="eq" data-family="budget"><TeX display tex={String.raw`\sum_{t \in T} \sum_{i \in I} c_i\, x_{i,t} \le B`} /><span class="eqn">(6)</span></div>
+      </div>
+      <aside class="note"><p>The week’s purchases cannot exceed 50,000 pesos. This single row is the only constraint that links every purchase.</p></aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Inventory balance</p>
+        <div class="eq" data-family="inventory"><TeX display tex={String.raw`\mu_{i,t} = \mu_{i,t-1} + x_{i,t} + \delta_{i,t} - \gamma_{i,t}, \qquad \mu_{i,0} = I_{i,0} \qquad \forall\, i, t`} /><span class="eqn">(7)</span></div>
+      </div>
+      <aside class="note"><p>Stock at the end of today equals yesterday’s stock, plus purchases and donations, minus what was cooked.</p></aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Terminal stock</p>
+        <div class="eq" data-family="terminal"><TeX display tex={String.raw`\mu_{i,7} \ge I_{i,0} \qquad \forall\, i`} /><span class="eqn">(8)</span></div>
+      </div>
+      <aside class="note"><p>The week ends with at least as much of each ingredient as it began with, so the next week starts from no worse a position.</p></aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="method-h">
+    <div class="r"><h2 class="m" id="method-h">Method</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          The model is written in Pyomo and solved with GLPK, a branch-and-bound solver for mixed-integer programs.
+          When it terminates with an optimal status, no cheaper plan satisfies constraints (2)–(8). The run reported in
+          the repository, on 8 March 2026, terminated optimal.
+        </p>
+        <p>
+          A Streamlit interface lets the shelter’s staff edit the budget, the portions required, the unit costs, the
+          initial stock, the lot sizes, the donations and the menu; solve; and read the meal plan, daily purchases,
+          stock, consumption and costs, or download them as text.
+        </p>
+        <p>
+          Two practical features were left out to keep the problem tractable: the expiry dates of perishable
+          ingredients and the physical capacity of the warehouse.
+        </p>
+      </div>
+      <aside class="note">
+        <p>“Optimal” means optimal for the data as entered: prices, stock and menu. When they change, the model is solved again.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="results-h">
+    <div class="r"><h2 class="m" id="results-h">Results</h2></div>
+    <div class="r">
+      <div class="m">
+        <table class="data">
+          <caption class="vh">Indicators of the optimal solution, run of 8 March 2026.</caption>
+          <thead><tr><th scope="col">Indicator</th><th scope="col" class="n">Value</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Optimal cost <TeX tex={String.raw`\Phi^*`} /></th><td class="n">MXN 25,995.10</td></tr>
+            <tr><th scope="row">Budget <TeX tex={String.raw`B`} /></th><td class="n">MXN 50,000.00</td></tr>
+            <tr><th scope="row">Share of the budget used</th><td class="n">51.99%</td></tr>
+            <tr><th scope="row">Days with purchases</th><td class="n">2 of 7</td></tr>
+            <tr><th scope="row">Cost per portion served</th><td class="n">MXN 12.38</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="note"><p>Cost per portion is the week’s cost divided by 2,100 portions: 100 people, 21 meals.</p></aside>
+    </div>
+    <div class="r after-table">
+      <div class="m prose">
+        <p>
+          The plan buys almost everything on Monday, 99.1% of the week’s spending (MXN 25,755.10), and the remainder,
+          carrots and pasta for MXN 240.00, on Tuesday. Nothing is bought from Wednesday to Sunday. Rice and beans need
+          no purchase at all: the 100 kg and 330 kg in stock, with 50 kg of each donated on Monday, cover the week.
+        </p>
+        <p>
+          Five ingredients account for 62.7% of spending: beef (27.7%), bread (11.5%), eggs (9.5%), tuna (7.7%) and
+          chicken (6.3%). The heavily used perishables, among them tortillas, eggs, bread and beef, run down to exactly
+          zero by Sunday, which constraint (8) allows because none was in stock at the start.
+        </p>
+        <p>
+          The unused 48% of the budget, MXN 24,004.90, could feed more than 100 people per meal, pay for more varied
+          dishes, or be kept as a reserve against changes in prices or donations.
+        </p>
+      </div>
+      <aside class="note">
+        <p>Buying almost everything in one trip is cheapest here because prices are fixed for the week and the model has no expiry dates.</p>
+      </aside>
+    </div>
+  </section>
+</Project>
+
+<style>
+  .fig-section { margin-top: 56px; }
+  .after-table { margin-top: 28px; }
+</style>

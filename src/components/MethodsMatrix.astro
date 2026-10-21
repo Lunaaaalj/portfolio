@@ -29,6 +29,22 @@ import { methods } from '../data/site';
   </table>
 </div>
 
+<script>
+  // Crosshair: pointing at a cell lights its method row and its project column
+  for (const table of document.querySelectorAll<HTMLTableElement>('.matrix')) {
+    const clear = () => table.querySelectorAll('.x-row, .x-col').forEach((c) => c.classList.remove('x-row', 'x-col'));
+    table.addEventListener('pointerover', (e) => {
+      const cell = (e.target as Element).closest('td, th') as HTMLTableCellElement | null;
+      if (!cell) return;
+      clear();
+      const row = cell.parentElement as HTMLTableRowElement, col = cell.cellIndex;
+      if (row.parentElement?.tagName === 'TBODY') for (const c of row.cells) c.classList.add('x-row');
+      if (col > 0) for (const r of table.rows) r.cells[col]?.classList.add('x-col');
+    });
+    table.addEventListener('pointerleave', clear);
+  }
+</script>
+
 <style>
   /* position: relative contains the visually hidden labels, which would otherwise widen the page */
   .matrix-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -41,6 +57,10 @@ import { methods } from '../data/site';
   th:first-child { position: sticky; left: 0; background: var(--paper); z-index: 1; }
   .impl th, .impl td { color: var(--graphite); border-bottom: 0; padding-top: 12px; }
   .feat { color: var(--ink); }
+  .x-row, .x-col { background: color-mix(in srgb, var(--survey) 7%, var(--paper)); }
+  .x-row.x-col { background: color-mix(in srgb, var(--survey) 16%, var(--paper)); }
+  th.x-col, th.x-row { color: var(--ink); }
+  td, th { transition: background-color 120ms ease-out; }
   .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); vertical-align: middle; }
   a { color: inherit; text-decoration-color: var(--rule); }
   a:hover { color: var(--survey); text-decoration-color: currentColor; }

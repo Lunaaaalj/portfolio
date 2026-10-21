@@ -7,12 +7,14 @@
   --survey: #1D4E89;
   --hazard: #A23B2A;
   --line-accent: #6E5A5F;   /* generative line figures only */
+  --ramp-1: #DCE6F0; --ramp-2: #A9C3DE; --ramp-3: #6E9CCB; --ramp-4: #3A6FAE; --ramp-5: #1D4E89;  /* sequential data only */
+  --genus-1: #3D7A5B; --genus-2: #8A9A2B; --genus-3: #7A4E2D; --genus-4: #C08A1E;                 /* categorical: genus */
 
   --serif: "STIX Two Text Variable", "STIX Two Text", Georgia, serif;
   --sans: "IBM Plex Sans", system-ui, sans-serif;
   --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
 
-  --main: 66ch;
+  --main: 36.75rem;        /* about 66 characters of the 18px text face; rem keeps every element on one grid */
   --margin: 240px;
   --gap: 48px;
   --inset: clamp(16px, 9vw, 152px);
@@ -22,12 +24,16 @@
   :root:not([data-theme="light"]) {
     --paper: #141B24; --ink: #D3DAE3; --graphite: #8B96A5; --rule: #30363D;
     --survey: #8FB8EC; --hazard: #F2766B; --line-accent: #B39CA1;
+    --ramp-1: #1A2A3D; --ramp-2: #24476E; --ramp-3: #3468A3; --ramp-4: #5A8FD0; --ramp-5: #8FB8EC;
+    --genus-1: #6CBF94; --genus-2: #B9C95A; --genus-3: #C08A62; --genus-4: #E5B84B;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #141B24; --ink: #D3DAE3; --graphite: #8B96A5; --rule: #30363D;
   --survey: #8FB8EC; --hazard: #F2766B; --line-accent: #B39CA1;
+  --ramp-1: #1A2A3D; --ramp-2: #24476E; --ramp-3: #3468A3; --ramp-4: #5A8FD0; --ramp-5: #8FB8EC;
+  --genus-1: #6CBF94; --genus-2: #B9C95A; --genus-3: #C08A62; --genus-4: #E5B84B;
   color-scheme: dark;
 }
 
@@ -70,6 +76,34 @@ h2 { font-size: 24px; line-height: 1.3; margin-bottom: 24px; }
 .summary .lead { font-size: 21px; line-height: 1.5; }
 .summary b { font-weight: 600; }
 
+/* ---------- Mathematics: MathML from Temml, set in STIX Two Math ---------- */
+math { font-family: "STIX Two Math", math; font-size: 1.04em; font-feature-settings: "dtls" off; }
+math.tml-display { display: block math; width: 100%; }
+.eq math.tml-display { width: auto; justify-self: start; max-width: 100%; overflow-x: auto; overflow-y: hidden; }  /* left-aligned, as all text is */
+.eq {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 16px;
+  padding: 10px 12px; margin: 0 -12px; border-radius: 2px;
+  transition: background-color 160ms ease-out;
+}
+.eq .eqn { font: 400 14px/1 var(--sans); color: var(--graphite); font-variant-numeric: tabular-nums; }
+.eq.is-hl { background: color-mix(in srgb, var(--survey) 9%, transparent); }
+.eq-label { font: 500 14px/1.45 var(--sans); color: var(--ink); margin: 18px 0 0; }
+
+/* ---------- Numbered figures ---------- */
+.fig { margin: 0; }
+.fig figcaption { margin-top: 12px; font: 400 14px/1.45 var(--sans); color: var(--graphite); max-width: 62ch; }
+.fig figcaption b { color: var(--ink); font-weight: 600; }
+
+/* ---------- Data tables in running text ---------- */
+.data { border-collapse: collapse; width: 100%; font: 400 14px/1.45 var(--sans); font-variant-numeric: tabular-nums; }
+.data th, .data td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.data thead th { font-weight: 500; border-bottom-color: var(--ink); }
+.data td.n, .data th.n { text-align: right; padding-right: 0; }
+.data tbody th { font-weight: 400; }
+
+.prose h3 { font-size: 21px; line-height: 1.3; margin: 32px 0 12px; }
+.prose p { max-width: 66ch; }
+
 /* ---------- Footer ---------- */
 footer {
   margin-top: 112px; padding: 20px 0 48px; border-top: 1px solid var(--rule);
@@ -105,5 +139,68 @@ footer code { font-size: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ---------- Print: the page as a paper, margin notes as side notes ---------- */
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print {
+  :root, :root[data-theme], :root:not([data-theme="light"]) {
+    --paper: #FFFFFF !important; --ink: #000000 !important; --graphite: #444B55 !important;
+    --rule: #B8C0CA !important; --survey: #1D4E89 !important; --hazard: #A23B2A !important;
+    --ramp-1: #DCE6F0 !important; --ramp-2: #A9C3DE !important; --ramp-3: #6E9CCB !important;
+    --ramp-4: #3A6FAE !important; --ramp-5: #1D4E89 !important;
+    --genus-1: #3D7A5B !important; --genus-2: #8A9A2B !important; --genus-3: #7A4E2D !important; --genus-4: #C08A1E !important;
+    --main: 118mm; --gap: 7mm; --margin: 52mm; --inset: 0;
+    color-scheme: light;
+  }
+  body { font-size: 10.5pt; line-height: 1.45; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { padding: 0; max-width: none; }
+
+  /* Decoration and on-screen controls do not print */
+  canvas, .bg-canvas, .hero-canvas, .theme-btn, .running-head, .hero nav, .bar nav,
+  .hint, .scroll-hint, .readout, .years, .switch, .families, .legend .hint,
+  astro-dev-toolbar { display: none !important; }
+
+  /* The title screen becomes a title block of text */
+  .hero { border: 0; background: none; }
+  .hero::before { display: none; }
+  /* !important: the hero's own scoped rules are more specific than these */
+  .hero-inner { min-height: 0 !important; padding: 0 0 6mm !important; display: block !important; }
+  .hero-title { padding: 0 !important; }
+  .name { font-size: 30pt !important; max-width: none !important; }
+  .role { font-size: 13pt !important; margin-top: 3mm !important; }
+  .hero-cap { display: none; }
+  .summary { padding-top: 4mm !important; }
+
+  /* Margin notes stay beside their paragraph, as side notes */
+  .r { grid-template-columns: var(--main) var(--margin); column-gap: var(--gap); }
+  .note { grid-column: 2; font-size: 8.5pt; border: 0; margin: 0; padding: 0.2em 0 0; max-width: none; }
+  section { margin-top: 9mm; }
+  h2 { font-size: 15pt; margin-bottom: 4mm; break-after: avoid; }
+  h3 { break-after: avoid; }
+
+  /* Figures sized for the page, so a figure and its caption fit under the title */
+  .fig-section { margin-top: 5mm !important; }
+  .fig svg { max-height: 82mm; width: auto; max-width: 100%; }
+  .head { margin-top: 6mm !important; }
+  .abstract { font-size: 12pt !important; }
+  h1 { font-size: 22pt !important; }
+
+  /* Keep things whole across pages */
+  figure, .eq, tr, .entry, .title-block, .tb, .links li { break-inside: avoid; }
+  .entry > a { padding: 6mm 0; }
+
+  /* Links: text links print their address; block links and tables do not */
+  .prose a[href^="http"]::after, .links a[href^="http"]::after, .contact a[href^="http"]::after,
+  footer a[href^="http"]::after, .further a[href^="http"]::after {
+    content: " (" attr(href) ")"; font: 400 7.5pt/1.3 var(--sans); color: var(--graphite); word-break: break-all;
+  }
+  .contact a[href^="mailto"]::after { content: ""; }
+  a { color: var(--ink); text-decoration: none; }
+  .links a, .prose a { text-decoration: underline; text-decoration-color: var(--rule); }
+
+  .sheets { margin-top: 8mm; }
+  footer { margin-top: 10mm; }
   * { transition: none !important; }
 }

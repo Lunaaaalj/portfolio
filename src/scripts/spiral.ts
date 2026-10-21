@@ -61,7 +61,7 @@ export function mountSpiral(canvas: HTMLCanvasElement): void {
     const penTheta = span * penAt(drawn / DRAW);
 
     // Graph-paper axes
-    ctx.strokeStyle = grid; ctx.lineWidth = 1; ctx.globalAlpha = 0.45 * Math.min(1, drawn / 0.6);
+    ctx.strokeStyle = grid; ctx.lineWidth = 1; ctx.globalAlpha = 0.45 * Math.min(1, drawn / 0.6) * Math.max(0, 1 - scroll * 1.8); // grid clears first
     ctx.beginPath();
     for (let g = -4; g <= 4; g++) {
       const gx = Math.round(cx + g * S * 0.25) + 0.5, gy = Math.round(cy + g * S * 0.25) + 0.5;

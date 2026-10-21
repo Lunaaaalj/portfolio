@@ -1,6 +1,6 @@
 # Portfolio design
 
-Design plan for Angel Eduardo Luna's portfolio site. It extends the identity already established in the GitHub profile README (`README.md`, `assets/build.py`). Status: approved direction, not yet built.
+Design plan for Angel Eduardo Luna's portfolio site. It extends the identity already established in the GitHub profile README (`README.md`, `assets/build.py`). Status: built — home page and the three featured pages (October 2026); domain and deployment pending.
 
 ## 1. Purpose and audience
 
@@ -74,7 +74,7 @@ The theme follows `prefers-color-scheme`, with a manual toggle stored per visito
 | Text, headings | **STIX Two Text** (variable weight) | Drawn for scientific publishing; shares its design with STIX Two Math, so text and equations match. |
 | Margin notes, captions, labels, navigation | **IBM Plex Sans** | Tabular figures (`font-variant-numeric: tabular-nums`) in tables and legends |
 | Title block | **IBM Plex Sans Condensed** | Only inside title blocks |
-| Mathematics | **STIX Two Math** via MathJax, rendered at build time | KaTeX cannot use STIX Two Math. Chosen over Computer Modern, which looks thin beside the text. |
+| Mathematics | **STIX Two Math**, as native MathML rendered at build time by Temml | KaTeX cannot use STIX Two Math. MathML replaces the planned MathJax: no client script, and screen readers read it as mathematics. Display equations are left-aligned with their number at the right of the main column. |
 
 All fonts are self-hosted as WOFF2 and subset to Latin plus Latin Extended (the Spanish place names need accented letters).
 
@@ -115,7 +115,8 @@ All fonts are self-hosted as WOFF2 and subset to Latin plus Latin Extended (the 
 
 - Cells: project, partner and place, coordinates, sheet number and year. The 1 px rules use the `rule` token; text is Plex Sans Condensed at 14 px.
 - "Sheet n of 3" is real sequence information: there are three featured pages, in a fixed order, and the next/previous navigation at the foot of each page follows the same order.
-- **Coordinates must be verified before publishing**; the values above are placeholders. GeoStats uses the centroid of the metropolitan area; RefInit uses the transmission-line site; Casa Monarca uses Santa Catarina.
+- **Coordinates are computed from project data where it exists:** GeoStats is the mean of the 379,294 geocoded records (25.71° N, 100.31° W); RefInit is the centroid of the polygon points in `data/processed/mapa.csv`, UTM 14N (23.46° N, 101.34° W). Casa Monarca uses the Santa Catarina municipal seat (25.67° N, 100.46° W) and must be confirmed before publishing.
+- The second cell's label can change where the project has no partner: GeoStats reads “Context and place” (Semana de la Movilidad).
 - On phones the four cells stack two by two.
 
 ### Figures
@@ -137,18 +138,18 @@ Columns: project, one-line description, Report (PDF), Repository. Report cells a
 The home page's signature. Every figure is made only of straight lines, and the curve appears as their envelope, so the decoration is itself a piece of mathematics.
 
 - **Title screen:** a logarithmic spiral *r* = *a*e^(*bθ*) through 150 tangent segments per arm, on two arms (the second at 42% strength). Segments are 3.2 × the radius long and taper to transparent at both tips. The caption beneath the title states what it is.
-- **Sections:** one quieter construction per section, drawn on a fixed canvas in the free space to the right of the text, with a fade so nothing draws under the main or margin columns. Each has a small label, shown only when it fits at its natural width.
+- **Sections:** one family of 96 straight lines, treated as decoration in the same way as the title spiral, never as an exhibit: no frame, no caption, no plate. Each section has a construction; while a section is read the lines hold it, and between section centres every line travels, index by index, to its place in the next construction, so the decoration is one drawing that turns into the next. It sits on a fixed canvas larger than the free space to the right of the margin column, so the window crops it; every line runs past its construction points and tapers to nothing at both tips, and the field dissolves before it reaches the margin column. The contact section's colophon names the constructions and says that they are decorative.
 
 | Section | Construction | Scroll changes |
 |---|---|---|
-| Summary | Astroid (sliding ladder, mirrored) | Ladder length |
+| Summary | Astroid (sliding ladder, four quadrants) | Ladder length |
 | Selected work | Parabola (string art between two arms) | Angle between the arms |
-| Methods | Chords *k* → *m·k* on a circle | *m* from 2 (cardioid) to 3 (nephroid); the label shows *m* |
+| Methods | Chords *k* → *m·k* on a circle | *m* from 2 (cardioid) to 3 (nephroid) |
 | Further work | Chords *k* → −2*k* (deltoid) | Rotation |
 | Contact | Circle from its tangents | Rotation |
 
-- Colours: `graphite`, `rule`, `line-accent` and `survey` at low alpha; the title spiral uses `ink` as well.
-- Below 1100 px the section figures are not drawn; the title spiral moves above the name on phones.
+- Colours: the section figures use the title spiral's palette (`ink`, `graphite`, `line-accent`, `rule`, `survey`) at lower alpha; each line keeps its colour through the morph.
+- Section figures are drawn only when at least 160 px of free space remains beside the margin column; the title spiral moves above the name on phones.
 
 ## 7. Pages
 
@@ -175,7 +176,7 @@ Further work            (table)
 Contact                 LinkedIn, lunaleija@outlook.com
 ```
 
-The thumbnails are static versions of each project's figure, and the whole entry is the link.
+Each entry leads with its project page's own Fig. 1 in compact form, large in the main column on a plate sized to the figure's proportions, with the reduced title block beside it in the margin column and the text beneath. The whole entry is the link. Pointing at or focusing an entry previews the figure's interaction: the hex map steps through 2019–2024, the planting tile switches from random to competition-aware, the constraint matrix steps through its families. On phones the tile preview shows its left part at a legible size.
 
 ### Featured project page
 
@@ -183,7 +184,7 @@ The thumbnails are static versions of each project's figure, and the whole entry
 2. Title and abstract (2–3 sentences)
 3. Fig. 1: the interactive figure
 4. **Problem.** What decision is being made, by whom, under which constraints
-5. **Formulation.** Sets, variables, objective, constraints in KaTeX, each with a margin note
+5. **Formulation.** Sets, variables, objective, constraints in MathML, each with a margin note
 6. **Method.** Solver or estimator, and how it is validated
 7. **Results.** Only results stated in the repository or its report
 8. **Links.** Repository, live application, Report (PDF)
@@ -193,15 +194,21 @@ The thumbnails are static versions of each project's figure, and the whole entry
 
 | Page | Figure | Interaction | Data |
 |---|---|---|---|
-| GeoStats | Hexagonal density map | Hover or tap a cell to show its count; toggle by year, 2019–2024 | Re-bin the ATUS parquet by `ANIO` (the current `geostats_hex.json` is pooled across years) |
-| Reforestation | Staggered planting lattice | Switch between random and competition-aware assignment; same-genus contacts are redrawn and the count updates | Port the `lattice_panel` logic from `build.py` to the browser. Label it illustrative. |
-| Casa Monarca | Constraint-matrix sparsity | Hover a block to name the variable block and constraint family, and highlight the matching line of the formulation | Structure from `fig_sparsity` in `build.py` |
+| GeoStats | Hexagonal map on the project's own 2,241-cell grid | Year selector (native radio buttons) 2019–2024 and the 2027 forecast; pointing at a cell reads its municipality and count; yearly totals in a table beside the map | `scripts/extract-geostats.mjs` from the presentation's `datos.json` → `src/data/geostats.json`. One set of log class breaks for all years |
+| Reforestation | One 4 × 13 staggered planting tile, periodic borders, 156 neighbouring pairs | Switch random / competition-aware (radio buttons and CSS; works without JavaScript); competition, its random expectation, the coefficient and same-species pairs update | `scripts/extract-refinit.mjs` → `src/data/refinit.json` (real matrix *W*); composition proportional to the plan; arrangement from a seeded tabu search at build time. Labelled illustrative |
+| Casa Monarca | Constraint matrix, 1,092 × 934 | Point at the matrix or choose a constraint family to highlight it and the matching equation; the readout gives exact nonzero counts | Built in `src/lib/casaMonarca.ts` from the formulation and the real recipe table; not schematic |
 
 ## 8. Motion
 
 - **One authored, continuous motion: the home title screen.** A logarithmic spiral is traced by a pen on first load (about 3.6 s) and then flows outward along its tangents; the pointer rotates it and tightens or loosens it; scrolling opens and fades it. It pauses when off screen or when the tab is hidden.
 - **Section figures draw once and then move only with scroll** (§6 Envelope figures). Nothing else moves on load.
-- Everything else answers the visitor: switching the lattice assignment eases the edge colours over about 200 ms; switching the hex-map year cross-fades the fills.
+- Everything else answers the visitor: switching the lattice assignment cross-fades over 200 ms; switching the hex-map year cross-fades the fills; the home entries preview their figure only while pointed at or focused, and not at all under reduced motion.
+- A running head in the margin column (desktop only) appears once the opening of the page has scrolled away: the page's name and the section being read. It steps aside while a full-width table passes under it.
+
+### Print and sharing
+
+- **Print:** A4, light palette whatever the theme, margin notes as side notes in a 52 mm column, canvases and on-screen controls removed, the addresses of text links printed after them, figures and equations kept whole.
+- **Social card:** `public/og.png`, 1200 × 630, rendered from `scripts/og-image.html` by `scripts/og-image.sh`. Its URL becomes absolute once `site` is set in `astro.config.mjs`.
 - Respect `prefers-reduced-motion`: the spiral and the section figures render as still, complete drawings, and changes become instant.
 
 ## 9. Accessibility floor
@@ -213,7 +220,7 @@ The thumbnails are static versions of each project's figure, and the whole entry
 
 ## 10. Stack and delivery
 
-- **Astro**, static output. Interactive figures are islands of plain TypeScript and SVG (or a small canvas for the hex map if performance requires it); no UI framework unless one is needed. KaTeX rendered at build time.
+- **Astro**, static output. Interactive figures are SVG drawn at build time, with small scripts for highlighting; no UI framework. Mathematics is MathML from Temml at build time.
 - **Data:** figures are generated from versioned data by scripts in the repository and never edited by hand.
 - **Hosting:** Vercel, where the other project demos live.
 - **Repository:** `Lunaaaalj/portfolio`, separate from the profile repository. Fonts are self-hosted through Fontsource packages.
@@ -232,6 +239,7 @@ The thumbnails are static versions of each project's figure, and the whole entry
 - [x] Displayed name: "Angel Eduardo Luna". The profile README header ("Eduardo Luna") still needs updating to match.
 - [x] CV download: none for now; the site does not reference a CV.
 - [ ] Domain: a Vercel subdomain or a custom domain.
-- [ ] Which further-work projects to list, and which of them have a PDF report.
-- [ ] Verified coordinates and partner wording for each title block.
-- [ ] Featured entries link to their repositories until the project pages exist; switch them to `/geostats`, `/reforestation` and `/casa-monarca` then.
+- [x] Reports: only NeuralNetworksTeamEnvironment has a written report (`reports/main.pdf`); MSED's PDFs are notebook exports and are not linked. The list of further-work projects stands as it is unless changed.
+- [ ] Coordinates: GeoStats and RefInit computed from data (§6). Casa Monarca's still needs confirming (municipal seat used).
+- [x] Featured entries and the methods matrix link to `/geostats`, `/reforestation` and `/casa-monarca`.
+- [ ] The RefInit comparison with the exact integer program is pending in its report; the page says so. Update the page when the bound and gap are reported.

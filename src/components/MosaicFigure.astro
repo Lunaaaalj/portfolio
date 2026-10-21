@@ -1,0 +1,187 @@
+---
+// Fig. 1 on the reforestation page: one planting tile, random against competition-aware.
+// Both states are drawn at build time; the switch is two radio buttons and CSS, so it works
+// without JavaScript, and the cross-fade is the only motion.
+import {
+  ROWS, COLS, EDGES, W, CODES, GENUS, species,
+  composition, expected, randomArrangement, tabuArrangement, competition,
+} from '../lib/mosaic';
+
+interface Props { compact?: boolean }  // compact: the home-page preview, random until pointed at
+const { compact = false } = Astro.props;
+
+const m = composition();
+const E = expected(m);
+const states = [
+  { key: 'random', label: 'Random', a: randomArrangement(m) },
+  { key: 'aware', label: 'Competition-aware', a: [] as number[] },
+];
+states[1].a = tabuArrangement(states[0].a);
+
+const S = 46, H = (S * Math.sqrt(3)) / 2, PAD = S * 1.1;
+const pos = (r: number, c: number) => [PAD + (c + (((r % 2) + 2) % 2 ? 0.5 : 0)) * S, PAD + r * H];
+const wrap = (r: number, c: number) => (((r % ROWS) + ROWS) % ROWS) * COLS + (((c % COLS) + COLS) % COLS);
+// Bounds include the faded ring of neighbouring copies on every side
+const R0 = 17, VX = PAD - S - R0, VY = PAD - H - R0;
+const VW = (COLS + 1.5) * S + 2 * R0, VH = (ROWS + 1) * H + 2 * R0;
+
+// Geometric neighbours of each tile position, including those across the periodic border
+const geo = Array.from({ length: ROWS * COLS }, (_, k) => {
+  const r = Math.floor(k / COLS), c = k % COLS, s = r % 2 ? 0 : -1;
+  return [[r, c + 1], [r + 1, c + s], [r + 1, c + s + 1]] as [number, number][];
+});
+const ghosts: [number, number][] = [];
+for (let r = -1; r <= ROWS; r++) for (let c = -1; c <= COLS; c++) if (r < 0 || r >= ROWS || c < 0 || c >= COLS) ghosts.push([r, c]);
+
+const stats = states.map((s) => {
+  const C = competition(s.a);
+  const same = EDGES.filter(([u, v]) => s.a[u] === s.a[v]).length;
+  return { C, coef: C / E, same };
+});
+const fmt = (x: number, d = 2) => x.toFixed(d);
+const genusNames = ['Agave', 'Opuntia', 'Prosopis', 'Yucca'];
+---
+{compact ? (
+  <div class="preview mosaic-preview">
+    <svg viewBox={`${VX.toFixed(1)} ${VY.toFixed(1)} ${VW.toFixed(1)} ${VH.toFixed(1)}`} preserveAspectRatio="xMinYMid meet" aria-hidden="true">
+      <rect class="tile" x={PAD - S * 0.5} y={PAD - H * 0.5} width={COLS * S} height={ROWS * H} />
+      {states.map((s) => (
+        <g class={`state pstate-${s.key}`}>
+          {geo.flatMap((ns, k) => {
+            const r = Math.floor(k / COLS), c = k % COLS, [x1, y1] = pos(r, c);
+            return ns.map(([r2, c2]) => {
+              const [x2, y2] = pos(r2, c2), a = s.a[k], b = s.a[wrap(r2, c2)];
+              const same = a === b;
+              return <line x1={x1.toFixed(1)} y1={y1.toFixed(1)} x2={x2.toFixed(1)} y2={y2.toFixed(1)}
+                class={same ? 'same' : 'pair'} style={same ? undefined : `opacity:${(0.12 + 0.7 * (W[a][b] - 0.17) / 1.33).toFixed(2)}`} />;
+            });
+          })}
+          {s.a.map((sp, k) => { const [x, y] = pos(Math.floor(k / COLS), k % COLS);
+            return <g class={`plant g${GENUS[sp]}`} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}><circle r="15" /><text dy="3.4">{CODES[sp]}</text></g>; })}
+        </g>
+      ))}
+    </svg>
+    <span class="tag"><span class="t-random">Random: {stats[0].same} same-species pairs</span><span class="t-aware">Competition-aware: {stats[1].same} same-species pairs</span></span>
+  </div>
+) : (
+<div class="r mosaic">
+  <figure class="m fig">
+    <div class="scroll">
+    <svg viewBox={`${VX.toFixed(1)} ${VY.toFixed(1)} ${VW.toFixed(1)} ${VH.toFixed(1)}`} role="img" aria-labelledby="mosaic-cap">
+      <rect class="tile" x={PAD - S * 0.5} y={PAD - H * 0.5} width={COLS * S} height={ROWS * H} />
+      {states.map((s) => (
+        <g class={`state state-${s.key}`}>
+          {geo.flatMap((ns, k) => {
+            const r = Math.floor(k / COLS), c = k % COLS, [x1, y1] = pos(r, c);
+            return ns.map(([r2, c2]) => {
+              const [x2, y2] = pos(r2, c2), a = s.a[k], b = s.a[wrap(r2, c2)];
+              const w = W[a][b], same = a === b;
+              return <line x1={x1.toFixed(1)} y1={y1.toFixed(1)} x2={x2.toFixed(1)} y2={y2.toFixed(1)}
+                class={same ? 'same' : 'pair'} style={same ? undefined : `opacity:${(0.12 + 0.7 * (w - 0.17) / 1.33).toFixed(2)}`} />;
+            });
+          })}
+          {ghosts.map(([r, c]) => { const [x, y] = pos(r, c); const sp = s.a[wrap(r, c)];
+            return <g class={`plant ghost g${GENUS[sp]}`} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}><circle r="15" /><text dy="3.4">{CODES[sp]}</text></g>; })}
+          {s.a.map((sp, k) => { const [x, y] = pos(Math.floor(k / COLS), k % COLS);
+            return <g class={`plant g${GENUS[sp]}`} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}><circle r="15" /><text dy="3.4">{CODES[sp]}</text></g>; })}
+        </g>
+      ))}
+    </svg>
+    </div>
+    <figcaption id="mosaic-cap">
+      <b>Fig. 1.</b> One planting tile: 4 rows of 13 positions on the staggered grid, 156 neighbouring pairs. The tile
+      repeats across the polygon, so its borders are periodic; the faded ring shows the neighbouring copies. Lines join
+      neighbours, darker where the two species compete more under the matrix <i>W</i>; red marks two plants of the same
+      species side by side. <i>Illustrative:</i> the composition is proportional to the plan’s densities, and the
+      competition-aware tile is computed on this page by a short tabu search with the report’s matrix, not taken from
+      the project’s results.<span class="scroll-hint"> The figure scrolls sideways.</span>
+    </figcaption>
+  </figure>
+
+  <aside class="note legend">
+    <fieldset class="switch">
+      <legend>Arrangement</legend>
+      {states.map((s, k) => (
+        <label><input type="radio" name="mosaic-state" value={s.key} checked={k === 1} /><span>{s.label}</span></label>
+      ))}
+    </fieldset>
+    {states.map((s, k) => (
+      <dl class={`stats stats-${s.key}`}>
+        <div><dt>Competition</dt><dd>{fmt(stats[k].C)}</dd></div>
+        <div><dt>Expected at random</dt><dd>{fmt(E)}</dd></div>
+        <div><dt>Coefficient</dt><dd>{fmt(stats[k].coef, 3)}</dd></div>
+        <div><dt>Same-species pairs</dt><dd>{stats[k].same}</dd></div>
+      </dl>
+    ))}
+    <p class="key-title">Genus</p>
+    <ul class="genus">
+      {genusNames.map((g, k) => <li><span class={`dot g${k}`}></span><i>{g}</i></li>)}
+    </ul>
+    <p class="key-title">Species and positions</p>
+    <ul class="species">
+      {species.map((s, k) => <li><span class="code">{CODES[k]}</span><i>{s.name.replace(/^(\w)\w+ /, '$1. ')}</i><span class="n">{m[k]}</span></li>)}
+    </ul>
+  </aside>
+</div>
+)}
+
+<style>
+  svg { display: block; width: 100%; height: auto; }
+  .tile { fill: none; stroke: var(--rule); stroke-dasharray: 4 4; }
+  .state { transition: opacity 200ms ease-out; }
+  .pair { stroke: var(--ink); stroke-width: 1.5; }
+  .same { stroke: var(--hazard); stroke-width: 3.5; }
+  .plant circle { fill: var(--paper); stroke-width: 3; }
+  .plant text { font: 500 9.5px var(--cond); fill: var(--ink); text-anchor: middle; }
+  .plant.g0 circle { stroke: var(--genus-1); } .plant.g1 circle { stroke: var(--genus-2); }
+  .plant.g2 circle { stroke: var(--genus-3); } .plant.g3 circle { stroke: var(--genus-4); }
+  .ghost { opacity: 0.28; }
+
+  /* The switch: which state is shown follows the checked radio button */
+  .state-random, .stats-random { opacity: 0; }
+  .state-random { pointer-events: none; }
+  .stats-random { display: none; }
+  .mosaic:has(input[value="random"]:checked) .state-random { opacity: 1; }
+  .mosaic:has(input[value="random"]:checked) .state-aware { opacity: 0; }
+  .mosaic:has(input[value="random"]:checked) .stats-random { display: block; opacity: 1; }
+  .mosaic:has(input[value="random"]:checked) .stats-aware { display: none; }
+
+  .switch { border: 0; margin: 0 0 14px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  .switch legend { padding: 0; margin-bottom: 6px; color: var(--ink); font-weight: 500; }
+  .switch label { position: relative; cursor: pointer; }
+  .switch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .switch span { display: inline-block; padding: 3px 8px; border: 1px solid var(--rule); border-radius: 2px; color: var(--ink); }
+  .switch input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .switch input:focus-visible + span { outline: 2px solid var(--survey); outline-offset: 2px; }
+  .switch label:hover span { border-color: var(--graphite); }
+  .stats { margin: 0 0 18px; }
+  .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--rule); }
+  .stats dt { color: var(--graphite); }
+  .stats dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .key-title { margin: 0 0 6px; color: var(--ink); font-weight: 500; }
+  .genus, .species { list-style: none; margin: 0 0 16px; padding: 0; }
+  .genus li { display: flex; align-items: center; gap: 8px; padding: 1px 0; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: 3px solid; flex: none; }
+  .dot.g0 { border-color: var(--genus-1); } .dot.g1 { border-color: var(--genus-2); }
+  .dot.g2 { border-color: var(--genus-3); } .dot.g3 { border-color: var(--genus-4); }
+  .species li { display: grid; grid-template-columns: 34px 1fr auto; padding: 1px 0; }
+  .species .code { font-family: var(--cond); color: var(--ink); }
+  .species .n { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .scroll-hint { display: none; }
+  @media (max-width: 640px) {
+    .scroll svg { min-width: 600px; }
+    .scroll-hint { display: inline; }
+  }
+  /* Home preview: random until the entry is pointed at or focused */
+  .mosaic-preview svg { width: 100%; height: auto; }
+  .pstate-aware, .t-aware { opacity: 0; }
+  .t-aware, .t-random { transition: opacity 200ms ease-out; }
+  .tag { display: grid; } .tag > span { grid-area: 1 / 1; }
+  :global(.entry a:is(:hover, :focus-visible)) .pstate-random,
+  :global(.entry a:is(:hover, :focus-visible)) .t-random { opacity: 0; }
+  :global(.entry a:is(:hover, :focus-visible)) .pstate-aware,
+  :global(.entry a:is(:hover, :focus-visible)) .t-aware { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .state { transition: none; } }
+</style>

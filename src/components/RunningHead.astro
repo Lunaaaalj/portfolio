@@ -1,0 +1,54 @@
+---
+// Running head in the margin column, as a journal sets one: once the opening of the page has
+// scrolled away it names the page and the section being read, and links back to the top.
+// Desktop only; below 1100 px there is no margin column to hold it.
+interface Props { title: string; after: string }  // after: selector of the element it waits to clear
+const { title, after } = Astro.props;
+---
+<div class="running-head" data-after={after} aria-hidden="true">
+  <a href="#top" tabindex="-1">{title}</a>
+  <span class="current"></span>
+</div>
+
+<script>
+  for (const head of document.querySelectorAll<HTMLElement>('.running-head')) {
+    const after = document.querySelector<HTMLElement>(head.dataset.after!);
+    const current = head.querySelector<HTMLElement>('.current')!;
+    const headings = [...document.querySelectorAll<HTMLElement>('main section h2')];
+    const wides = [...document.querySelectorAll<HTMLElement>('.wide')];
+    let queued = false;
+    function update() {
+      queued = false;
+      // Step aside while a full-width table or figure passes under the head
+      const blocked = wides.some((w) => { const r = w.getBoundingClientRect(); return r.top < 80 && r.bottom > 0; });
+      const shown = !blocked && (after ? after.getBoundingClientRect().bottom < 0 : window.scrollY > 200);
+      head.classList.toggle('is-shown', shown);
+      if (!shown) return;
+      let name = '';
+      for (const h of headings) if (h.getBoundingClientRect().top < window.innerHeight * 0.35) name = h.textContent ?? '';
+      current.textContent = name;
+    }
+    window.addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
+</script>
+
+<style>
+  .running-head {
+    position: fixed; top: 0; z-index: 3;
+    left: calc(var(--inset) + var(--main) + var(--gap));
+    width: var(--margin);
+    padding: 18px 0 10px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    font: 400 13px/1.4 var(--sans); color: var(--graphite);
+    opacity: 0; transform: translateY(-6px); pointer-events: none;
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+  }
+  .running-head.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+  a { display: block; color: var(--ink); font-weight: 500; text-decoration: none; }
+  a:hover { color: var(--survey); }
+  .current { display: block; min-height: 1.4em; }
+  @media (max-width: 1099px) { .running-head { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .running-head { transition: none; } }
+</style>

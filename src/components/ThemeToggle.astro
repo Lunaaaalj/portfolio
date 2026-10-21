@@ -1,0 +1,26 @@
+<button class="theme-btn" type="button">Dark theme</button>
+
+<script>
+  const root = document.documentElement;
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  const current = () => root.dataset.theme || (mq.matches ? 'dark' : 'light');
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.theme-btn')) {
+    const label = () => { btn.textContent = current() === 'dark' ? 'Light theme' : 'Dark theme'; };
+    btn.addEventListener('click', () => {
+      const next = current() === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try { localStorage.setItem('theme', next); } catch {}
+      label();
+    });
+    mq.addEventListener('change', label);
+    label();
+  }
+</script>
+
+<style>
+  .theme-btn {
+    font: inherit; color: var(--graphite); background: none; border: 0; padding: 4px 0; cursor: pointer;
+    text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 0.25em;
+  }
+  .theme-btn:hover { color: var(--ink); text-decoration-color: currentColor; }
+</style>

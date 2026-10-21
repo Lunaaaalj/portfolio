@@ -1,0 +1,188 @@
+---
+// Sources: Lunaaaalj/GeoStats: README.md, docs/reporte/reporte.tex (method, diagnostics,
+// validation), docs/presentacion/index.html speaker notes (2027 central forecast) and
+// docs/presentacion/datos.json (the grid). Nothing here is stated beyond those documents.
+import Project from '../layouts/Project.astro';
+import TeX from '../components/TeX.astro';
+import HexMapFigure from '../components/HexMapFigure.astro';
+---
+<Project
+  slug="geostats"
+  abstract="A geostatistical analysis of the 379,294 traffic incidents recorded by INEGI in the 18 municipalities of the Monterrey metropolitan area between 2019 and 2024, and a hierarchical Bayesian model that forecasts incidents for each one-kilometre cell. Risk is concentrated and persistent: 5% of the cells hold 44% of incidents, and the 2019 ranking of cells correlates 0.83 with that of 2024."
+>
+  <section class="fig-section" aria-label="Figure 1">
+    <HexMapFigure />
+  </section>
+
+  <section aria-labelledby="problem-h">
+    <div class="r"><h2 class="m" id="problem-h">Problem</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          The project asks three questions of the metropolitan area’s traffic incidents: where risk concentrates, who
+          bears its cost, and how well it can be anticipated. It was developed for the Semana de la Movilidad by
+          Angel Eduardo Luna, Jenaro Alcaraz, Roberto Pérez, Damián Yul Reynoso and Mateo Rodolfo Flores.
+        </p>
+        <p>
+          The human cost is the exception, but a heavy one. 92.9% of incidents cause material damage only; the rest
+          left 25,642 people injured and 1,167 dead, and 64.4% of those deaths occurred at intersections in four
+          municipalities: Monterrey, Apodaca, Guadalupe and García. Where incidents are most frequent is not where they
+          are most severe: central cells average 498 incidents and 4.7% leave casualties, peripheral cells 29 and
+          8.4%. A ranking by count alone puts the periphery last.
+        </p>
+        <p>
+          The original question, how many incidents and in which census tracts, was reformulated before any data was
+          touched. If counts per unit are independent Poisson, the total and its distribution across units come from
+          one model, so a single model of the rate per unit answers both “how many” and “where”.
+        </p>
+      </div>
+      <aside class="note">
+        <p>No model can predict a single crash. What can be estimated is how loaded the dice are in each place: the expected rate. The ranking, the total and the map all follow from it.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="data-h">
+    <div class="r"><h2 class="m" id="data-h">Data and spatial unit</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          The source is INEGI’s <i>Accidentes de Tránsito Terrestre en Zonas Urbanas y Suburbanas</i> (ATUS), a census
+          of the reports filed by each municipality’s traffic police, not a survey. The records are cut to the 18
+          municipalities of the metropolitan area and assigned to a grid of regular hexagons 500 m a side
+          (0.65 km²). The 2,241 cells with at least one incident in six years are kept.
+        </p>
+        <p>
+          The structure is strong. The Gini coefficient of counts per cell is 0.766, and Moran’s <TeX tex="I" /> on <TeX tex={String.raw`\log(1+n)`} /> is 0.648. Local statistics are corrected for multiple testing
+          (Benjamini–Hochberg): significant LISA cells fall from 682 to 287, and what survives is a compact core over
+          the consolidated urban area with no isolated hot spots. Risk follows corridors, not corners.
+        </p>
+      </div>
+      <aside class="note">
+        <p>Hexagons rather than census tracts: tract boundaries run along the avenues, exactly where incidents happen, and tracts vary widely in size. Equal cells can be compared directly.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="form-h">
+    <div class="r"><h2 class="m" id="form-h">Formulation</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          For cell <TeX tex="i" /> in municipality <TeX tex="j(i)" /> and year <TeX tex="a" />, the count of recorded
+          incidents is negative binomial, with a municipal effect that changes over time and a spatial effect for each
+          cell.
+        </p>
+      </div>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Likelihood</p>
+        <div class="eq"><TeX display tex={String.raw`Y_{ia} \sim \mathrm{NB}(\mu_{ia},\,\theta), \qquad \log \mu_{ia} = \beta_0 + m_{j(i),a} + u_i`} /><span class="eqn">(1)</span></div>
+      </div>
+      <aside class="note"><p>The municipal term absorbs how much each municipality reports; the cell term absorbs where, within the municipality, incidents concentrate.</p></aside>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Municipal level</p>
+        <div class="eq"><TeX display tex={String.raw`m_{j,2019} = \sigma_m z_j, \qquad m_{j,a} = m_{j,a-1} + \sigma_{rw}\,\varepsilon_{j,a}, \quad \varepsilon_{j,a} \sim t_3`} /><span class="eqn">(2)</span></div>
+      </div>
+      <aside class="note"><p>A random walk with heavy-tailed steps: most municipalities move little from year to year, and a few jump. The <TeX tex="z_j" /> sum to zero, which identifies <TeX tex={String.raw`\beta_0`} />.</p></aside>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Cell level</p>
+        <div class="eq"><TeX display tex={String.raw`\mathbf{u} \sim \mathcal{N}\!\left(\mathbf{0},\ \sigma_u^2\,(D - \alpha A)^{-1}\right)`} /><span class="eqn">(3)</span></div>
+      </div>
+      <aside class="note"><p>Each cell borrows strength from its six neighbours: <TeX tex="A" /> is the adjacency of the hexagons, <TeX tex="D" /> their number of neighbours, and <TeX tex={String.raw`\alpha`} /> how strongly neighbours resemble each other.</p></aside>
+    </div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          A BYM2 spatial term was tried first, in both parameterisations, and did not identify: with five years of
+          counts per cell the data fix each <TeX tex="u_i" /> almost completely, and only the priors can split it into
+          spatial and independent parts. The proper CAR prior has a single variance and a single <TeX tex={String.raw`\alpha`} />, and is identified by strong data.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="method-h">
+    <div class="r"><h2 class="m" id="method-h">Method</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          The model is fitted in PyMC on an annual cell-by-year panel of 11,205 rows, with four NUTS chains (nutpie),
+          1,000 warm-up iterations and 2,000 draws, in four minutes. There are no divergences; over the 11,205 identified
+          quantities <TeX tex={String.raw`\log \mu_{ia}`} />, the largest <TeX tex={String.raw`\hat{R}`} /> is 1.005
+          and the smallest effective sample size 2,441. With alternative priors the hyperparameters change only in the
+          third decimal.
+        </p>
+        <p>
+          Validation is out of sample: the model is trained on 2019–2023 and asked for 2024, which it has not seen, and
+          compared with three baselines on mean absolute error, continuous ranked probability score (CRPS), the coverage
+          of the 90% interval, and the predictive accuracy index (PAI) of the top 5% of cells.
+        </p>
+      </div>
+      <aside class="note">
+        <p>CRPS scores the whole forecast distribution, not just its centre. Coverage asks whether a 90% interval contains the truth 90% of the time.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="results-h">
+    <div class="r"><h2 class="m" id="results-h">Results</h2></div>
+    <div class="r">
+      <div class="m">
+        <table class="data">
+          <caption class="vh">Validation on 2024, cell-by-year scale.</caption>
+          <thead>
+            <tr><th scope="col">Model</th><th scope="col" class="n">MAE</th><th scope="col" class="n">CRPS</th><th scope="col" class="n">90% coverage</th><th scope="col" class="n">PAI 5%</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Mean, 2019–2023</th><td class="n">9.59</td><td class="n">8.04</td><td class="n">63%</td><td class="n">8.41</td></tr>
+            <tr><th scope="row">Mean, 2022–2023</th><td class="n">8.15</td><td class="n">6.56</td><td class="n">68%</td><td class="n">8.38</td></tr>
+            <tr><th scope="row">Negative binomial, recent history</th><td class="n">8.18</td><td class="n">6.93</td><td class="n">90%</td><td class="n">8.38</td></tr>
+            <tr class="best"><th scope="row">Hierarchical, CAR and municipality</th><td class="n">8.19</td><td class="n">6.17</td><td class="n">87%</td><td class="n">8.42</td></tr>
+          </tbody>
+        </table>
+        <p class="table-note">Validation on 2024, from the project’s technical report.</p>
+      </div>
+      <aside class="note"><p>The hierarchical model predicted 70,815 incidents for 2024 against 71,249 recorded in the grid’s cells: 0.6% off the metropolitan total.</p></aside>
+    </div>
+    <div class="r after-table">
+      <div class="m prose">
+        <p>
+          The hierarchical model ties the best baseline on absolute error and beats it on CRPS by 6%: its centre points
+          where a well-chosen average already points, but its distribution is better calibrated. The baseline’s 90%
+          interval covers 68% of cells; the model’s covers 87%. Spatial dependence net of the municipality is strong, <TeX tex={String.raw`\alpha = 0.85`} /> (94% interval 0.81 to 0.88). The central forecast for 2027 is 73,577
+          incidents, with a margin of 3%.
+        </p>
+        <p>
+          The PAI of 8.4 did not move in any model, from the first spatial analysis to the hierarchical one: choosing
+          5% of cells from the 2019–2023 data captures 42% of 2024’s incidents by counting alone. Where incidents happen
+          is decided by history; changing that would need covariates that vary by cell, such as road exposure, land use
+          or population.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          The dominant source of error is administrative, not statistical. Municipalities change how they report from
+          one year to the next: Santa Catarina recorded 46 incidents in 2021 and 1,813 in 2022; Guadalupe, 7,868 in
+          2020 and 2,770 in 2024. The municipal effect therefore measures reporting, not risk, and no model can
+          anticipate a change of reporting regime from earlier data. The forecasts are conditional on no such change,
+          and their intervals are a floor on the real uncertainty.
+        </p>
+      </div>
+      <aside class="note">
+        <p>Toggle 2021 and 2022 in Fig. 1 and watch Santa Catarina, west of the centre, appear: the city did not change in a year; its reporting did.</p>
+      </aside>
+    </div>
+  </section>
+</Project>
+
+<style>
+  .fig-section { margin-top: 56px; }
+  .after-table { margin-top: 28px; }
+  .table-note { margin: 8px 0 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .best th, .best td { font-weight: 600; color: var(--ink); }
+</style>

@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Angel Eduardo Luna</title>
+<meta name="description" content="Quantitative modelling for operational decisions under uncertainty: spatial risk, resource allocation and stochastic planning.">
+<script>
+  (function () {
+    var root = document.documentElement, t = null;
+    try { t = new URLSearchParams(location.search).get('theme') || localStorage.getItem('theme'); } catch (e) {}
+    if (t === 'light' || t === 'dark') root.dataset.theme = t;
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap">
+<style>
+  :root {
+    --paper: #FFFFFF;
+    --ink: #1B2430;
+    --graphite: #5B6675;
+    --rule: #C9D1DA;
+    --survey: #1D4E89;
+    --hazard: #A23B2A;
+    --tint: #F3F6F9;
+
+    --serif: "Source Serif 4", Charter, Georgia, serif;
+    --sans: "IBM Plex Sans", system-ui, sans-serif;
+    --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+
+    --main: 66ch;
+    --margin: 240px;
+    --gap: 48px;
+    --inset: clamp(16px, 9vw, 152px);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141B24; --ink: #D3DAE3; --graphite: #8B96A5; --rule: #30363D;
+      --survey: #8FB8EC; --hazard: #F2766B; --tint: #1A222D;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141B24; --ink: #D3DAE3; --graphite: #8B96A5; --rule: #30363D;
+    --survey: #8FB8EC; --hazard: #F2766B; --tint: #1A222D;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 18px/1.6 var(--serif);
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--survey); color: var(--paper); }
+  a { color: var(--survey); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 2px solid var(--survey); outline-offset: 2px; border-radius: 1px; }
+  p { margin: 0 0 1em; }
+  h1, h2, h3 { font-weight: 600; text-wrap: balance; margin: 0; }
+
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* ---------- Page grid: main column + margin column ---------- */
+  .page { padding: 0 16px 0 var(--inset); max-width: calc(var(--inset) + var(--main) + var(--gap) + var(--margin) + 64px); }
+  .r { display: grid; grid-template-columns: minmax(0, var(--main)) var(--margin); column-gap: var(--gap); align-items: start; }
+  .r > .wide { grid-column: 1 / -1; }
+  .r > .m { grid-column: 1; }
+
+  .note {
+    grid-column: 2;
+    font: 400 14px/1.45 var(--sans);
+    color: var(--graphite);
+    padding-top: 0.3em;
+  }
+  .note p { margin: 0 0 0.6em; }
+
+  /* ---------- Top line ---------- */
+  .top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
+    max-width: calc(var(--main) + var(--gap) + var(--margin));
+    padding: 20px 0 0;
+    font: 400 14px/1.45 var(--sans);
+    color: var(--graphite);
+  }
+  .top nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+  .top a { color: var(--graphite); text-decoration: none; }
+  .top a:hover { color: var(--ink); text-decoration: underline; }
+  .theme-btn {
+    font: inherit; color: var(--graphite); background: none; border: 0; padding: 4px 0; cursor: pointer;
+    text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 0.25em;
+  }
+  .theme-btn:hover { color: var(--ink); text-decoration-color: currentColor; }
+
+  /* ---------- Title ---------- */
+  /* ---------- Hero: tangent-line field ---------- */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--rule); }
+  .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      linear-gradient(180deg, var(--paper) 0, color-mix(in srgb, var(--paper) 80%, transparent) 56px, transparent 110px),
+      linear-gradient(90deg, var(--paper) 0%, color-mix(in srgb, var(--paper) 88%, transparent) 30%, transparent 60%);
+  }
+  .hero-inner {
+    position: relative; z-index: 2;
+    min-height: min(100svh, 1000px);
+    display: grid; grid-template-rows: auto 1fr auto;
+    padding: 0 16px 28px var(--inset);
+  }
+  .hero-title { align-self: center; padding: 64px 0; }
+  .name {
+    font-size: clamp(52px, 7.4vw, 112px); line-height: 0.96; letter-spacing: -0.028em;
+    font-variation-settings: "opsz" 60; max-width: 7.4em;
+  }
+  .role { margin: 24px 0 0; font: italic 400 clamp(20px, 1.9vw, 26px)/1.35 var(--serif); color: var(--ink); }
+  .affil { margin: 4px 0 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .hero-cap sup { font-size: 0.72em; }
+  .hero-cap { margin: 0; max-width: 46ch; font: 400 13px/1.45 var(--sans); color: var(--graphite); }
+
+  .title { padding: 72px 0 0; }
+
+  .abstract { margin-top: 0; }
+  .abstract .m p:first-child { font-size: 21px; line-height: 1.5; }
+  .abstract b { font-weight: 600; }
+
+  /* ---------- Sections ---------- */
+  section { margin-top: 88px; }
+  #work { margin-top: 64px; }
+  h2 { font-size: 24px; line-height: 1.3; margin-bottom: 24px; }
+
+  /* ---------- Featured entries ---------- */
+  .entries { list-style: none; margin: 0; padding: 0; }
+  .entry + .entry { margin-top: 0; }
+  .entry > a {
+    display: grid;
+    grid-template-columns: minmax(0, var(--main)) var(--margin);
+    column-gap: var(--gap);
+    color: inherit; text-decoration: none;
+    padding: 28px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .entry:last-child > a { border-bottom: 1px solid var(--rule); }
+  .entry-body { display: grid; grid-template-columns: 248px minmax(0, 1fr); column-gap: 28px; align-items: start; }
+  .thumb {
+    aspect-ratio: 31 / 20; margin: 0;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    display: grid; place-items: center;
+    padding: 10px;
+    transition: border-color 160ms ease-out;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .entry h3 { font-size: 21px; line-height: 1.3; }
+  .entry h3 span { transition: text-decoration-color 160ms ease-out; text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+  .entry p { margin: 8px 0 0; font-size: 17px; line-height: 1.55; }
+  .entry .method { color: var(--graphite); font: 400 14px/1.45 var(--sans); margin-top: 10px; }
+  .entry > a:hover .thumb { border-color: var(--survey); }
+  .entry > a:hover h3 span { text-decoration-color: var(--survey); }
+  .entry > a:focus-visible { outline-offset: 6px; }
+
+  /* Reduced title block */
+  .tb {
+    margin: 0; align-self: start;
+    font: 400 14px/1.35 var(--cond);
+    border: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr 1fr;
+  }
+  .tb div { padding: 7px 10px 8px; border-top: 1px solid var(--rule); min-width: 0; }
+  .tb div:first-child { border-top: 0; }
+  .tb .full { grid-column: 1 / -1; }
+  .tb .b { border-left: 1px solid var(--rule); }
+  .tb dt { color: var(--graphite); font-size: 12px; letter-spacing: 0.01em; }
+  .tb dd { margin: 1px 0 0; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
+  .tb .sheet dd { font-variant-numeric: tabular-nums; }
+
+  /* ---------- Methods matrix ---------- */
+  .matrix-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { border-collapse: collapse; font: 400 14px/1.45 var(--sans); font-variant-numeric: tabular-nums; }
+  .matrix { width: 100%; min-width: 560px; }
+  .matrix th, .matrix td { padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+  .matrix thead th { font-weight: 500; text-align: center; vertical-align: bottom; border-bottom-color: var(--ink); white-space: nowrap; }
+  .matrix thead th:first-child { text-align: left; }
+  .matrix tbody th { text-align: left; font-weight: 400; white-space: nowrap; }
+  .matrix td { text-align: center; }
+  .matrix th:first-child { position: sticky; left: 0; background: var(--paper); z-index: 1; }
+  .matrix tr.impl th, .matrix tr.impl td { color: var(--graphite); border-bottom: 0; padding-top: 12px; }
+  .matrix .feat { color: var(--ink); }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); vertical-align: middle; }
+  .matrix a { color: inherit; text-decoration-color: var(--rule); }
+  .matrix a:hover { color: var(--survey); text-decoration-color: currentColor; }
+
+  .libs { margin-top: 20px; font: 400 14px/1.6 var(--sans); color: var(--graphite); max-width: var(--main); }
+  .scroll-hint { display: none; }
+  .libs b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- Further work ---------- */
+  .further { width: 100%; }
+  .further th, .further td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  .further thead th { font-weight: 500; border-bottom-color: var(--ink); color: var(--ink); white-space: nowrap; }
+  .further td:first-child { font: 400 16px/1.45 var(--serif); color: var(--ink); width: 30%; }
+  .further td:nth-child(2) { color: var(--graphite); }
+  .further td:nth-child(3), .further td:nth-child(4) { white-space: nowrap; }
+
+  /* ---------- Contact / footer ---------- */
+  .contact { font-size: 18px; margin: 0; }
+  .contact dt { font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .contact dd { margin: 0 0 14px; }
+  footer {
+    margin-top: 112px; padding: 20px 0 48px; border-top: 1px solid var(--rule);
+    font: 400 14px/1.45 var(--sans); color: var(--graphite);
+    max-width: calc(var(--main) + var(--gap) + var(--margin));
+  }
+  footer code { font-size: 13px; }
+
+  /* ---------- Below 1100 px: margin notes go inline, visible ---------- */
+  @media (max-width: 1099px) {
+    .r, .entry > a { grid-template-columns: minmax(0, var(--main)); }
+    .note {
+      grid-column: 1; margin: 4px 0 24px; padding: 10px 0 0;
+      border-top: 1px solid var(--rule);
+      max-width: 52ch;
+    }
+    .entry .tb { margin-top: 20px; display: flex; }
+    .entry .tb div { flex: 1 1 auto; border-top: 0; border-left: 1px solid var(--rule); }
+    .entry .tb div:first-child { border-left: 0; flex-grow: 2; }
+    .top { max-width: var(--main); }
+    footer { max-width: var(--main); }
+  }
+
+  @media (max-width: 760px) {
+    .hero::before {
+      background:
+        linear-gradient(180deg, var(--paper) 0, var(--paper) 72px, transparent 130px),
+        linear-gradient(0deg, var(--paper) 0%, var(--paper) 30%, color-mix(in srgb, var(--paper) 70%, transparent) 50%, transparent 72%);
+    }
+    .hero-inner { min-height: max(640px, 92svh); }
+    .hero-title { align-self: end; padding: 32px 0 24px; }
+    .name { font-size: clamp(44px, 12.5vw, 64px); }
+  }
+
+  /* ---------- Phones ---------- */
+  @media (max-width: 640px) {
+    body { font-size: 17px; }
+    .title { padding-top: 56px; }
+    .abstract .m p:first-child { font-size: 19px; }
+    section { margin-top: 72px; }
+    .top { flex-direction: column; gap: 8px; }
+    .entry-body { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
+    .entry .tb { display: grid; }
+    .entry .tb div { border-left: 0; border-top: 1px solid var(--rule); }
+    .entry .tb div:first-child { border-top: 0; }
+    .entry .tb .b { border-left: 1px solid var(--rule); }
+    .scroll-hint { display: inline; }
+    .further, .further tbody, .further tr, .further td { display: block; width: auto !important; }
+    .further thead { display: none; }
+    .further tr { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+    .further td { border: 0; padding: 0; }
+    .further td:nth-child(2) { margin: 4px 0 6px; }
+    .further td:empty { display: none; }
+  }
+
+  /* ---------- Figure theme swap ---------- */
+  .on-dark { display: none !important; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .on-light { display: none !important; }
+    :root:not([data-theme="light"]) .on-dark { display: block !important; }
+  }
+  :root[data-theme="dark"] .on-light { display: none !important; }
+  :root[data-theme="dark"] .on-dark { display: block !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <canvas class="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <div class="top">
+      <nav aria-label="Sections">
+        <a href="#work">Selected work</a>
+        <a href="#methods">Methods</a>
+        <a href="#further">Further work</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <button class="theme-btn" type="button" id="theme-btn">Dark theme</button>
+    </div>
+    <div class="hero-title">
+      <h1 class="name">Angel Eduardo Luna</h1>
+      <p class="role">Applied mathematics and data science</p>
+      <p class="affil">Tecnológico de Monterrey</p>
+    </div>
+    <p class="hero-cap">A logarithmic spiral, <i>r</i>&#8239;=&#8239;<i>a</i>&#8202;e<sup><i>b&theta;</i></sup>, traced by its tangent lines. Every tangent meets the radius at the same angle, so the curve looks the same at every scale.</p>
+  </div>
+</header>
+
+<div class="page">
+  <div class="title">
+    <div class="r abstract">
+      <div class="m">
+        <p>Quantitative modelling for operational decisions under uncertainty: spatial risk, resource allocation and stochastic planning. Undergraduate in Data Science and Mathematics at Tecnológico de Monterrey.</p>
+        <p><b>Practice.</b> Raw data is immutable; every derived table and figure is regenerated from versioned code. Formulations are specified in LaTeX before implementation and, where tractable, validated against an exact solution. Solvers are written in C++; analysis and modelling in Python.</p>
+      </div>
+      <aside class="note">
+        <p>In plain terms: mathematical models that help an organisation decide where to act, how to spend and how to plan when the outcome is not certain.</p>
+      </aside>
+    </div>
+
+    <div class="r">
+      <div class="m">
+        <p><b>Current work.</b> Chance-constrained optimisation and metaheuristics for reforestation planning; hierarchical Bayesian models for spatial count data; dataset distillation for convolutional networks.</p>
+      </div>
+    </div>
+  </div>
+
+  <section id="work" aria-labelledby="work-h">
+    <div class="r"><h2 class="m" id="work-h">Selected work</h2></div>
+
+    <ol class="entries">
+      <li class="entry">
+        <a href="geostats.html">
+          <div class="entry-body">
+            <figure class="thumb">
+              <img class="on-light" src="assets/thumb-geostats-light.svg" alt="Hexagonal density map of central Monterrey; incidents concentrate along a central corridor, with the top-percentile cells in red." width="465" height="320">
+              <img class="on-dark" src="assets/thumb-geostats-dark.svg" alt="" width="465" height="320">
+            </figure>
+            <div>
+              <h3><span>Traffic risk in metropolitan Monterrey</span></h3>
+              <p>Where traffic risk concentrates across the 18 municipalities of the Monterrey metropolitan area, who bears its cost, and how predictable it is.</p>
+              <p class="method">2,241-cell hexagonal grid, spatial autocorrelation and a hierarchical model forecasting incidents per cell for 2027.</p>
+            </div>
+          </div>
+          <dl class="tb">
+            <div class="full"><dt>Repository</dt><dd>GeoStats</dd></div>
+            <div><dt>Data</dt><dd>INEGI (ATUS)</dd></div>
+            <div class="b"><dt>Period</dt><dd>2019–2024</dd></div>
+            <div class="full sheet"><dt>Sheet</dt><dd>1 of 3</dd></div>
+          </dl>
+        </a>
+      </li>
+
+      <li class="entry">
+        <a href="reforestation.html">
+          <div class="entry-body">
+            <figure class="thumb">
+              <img class="on-light" src="assets/thumb-lattice-light.svg" alt="Two staggered planting grids: random species assignment produces 182 same-genus contacts, competition-aware assignment 57. Illustrative." width="620" height="290">
+              <img class="on-dark" src="assets/thumb-lattice-dark.svg" alt="" width="620" height="290">
+            </figure>
+            <div>
+              <h3><span>Reforestation planning under uncertainty</span></h3>
+              <p>Purchase quantities that meet a planting target with probability at least 1&#8202;&minus;&#8202;<i>&alpha;</i> within budget, and a species arrangement that minimises competition between neighbours.</p>
+              <p class="method">Chance-constrained purchasing model; memetic algorithm with tabu search, benchmarked against an exact integer program.</p>
+            </div>
+          </div>
+          <dl class="tb">
+            <div class="full"><dt>Repository</dt><dd>Stochastic_RefInit</dd></div>
+            <div><dt>Partner</dt><dd>CONAFOR</dd></div>
+            <div class="b"><dt>Place</dt><dd>San Luis Potosí</dd></div>
+            <div class="full sheet"><dt>Sheet</dt><dd>2 of 3</dd></div>
+          </dl>
+        </a>
+      </li>
+
+      <li class="entry">
+        <a href="casa-monarca.html">
+          <div class="entry-body">
+            <figure class="thumb">
+              <img class="on-light" src="assets/thumb-sparsity-light.svg" alt="Sparsity pattern of a mixed-integer program with 1,092 variables and 934 constraints, showing time-staged diagonal blocks." width="550" height="290">
+              <img class="on-dark" src="assets/thumb-sparsity-dark.svg" alt="" width="550" height="290">
+            </figure>
+            <div>
+              <h3><span>Food purchasing for a migrant shelter</span></h3>
+              <p>Minimum weekly purchasing cost for approximately 100 residents, subject to a fixed budget, commercial lot sizes, scheduled donations and inventory continuity.</p>
+              <p class="method">Mixed-integer linear program with Big-M menu scheduling and inventory balance, solved with GLPK through Pyomo.</p>
+            </div>
+          </div>
+          <dl class="tb">
+            <div class="full"><dt>Repository</dt><dd>Optimizacion-de-recursos</dd></div>
+            <div><dt>Partner</dt><dd>Casa Monarca</dd></div>
+            <div class="b"><dt>Place</dt><dd>Santa Catarina, N.L.</dd></div>
+            <div class="full sheet"><dt>Sheet</dt><dd>3 of 3</dd></div>
+          </dl>
+        </a>
+      </li>
+    </ol>
+  </section>
+
+  <section id="methods" aria-labelledby="methods-h">
+    <div class="r">
+      <h2 class="m" id="methods-h">Methods by project</h2>
+    </div>
+    <div class="r">
+      <div class="wide matrix-wrap">
+        <table class="matrix">
+          <caption class="vh">Methods used in each project. A dot marks a method the project uses.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Method</th>
+              <th scope="col" class="feat"><a href="https://github.com/Lunaaaalj/GeoStats">GeoStats</a></th>
+              <th scope="col" class="feat"><a href="https://github.com/Lunaaaalj/Stochastic_RefInit">RefInit</a></th>
+              <th scope="col" class="feat"><a href="https://github.com/Lunaaaalj/Optimizacion-de-recursos">Casa Monarca</a></th>
+              <th scope="col"><a href="https://github.com/Lunaaaalj/random_walk_simulator">GBM</a></th>
+              <th scope="col"><a href="https://github.com/Lunaaaalj/NeuralNetworksTeamEnvironment">CNN</a></th>
+              <th scope="col"><a href="https://github.com/Lunaaaalj/MSED">MSED</a></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Hierarchical Bayesian models</th><td><span class="dot"></span><span class="vh">Yes</span></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><th scope="row">Spatial statistics</th><td><span class="dot"></span><span class="vh">Yes</span></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><th scope="row">Mixed-integer programming</th><td></td><td><span class="dot"></span><span class="vh">Yes</span></td><td><span class="dot"></span><span class="vh">Yes</span></td><td></td><td></td><td></td></tr>
+            <tr><th scope="row">Chance constraints</th><td></td><td><span class="dot"></span><span class="vh">Yes</span></td><td></td><td></td><td></td><td></td></tr>
+            <tr><th scope="row">Metaheuristics</th><td></td><td><span class="dot"></span><span class="vh">Yes</span></td><td></td><td></td><td></td><td></td></tr>
+            <tr><th scope="row">Monte Carlo simulation</th><td></td><td></td><td></td><td><span class="dot"></span><span class="vh">Yes</span></td><td></td><td></td></tr>
+            <tr><th scope="row">Differential equations</th><td></td><td></td><td></td><td></td><td></td><td><span class="dot"></span><span class="vh">Yes</span></td></tr>
+            <tr><th scope="row">Regression</th><td><span class="dot"></span><span class="vh">Yes</span></td><td></td><td></td><td></td><td></td><td><span class="dot"></span><span class="vh">Yes</span></td></tr>
+            <tr><th scope="row">Deep learning</th><td></td><td></td><td></td><td></td><td><span class="dot"></span><span class="vh">Yes</span></td><td></td></tr>
+            <tr class="impl"><th scope="row">Implementation</th><td>Python</td><td>C++</td><td>Python</td><td>Python</td><td>Python</td><td>Python</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="r">
+      <p class="m libs"><b>Libraries.</b> PyMC, statsmodels, scikit-learn, SciPy, pandas, GeoPandas, PySAL, Pyomo with GLPK, TensorFlow and Keras, Dear ImGui.<br><b>Tooling.</b> uv, CMake, Quarto, LaTeX, Jupyter, Streamlit, Weights &amp; Biases, Neovim.</p>
+      <aside class="note"><p>Each column is a project and each row a method. The first three columns are the featured projects above.<span class="scroll-hint"> The table scrolls sideways.</span></p></aside>
+    </div>
+  </section>
+
+  <section id="further" aria-labelledby="further-h">
+    <div class="r"><h2 class="m" id="further-h">Further work</h2></div>
+    <div class="r">
+      <div class="wide">
+        <table class="further">
+          <thead>
+            <tr><th scope="col">Project</th><th scope="col">Subject</th><th scope="col">Report (PDF)</th><th scope="col">Repository</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Random walk simulator</td><td>Vectorised Monte Carlo under geometric Brownian motion; VaR and CVaR</td><td></td><td><a href="https://github.com/Lunaaaalj/random_walk_simulator">random_walk_simulator</a></td></tr>
+            <tr><td>Dataset distillation for image classification</td><td>104-class image classification with distribution-matching dataset distillation</td><td></td><td><a href="https://github.com/Lunaaaalj/NeuralNetworksTeamEnvironment">NeuralNetworksTeamEnvironment</a></td></tr>
+            <tr><td>Regression-derived differential equations</td><td>ODE systems (RK4) for demographic and economic series</td><td></td><td><a href="https://github.com/Lunaaaalj/MSED">MSED</a></td></tr>
+            <tr><td>Snake</td><td>Terminal game in C with ncurses</td><td></td><td><a href="https://github.com/Lunaaaalj/snake_game">snake_game</a></td></tr>
+            <tr><td>cvector</td><td>Generic dynamic array in C</td><td></td><td><a href="https://github.com/Lunaaaalj/cvector">cvector</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-h">
+    <div class="r"><h2 class="m" id="contact-h">Contact</h2></div>
+    <div class="r">
+      <dl class="m contact">
+        <dt>Email</dt><dd><a href="mailto:lunaleija@outlook.com">lunaleija@outlook.com</a></dd>
+        <dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/angel-eduardo-luna-0b69223b8/">angel-eduardo-luna</a></dd>
+        <dt>GitHub</dt><dd><a href="https://github.com/Lunaaaalj">Lunaaaalj</a></dd>
+      </dl>
+    </div>
+  </section>
+
+  <footer>
+    Figures are generated from versioned data by <code>assets/build.py</code> in the <a href="https://github.com/Lunaaaalj/Lunaaaalj">profile repository</a>.
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement, btn = document.getElementById('theme-btn');
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    function current() { return root.dataset.theme || (mq.matches ? 'dark' : 'light'); }
+    function label() { btn.textContent = current() === 'dark' ? 'Light theme' : 'Dark theme'; }
+    btn.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try { localStorage.setItem('theme', next); } catch (e) {}
+      label();
+    });
+    mq.addEventListener('change', label);
+    label();
+  })();
+</script>
+<script>
+  (function () {
+    var cv = document.querySelector('.hero-canvas'), hero = cv.parentElement, ctx = cv.getContext('2d');
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    var W = 0, H = 0, tones = [], grid = '#C9D1DA', pen = '#1D4E89';
+    var running = false, visible = true, last = 0, clock = 0;
+    var target = { x: 0, y: 0 }, cur = { x: 0, y: 0 }, scroll = 0;
+
+    // Logarithmic spiral r = a·e^(bθ), shown through N tangent segments per arm.
+    // Tangent direction at θ is (b cosθ − sinθ, b sinθ + cosθ): it meets the radius
+    // at the constant angle arccot(b), which is why the envelope reads as the curve.
+    var N = 150, ARMS = 2;
+    var DRAW = 3.6, LINE_GROW = 0.5;      // seconds: pen sweep, and each tangent's growth
+    var flow = 0, spin = 0;                 // idle motion: outward flow (in slots) and rotation ramp
+
+    function readTones() {
+      var cs = getComputedStyle(document.documentElement), v = function (n) { return cs.getPropertyValue(n).trim(); };
+      var dark = v('--paper').toUpperCase() === '#141B24';
+      tones = [
+        { c: v('--ink'), a: dark ? 0.5 : 0.68, w: 1.2 },
+        { c: v('--graphite'), a: dark ? 0.6 : 0.62, w: 1.05 },
+        { c: dark ? '#B39CA1' : '#6E5A5F', a: dark ? 0.5 : 0.58, w: 1.15 },
+        { c: v('--rule'), a: 1, w: 1.35 },
+        { c: v('--survey'), a: dark ? 0.42 : 0.34, w: 1.05 }
+      ];
+      grid = v('--rule'); pen = v('--survey');
+      tones.forEach(function (t) { t.rgb = toRgb(t.c); });
+    }
+    function toRgb(hex) {
+      var h = hex.replace('#', ''); if (h.length === 3) h = h.replace(/./g, '$&$&');
+      var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(',');
+    }
+    function rgba(rgb, a) { return 'rgba(' + rgb + ',' + a.toFixed(3) + ')'; }
+
+    function resize() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = hero.clientWidth; H = hero.clientHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function smooth(e0, e1, x) { x = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return x * x * (3 - 2 * x); }
+    function easeOut(x) { return 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3); }
+    // Pen progress along the curve: smoothstep in time, so the inner coil is drawn deliberately
+    function penAt(x) { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }
+    function penInverse(y) { return 0.5 - Math.sin(Math.asin(1 - 2 * y) / 3); }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      var narrow = W < 760;
+      var S = Math.min(W, H) * (narrow ? 1.15 : 1);
+      var cx = W * (narrow ? 0.5 : 0.68) + cur.x * W * 0.03;
+      var cy = H * (narrow ? 0.33 : 0.5) + cur.y * H * 0.03;
+      var D = Math.hypot(W, H);
+
+      var b = 0.18 + cur.y * 0.03;                          // pointer height tightens or loosens the spiral
+      var rMin = S * 0.006, rMax = S * 0.95 * (1 + scroll * 0.6);
+      var span = Math.log(rMax / rMin) / b, step = span / N;
+      var a = rMin;                                          // r(θ) = a·e^(bθ), θ measured from rMin
+      var rot = cur.x * 0.9 + spin;                          // pointer x rotates the whole figure
+      var drawn = reduce.matches ? Infinity : clock;         // seconds since the pen started
+      var fade = 1 - scroll * 0.75;
+
+      // Graph-paper axes
+      ctx.strokeStyle = grid; ctx.lineWidth = 1; ctx.globalAlpha = 0.45 * Math.min(1, drawn / 0.6);
+      ctx.beginPath();
+      for (var g = -4; g <= 4; g++) {
+        var gx = Math.round(cx + g * S * 0.25) + 0.5, gy = Math.round(cy + g * S * 0.25) + 0.5;
+        ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.moveTo(0, gy); ctx.lineTo(W, gy);
+      }
+      ctx.stroke();
+
+      var penTheta = span * penAt(drawn / DRAW);           // how far along the curve the pen is
+
+      for (var arm = 0; arm < ARMS; arm++) {
+        var off = rot + arm * Math.PI, armA = arm ? 0.42 : 1;
+
+        // The curve itself, faint, up to the pen
+        ctx.strokeStyle = arm ? grid : pen; ctx.lineWidth = 1; ctx.globalAlpha = (arm ? 0.6 : 0.35) * fade;
+        ctx.beginPath();
+        for (var q = 0; q <= 400; q++) {
+          var th = (span * q) / 400; if (th > penTheta) break;
+          var rr = a * Math.exp(b * th);
+          q ? ctx.lineTo(cx + rr * Math.cos(th + off), cy + rr * Math.sin(th + off)) : ctx.moveTo(cx + rr * Math.cos(th + off), cy + rr * Math.sin(th + off));
+        }
+        ctx.stroke();
+
+        // Tangent segments
+        for (var k = 0; k < N; k++) {
+          var t = (k + (flow % 1)) * step;                  // flow slides every point outward along the curve
+          if (t > penTheta) break;
+          var r = a * Math.exp(b * t), ang = t + off;
+          var c = Math.cos(ang), s = Math.sin(ang);
+          var dx = b * c - s, dy = b * s + c, len = Math.hypot(dx, dy); dx /= len; dy /= len;
+
+          // Appear when the pen passes; grow outward from the tangent point
+          var born = DRAW * penInverse(t / span);             // when the pen reached this point
+          var grow = reduce.matches ? 1 : easeOut((drawn - born) / LINE_GROW);
+          var half = Math.min(D, r * 3.2) * grow;
+
+          var w = smooth(rMin * 3, rMin * 14, r) * (1 - smooth(rMax * 0.7, rMax, r));
+          // Tone follows the line, not the slot: flow moves lines between slots,
+          // so indexing by k alone would recolour every line at once each time flow wraps.
+          var id = k - Math.floor(flow), L = tones.length;
+          var tone = tones[(((id * 7 + arm * 3) % L) + L) % L];
+          var al = tone.a * w * armA * fade;
+          if (al < 0.004 || half < 1) continue;
+          var px = cx + r * c, py = cy + r * s;
+          var x0 = px - dx * half, y0 = py - dy * half, x1 = px + dx * half, y1 = py + dy * half;
+          // Taper: transparent at both tips, full strength at the tangent point
+          var gr = ctx.createLinearGradient(x0, y0, x1, y1);
+          gr.addColorStop(0, rgba(tone.rgb, 0));
+          gr.addColorStop(0.2, rgba(tone.rgb, al * 0.35));
+          gr.addColorStop(0.5, rgba(tone.rgb, al));
+          gr.addColorStop(0.8, rgba(tone.rgb, al * 0.35));
+          gr.addColorStop(1, rgba(tone.rgb, 0));
+          ctx.strokeStyle = gr; ctx.lineWidth = tone.w; ctx.globalAlpha = 1;
+          ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+        }
+
+        // Pen nib while drawing
+        if (!arm && drawn < DRAW + 0.4) {
+          var pr = a * Math.exp(b * penTheta);
+          ctx.globalAlpha = 1 - smooth(DRAW - 0.2, DRAW + 0.4, drawn);
+          ctx.fillStyle = pen; ctx.beginPath();
+          ctx.arc(cx + pr * Math.cos(penTheta + off), cy + pr * Math.sin(penTheta + off), 3, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function frame(now) {
+      if (!running) return;
+      var dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+      clock += dt;
+      var idle = smooth(DRAW + 0.2, DRAW + 1.6, clock);    // idle motion eases in after the drawing
+      flow += dt * 0.22 * idle;
+      spin += dt * 0.012 * idle;
+      cur.x += (target.x - cur.x) * 0.06 * idle;
+      cur.y += (target.y - cur.y) * 0.06 * idle;
+      draw();
+      requestAnimationFrame(frame);
+    }
+    function start() {
+      if (running || reduce.matches || !visible || document.hidden) return;
+      running = true; last = 0; requestAnimationFrame(frame);
+    }
+    function stop() { running = false; }
+
+    window.addEventListener('pointermove', function (e) {
+      target.x = e.clientX / window.innerWidth - 0.5;
+      target.y = e.clientY / window.innerHeight - 0.5;
+    }, { passive: true });
+    window.addEventListener('scroll', function () {
+      scroll = Math.min(1, Math.max(0, window.scrollY / (H || 1)));
+      if (reduce.matches) draw();
+    }, { passive: true });
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; visible ? start() : stop(); }).observe(hero);
+    document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+    reduce.addEventListener('change', function () { reduce.matches ? (stop(), draw()) : start(); });
+
+    var retheme = function () { readTones(); draw(); };
+    new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
+    window.addEventListener('resize', resize);
+
+    // Skip the drawing when the page is opened scrolled past the title
+    if (window.scrollY > H) clock = DRAW + 2;
+    // Prototype only: ?t=<seconds> renders one still moment of the sequence, for screenshots
+    var still = parseFloat(new URLSearchParams(location.search).get('t'));
+    if (!isNaN(still)) {
+      clock = still;
+      var idle = smooth(DRAW + 0.2, DRAW + 1.6, still);
+      flow = 0.22 * Math.max(0, still - DRAW - 0.9) * idle; spin = 0.012 * Math.max(0, still - DRAW - 0.9) * idle;
+      readTones(); resize(); return;
+    }
+    readTones(); resize(); start();
+  })();
+</script>
+</body>
+</html>

@@ -12,9 +12,11 @@ export function mountSpiral(canvas: HTMLCanvasElement): void {
   const ctx = canvas.getContext('2d')!;
 
   const N = 150, ARMS = 2;
+  const MAX_DPR = 1.5;                     // thin tapered lines look the same; 44% fewer pixels than 2×
+  const DRAW_FPS = 60, IDLE_FPS = 30;      // the idle drift is slow: 30 fps reads the same and halves the work
   const DRAW = 3.6, LINE_GROW = 0.5;      // seconds: pen sweep, and each tangent's growth
   let W = 0, H = 0, tones: Tone[] = [], grid = '', pen = '';
-  let running = false, visible = true, last = 0, clock = 0;
+  let running = false, visible = true, ready = false, last = 0, clock = 0;
   let flow = 0, spin = 0;                 // outward flow (in slots) and slow rotation
   const target = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
   let scroll = 0;
@@ -37,7 +39,7 @@ export function mountSpiral(canvas: HTMLCanvasElement): void {
   }
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     W = host.clientWidth; H = host.clientHeight;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -132,6 +134,9 @@ export function mountSpiral(canvas: HTMLCanvasElement): void {
 
   function frame(now: number) {
     if (!running) return;
+    // Never redraw faster than needed, whatever the display's refresh rate (120 Hz screens included)
+    const fps = clock < DRAW + 1.6 ? DRAW_FPS : IDLE_FPS;
+    if (last && now - last < 1000 / fps - 2) { requestAnimationFrame(frame); return; }
     const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
     clock += dt;
     const idle = smooth(DRAW + 0.2, DRAW + 1.6, clock); // idle motion eases in after the drawing
@@ -143,7 +148,7 @@ export function mountSpiral(canvas: HTMLCanvasElement): void {
     requestAnimationFrame(frame);
   }
   function start() {
-    if (running || reducedMotion.matches || !visible || document.hidden) return;
+    if (!ready || running || reducedMotion.matches || !visible || document.hidden) return;
     running = true; last = 0; requestAnimationFrame(frame);
   }
   function stop() { running = false; }
@@ -164,5 +169,10 @@ export function mountSpiral(canvas: HTMLCanvasElement): void {
 
   // Opened already scrolled past the title (a reload, a fragment link): skip the drawing
   if (window.scrollY > host.clientHeight) clock = DRAW + 2;
-  readTones(); resize(); start();
+  // Start once the fonts are in and the browser is idle, so the pen does not compete with the
+  // page's first layout and raster; draw the still first frame straight away
+  readTones(); resize();
+  const go = () => { ready = true; start(); };
+  const idle = (fn: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 600 }) : setTimeout(fn, 200));
+  Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 1000))]).then(() => idle(go));
 }

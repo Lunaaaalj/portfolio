@@ -6,11 +6,10 @@ import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-sans/600.css';
 import '@fontsource/ibm-plex-sans-condensed/400.css';
 import '@fontsource/ibm-plex-sans-condensed/500.css';
-import '@fontsource/stix-two-math/400.css';
 import '../styles/global.css';
 
-interface Props { title: string; description: string }
-const { title, description } = Astro.props;
+interface Props { title: string; description: string; preloadMath?: boolean }
+const { title, description, preloadMath = false } = Astro.props;
 // Social previews need absolute URLs; they come from `site` in astro.config.mjs once the domain is set
 const abs = (path: string) => (Astro.site ? new URL(path, Astro.site).href : path);
 ---
@@ -23,6 +22,7 @@ const abs = (path: string) => (Astro.site ? new URL(path, Astro.site).href : pat
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {preloadMath && <link rel="preload" href="/fonts/STIXTwoMath-Regular.woff2" as="font" type="font/woff2" crossorigin />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

@@ -69,7 +69,7 @@ import HexMapFigure from '../components/HexMapFigure.astro';
     <div class="r">
       <div class="m prose">
         <p>
-          For cell <TeX tex="i" /> in municipality <TeX tex="j(i)" /> and year <TeX tex="a" />, the count of recorded
+          For cell <TeX tex="i" /> in municipality <TeX tex="j(i)" /> and year <span class="nowrap"><TeX tex="a" />,</span> the count of recorded
           incidents is negative binomial, with a municipal effect that changes over time and a spatial effect for each
           cell.
         </p>
@@ -87,12 +87,12 @@ import HexMapFigure from '../components/HexMapFigure.astro';
         <p class="eq-label">Municipal level</p>
         <div class="eq"><TeX display tex={String.raw`m_{j,2019} = \sigma_m z_j, \qquad m_{j,a} = m_{j,a-1} + \sigma_{rw}\,\varepsilon_{j,a}, \quad \varepsilon_{j,a} \sim t_3`} /><span class="eqn">(2)</span></div>
       </div>
-      <aside class="note"><p>A random walk with heavy-tailed steps: most municipalities move little from year to year, and a few jump. The <TeX tex="z_j" /> sum to zero, which identifies <TeX tex={String.raw`\beta_0`} />.</p></aside>
+      <aside class="note"><p>A random walk with heavy-tailed steps: most municipalities move little from year to year, and a few jump. The <TeX tex="z_j" /> sum to zero, which identifies <span class="nowrap"><TeX tex={String.raw`\beta_0`} />.</span></p></aside>
     </div>
     <div class="r">
       <div class="m">
         <p class="eq-label">Cell level</p>
-        <div class="eq"><TeX display tex={String.raw`\mathbf{u} \sim \mathcal{N}\!\left(\mathbf{0},\ \sigma_u^2\,(D - \alpha A)^{-1}\right)`} /><span class="eqn">(3)</span></div>
+        <div class="eq"><TeX display tex={String.raw`\mathbf{u} \sim \mathcal{N}\left(\mathbf{0},\ \sigma_u^2\,(D - \alpha A)^{-1}\right)`} /><span class="eqn">(3)</span></div>
       </div>
       <aside class="note"><p>Each cell borrows strength from its six neighbours: <TeX tex="A" /> is the adjacency of the hexagons, <TeX tex="D" /> their number of neighbours, and <TeX tex={String.raw`\alpha`} /> how strongly neighbours resemble each other.</p></aside>
     </div>
@@ -101,7 +101,7 @@ import HexMapFigure from '../components/HexMapFigure.astro';
         <p>
           A BYM2 spatial term was tried first, in both parameterisations, and did not identify: with five years of
           counts per cell the data fix each <TeX tex="u_i" /> almost completely, and only the priors can split it into
-          spatial and independent parts. The proper CAR prior has a single variance and a single <TeX tex={String.raw`\alpha`} />, and is identified by strong data.
+          spatial and independent parts. The proper CAR prior has a single variance and a single <span class="nowrap"><TeX tex={String.raw`\alpha`} />,</span> and is identified by strong data.
         </p>
       </div>
     </div>
@@ -114,7 +114,7 @@ import HexMapFigure from '../components/HexMapFigure.astro';
         <p>
           The model is fitted in PyMC on an annual cell-by-year panel of 11,205 rows, with four NUTS chains (nutpie),
           1,000 warm-up iterations and 2,000 draws, in four minutes. There are no divergences; over the 11,205 identified
-          quantities <TeX tex={String.raw`\log \mu_{ia}`} />, the largest <TeX tex={String.raw`\hat{R}`} /> is 1.005
+          quantities <span class="nowrap"><TeX tex={String.raw`\log \mu_{ia}`} />,</span> the largest <TeX tex={String.raw`\hat{R}`} /> is 1.005
           and the smallest effective sample size 2,441. With alternative priors the hyperparameters change only in the
           third decimal.
         </p>

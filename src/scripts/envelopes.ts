@@ -91,7 +91,7 @@ export interface FigureSpec {
 
 export function mountEnvelopes(canvas: HTMLCanvasElement, specs: FigureSpec[], anchor: HTMLElement): void {
   const ctx = canvas.getContext('2d')!;
-  let W = 0, H = 0, tones: Tone[] = [], queued = false, born = 0;
+  let W = 0, H = 0, tones: Tone[] = [], queued = false, born = 0, maskAt = '';
 
   const figures: Figure[] = specs.flatMap((s) => {
     const el = document.querySelector<HTMLElement>(s.selector);
@@ -114,7 +114,7 @@ export function mountEnvelopes(canvas: HTMLCanvasElement, specs: FigureSpec[], a
   }
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     W = window.innerWidth; H = window.innerHeight;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -126,6 +126,11 @@ export function mountEnvelopes(canvas: HTMLCanvasElement, specs: FigureSpec[], a
     ctx.clearRect(0, 0, W, H);
     const edge = anchor.getBoundingClientRect().right, free = W - edge;
     if (free < MIN_FREE || !figures.length) return false;
+
+    // Dissolve towards the text with a CSS mask, applied once by the compositor rather than as a
+    // full-canvas pass every frame; nothing reaches the main or margin columns
+    const mask = `linear-gradient(90deg, transparent ${edge.toFixed(0)}px, #000 ${(edge + Math.min(free * 0.6, 280)).toFixed(0)}px)`;
+    if (mask !== maskAt) { canvas.style.maskImage = canvas.style.webkitMaskImage = mask; maskAt = mask; }
 
     const line = H * 0.5;
     const rects = figures.map((f) => f.el.getBoundingClientRect());
@@ -174,12 +179,6 @@ export function mountEnvelopes(canvas: HTMLCanvasElement, specs: FigureSpec[], a
       ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
     }
 
-    // Dissolve towards the text: nothing reaches the main or margin columns
-    ctx.globalCompositeOperation = 'destination-in';
-    const m = ctx.createLinearGradient(edge, 0, edge + Math.min(free * 0.6, 280), 0);
-    m.addColorStop(0, 'rgba(0,0,0,0)'); m.addColorStop(1, 'rgba(0,0,0,1)');
-    ctx.fillStyle = m; ctx.fillRect(0, 0, W, H);
-    ctx.globalCompositeOperation = 'source-over';
     return reveal < 1;
   }
 

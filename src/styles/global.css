@@ -77,8 +77,17 @@ h2 { font-size: 24px; line-height: 1.3; margin-bottom: 24px; }
 .summary b { font-weight: 600; }
 
 /* ---------- Mathematics: MathML from Temml, set in STIX Two Math ---------- */
+/* The complete font (STIX v2.13, OFL; public/fonts/STIX-OFL.txt). A Latin-only subset is not
+   enough: Greek, operators and script letters would fall back to other fonts, and without the
+   MATH table display operators do not grow and scripts are misplaced. */
+@font-face {
+  font-family: "STIX Two Math";
+  src: url("/fonts/STIXTwoMath-Regular.woff2") format("woff2");
+  font-display: swap;
+}
 math { font-family: "STIX Two Math", math; font-size: 1.04em; font-feature-settings: "dtls" off; }
 math.tml-display { display: block math; width: 100%; }
+.nowrap { white-space: nowrap; }   /* an inline formula and the punctuation after it never part at a line end */
 .eq math.tml-display { width: auto; justify-self: start; max-width: 100%; overflow-x: auto; overflow-y: hidden; }  /* left-aligned, as all text is */
 .eq {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 16px;

@@ -74,7 +74,7 @@ The theme follows `prefers-color-scheme`, with a manual toggle stored per visito
 | Text, headings | **STIX Two Text** (variable weight) | Drawn for scientific publishing; shares its design with STIX Two Math, so text and equations match. |
 | Margin notes, captions, labels, navigation | **IBM Plex Sans** | Tabular figures (`font-variant-numeric: tabular-nums`) in tables and legends |
 | Title block | **IBM Plex Sans Condensed** | Only inside title blocks |
-| Mathematics | **STIX Two Math**, as native MathML rendered at build time by Temml | KaTeX cannot use STIX Two Math. MathML replaces the planned MathJax: no client script, and screen readers read it as mathematics. Display equations are left-aligned with their number at the right of the main column. |
+| Mathematics | **STIX Two Math**, as native MathML rendered at build time by Temml | KaTeX cannot use STIX Two Math. MathML replaces the planned MathJax: no client script, and screen readers read it as mathematics. Display equations are left-aligned with their number at the right of the main column. The complete STIX Two Math is self-hosted (`public/fonts`): a Latin-only subset sends Greek and operators to fallback fonts. `src/lib/mathml.ts` corrects browser layout towards TeX: single-token subscript bases get zero depth, and operators in script positions lose their side spacing. Inline formulas and their trailing punctuation are kept together (`.nowrap`). |
 
 All fonts are self-hosted as WOFF2 and subset to Latin plus Latin Extended (the Spanish place names need accented letters).
 
@@ -200,6 +200,7 @@ Each entry leads with its project page's own Fig. 1 in compact form, large in th
 
 ## 8. Motion
 
+- **Rendering budget:** canvases render at no more than 1.5× pixel density; the title spiral redraws at most 60 fps while the pen draws and 30 fps while it drifts, and starts only once fonts have loaded and the browser is idle; the section field fades towards the text with a CSS mask, not a per-frame compositing pass; home entries use `content-visibility: auto`.
 - **One authored, continuous motion: the home title screen.** A logarithmic spiral is traced by a pen on first load (about 3.6 s) and then flows outward along its tangents; the pointer rotates it and tightens or loosens it; scrolling opens and fades it. It pauses when off screen or when the tab is hidden.
 - **Section figures draw once and then move only with scroll** (§6 Envelope figures). Nothing else moves on load.
 - Everything else answers the visitor: switching the lattice assignment cross-fades over 200 ms; switching the hex-map year cross-fades the fills; the home entries preview their figure only while pointed at or focused, and not at all under reduced motion.

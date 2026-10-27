@@ -1,9 +1,10 @@
 ---
 // TeX rendered to MathML at build time; the browser sets it in STIX Two Math.
 import temml from 'temml';
+import { texLikeMathML } from '../lib/mathml';
 
 interface Props { tex: string; display?: boolean }
 const { tex, display = false } = Astro.props;
-const html = temml.renderToString(tex, { displayMode: display, throwOnError: true });
+const html = texLikeMathML(temml.renderToString(tex, { displayMode: display, throwOnError: true }));
 ---
 <Fragment set:html={html} />

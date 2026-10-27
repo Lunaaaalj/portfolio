@@ -15,7 +15,7 @@ const prev = featured[(index + featured.length - 1) % featured.length];
 const next = featured[(index + 1) % featured.length];
 const sheetOf = (f: typeof entry) => featured.indexOf(f) + 1;
 ---
-<Base title={`${entry.title} · ${person.name}`} description={abstract}>
+<Base title={`${entry.title} · ${person.name}`} description={abstract} preloadMath>
   <RunningHead title={entry.title} after=".head" />
   <div class="page project-page">
     <header class="bar">

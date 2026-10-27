@@ -42,11 +42,10 @@ import MosaicFigure from '../components/MosaicFigure.astro';
     <div class="r">
       <div class="m prose">
         <p>
-          For polygon <TeX tex="i" /> of area <TeX tex="A_i" /> and species <TeX tex="s" />, the plants already
-          present are <TeX tex={String.raw`E_{is} \sim \operatorname{Poisson}(\lambda_s A_i)`} />, and the survivors
-          of <TeX tex="x" /> new plants are <TeX tex={String.raw`S_{is}(x) \sim \operatorname{Bin}(x, q_s)`} />. The
-          decisions are the target <TeX tex={String.raw`n_{is}`} /> and the purchase <TeX tex={String.raw`x_{is}`} />,
-          both integer.
+          For polygon <TeX tex="i" /> of area <TeX tex="A_i" /> and species <span class="nowrap"><TeX tex="s" />,</span> the plants already
+          present are <span class="nowrap"><TeX tex={String.raw`E_{is} \sim \operatorname{Poisson}(\lambda_s\, A_i)`} />,</span> and the survivors
+          of <TeX tex="x" /> new plants are <span class="nowrap"><TeX tex={String.raw`S_{is}(x) \sim \operatorname{Bin}(x, q_s)`} />.</span> The
+          decisions are the target <TeX tex={String.raw`n_{is}`} /> and the purchase <span class="nowrap"><TeX tex={String.raw`x_{is}`} />,</span> both integer.
         </p>
       </div>
       <aside class="note"><p>Existing plants are scattered at random over each polygon; each new plant survives its first year independently with its species’ observed probability.</p></aside>
@@ -61,13 +60,13 @@ import MosaicFigure from '../components/MosaicFigure.astro';
     <div class="r">
       <div class="m">
         <p class="eq-label">Constraints</p>
-        <div class="eq"><TeX display tex={String.raw`\sum_s n_{is} = 658\,A_i, \qquad \left|n_{is} - n^0_s A_i\right| \le \delta\, n^0_s A_i`} /><span class="eqn">(2)</span></div>
+        <div class="eq"><TeX display tex={String.raw`\sum_s n_{is} = 658\,A_i, \qquad \lvert n_{is} - n^0_s\, A_i \rvert \le \delta\, n^0_s\, A_i`} /><span class="eqn">(2)</span></div>
         <div class="eq"><TeX display tex={String.raw`(1+\theta)\sum_s c_s x_{is} \le B\,A_i`} /><span class="eqn">(3)</span></div>
         <div class="eq"><TeX display tex={String.raw`\mathbb{P}\!\left(E_{is} + S_{is}(x_{is}) \ge n_{is}\right) \ge 1 - \alpha`} /><span class="eqn">(4)</span></div>
       </div>
       <aside class="note">
         <p>The total density is fixed, and each species may move at most 10% from the plan. Spending stays within the budget per hectare.</p>
-        <p>The chance constraint: each species reaches its target with probability at least 95% (<TeX tex={String.raw`\alpha = 0.05`} />).</p>
+        <p>The chance constraint: each species reaches its target with probability at least 95% (<span class="nowrap"><TeX tex={String.raw`\alpha = 0.05`} />)</span>.</p>
       </aside>
     </div>
   </section>
@@ -89,7 +88,7 @@ import MosaicFigure from '../components/MosaicFigure.astro';
         <div class="eq"><TeX display tex={String.raw`W_{ab} = \gamma^{\,\mathbf{1}[a=b]}\; T_{ab}\, N_{ab} - \phi\, F_{ab}`} /><span class="eqn">(5)</span></div>
       </div>
       <aside class="note">
-        <p><TeX tex={String.raw`T_{ab}`} />: how much of the spacing the two adult canopies cover. <TeX tex={String.raw`N_{ab}`} />: how much their roots draw on the same soil layer. <TeX tex={String.raw`\gamma = 1.5`} /> makes two plants of the same species compete more; <TeX tex={String.raw`\phi = 0.3`} /> credits mesquite as a nurse plant for the succulents.</p>
+        <p><span class="nowrap"><TeX tex={String.raw`T_{ab}`} />:</span> how much of the spacing the two adult canopies cover. <span class="nowrap"><TeX tex={String.raw`N_{ab}`} />:</span> how much their roots draw on the same soil layer. <TeX tex={String.raw`\gamma = 1.5`} /> makes two plants of the same species compete more; <TeX tex={String.raw`\phi = 0.3`} /> credits mesquite as a nurse plant for the succulents.</p>
       </aside>
     </div>
     <div class="r">
@@ -140,7 +139,7 @@ import MosaicFigure from '../components/MosaicFigure.astro';
           With MXN 12,500 per hectare, no polygon is feasible. The minimum budget that satisfies every constraint is, on
           average weighted by area, MXN 14,496 per hectare (from 14,361 to 14,934), 16% more than is available. The
           shortfall is structural and is not closed by accepting more risk: the minimum budget falls only from MXN 14,664
-          at <TeX tex={String.raw`\alpha = 0.01`} /> to 14,117 at <TeX tex={String.raw`\alpha = 0.50`} />, under 4% for a
+          at <TeX tex={String.raw`\alpha = 0.01`} /> to 14,117 at <span class="nowrap"><TeX tex={String.raw`\alpha = 0.50`} />,</span> under 4% for a
           fiftyfold increase in the probability of falling short.
         </p>
         <p>

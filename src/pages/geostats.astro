@@ -1,28 +1,236 @@
 ---
 // Sources: Lunaaaalj/GeoStats: README.md, docs/reporte/reporte.tex (method, diagnostics,
 // validation), docs/presentacion/index.html speaker notes (2027 central forecast) and
-// docs/presentacion/datos.json (the grid). Nothing here is stated beyond those documents.
+// docs/presentacion/datos.json (the grid). Numbers that recompute differently from the report are
+// those of the data: see scripts/extract-geostats-story.py and scripts/extract-geostats-model.py.
+//
+// The pipeline and the model are shown as scroll scenes (src/scripts/showcase/geostats); the text
+// after them carries the results and the formulation. Scene data comes from
+// scripts/extract-geostats-story.py.
 import Project from '../layouts/Project.astro';
 import TeX from '../components/TeX.astro';
 import HexMapFigure from '../components/HexMapFigure.astro';
+import Scene from '../components/Scene.astro';
+import story from '../data/geostats-story.json';
+import model from '../data/geostats-model.json';
+
+const fmt = (n: number) => n.toLocaleString('en-GB');
+const f = story.facts;
 ---
 <Project
   slug="geostats"
-  abstract="A geostatistical analysis of the 379,294 traffic incidents recorded by INEGI in the 18 municipalities of the Monterrey metropolitan area between 2019 and 2024, and a hierarchical Bayesian model that forecasts incidents for each one-kilometre cell. Risk is concentrated and persistent: 5% of the cells hold 44% of incidents, and the 2019 ranking of cells correlates 0.83 with that of 2024."
+  abstract="A data pipeline and a hierarchical Bayesian model that turn the 379,294 traffic incidents recorded by INEGI in the 18 municipalities of the Monterrey metropolitan area between 2019 and 2024 into a forecast for each one-kilometre cell. Risk is concentrated and persistent: 5% of the cells hold 43% of incidents, and the 2019 ranking of cells correlates 0.83 with that of 2024. The dominant source of error is how each municipality reports, not the statistics."
 >
-  <section class="fig-section" aria-label="Figure 1">
+  <script is:inline>
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('sx-live');
+  </script>
+  <div class="r intro">
+    <p class="m skip">The pipeline and the model are told in figures that play as the page scrolls. <a href="#results-h">Skip to the results</a></p>
+  </div>
+
+  <div class="showcase">
+    <Scene name="reports" fig={1} title="Reports, not crashes" source={`INEGI’s ATUS, to scale: one grain is 1,000 reports, then ${story.grain}`} length={3.8}>
+      <div class="beat" data-at="0 0.31">
+        <p>Nothing here is a crash. Each grain stands for reports: forms filled in by each municipality’s traffic police and gathered by INEGI, {fmt(f.nacional)} of them from 2019 to 2024.</p>
+      </div>
+      <div class="beat" data-at="0.31 0.58">
+        <p>The analysis keeps the 18 municipalities of the Monterrey metropolitan area: {fmt(f.zmm)} reports, 28.8% of the country’s.</p>
+        <p class="small">The same 18 report in all six years, so the years can be compared. Nationally, coverage runs from 91 municipalities in 2019 to 198 in 2024.</p>
+      </div>
+      <div class="beat" data-at="0.58 0.88">
+        <p>A report does not say where the vehicles met. It names a crossing: {f.enInterseccion}% are pinned to one, so the grains pile up on {fmt(f.cruces)} points instead of spreading along the road.</p>
+      </div>
+      <div class="beat" data-at="0.88 1">
+        <p>What exists is a count at each crossing, not a scatter of points, which rules out flat-plane methods such as kernel density.</p>
+        <p class="small">No report is deleted and nothing is imputed. Blank answers are not random: in fatal crashes the breath test goes unrecorded 2.4 times as often, so dropping them would bias against the worst cases.</p>
+      </div>
+    </Scene>
+
+    <Scene name="sieve" fig={2} title="The sieve" source="The project’s grid, to scale; column height is reports, 2019–2024" length={3.6}>
+      <div class="beat" data-at="0 0.24">
+        <p>The obvious unit is the census tract, and here it fails. Tract boundaries run along the avenues, and {f.cercaVia}% of the reports stand within 100 m of a main road: on a line, a report belongs to either side.</p>
+        <p class="small">Tracts also differ in size, and have from 1 to 20 neighbours.</p>
+      </div>
+      <div class="beat" data-at="0.24 0.5">
+        <p>A grid knows nothing of the streets. Regular hexagons 500 m a side, 0.65 km² each, are laid over the city, and every grain falls into exactly one.</p>
+      </div>
+      <div class="beat" data-at="0.5 0.74">
+        <p>The cells have equal area, so the height of a column is a density. And each has six neighbours at the same distance, which is what the model will need.</p>
+        <p class="small">Repeated at 250 m and 1,000 m a side, the top 5% of cells hold 44.8% and 43.5% of reports, against 42.6% here. The concentration does not come from the grid.</p>
+      </div>
+      <div class="beat" data-at="0.74 1">
+        <p>A cell left empty by {fmt(f.zmm)} reports has no road. It is not zero risk, and it goes, with {f.islands} islands that have no neighbours.</p>
+        <p class="eqline">{fmt(f.celdas)} columns remain. The rest of this page stands on them.</p>
+      </div>
+    </Scene>
+
+    <Scene name="sealed" fig={3} title="The sealed year" source="Yearly counts per cell, to scale" length={3.4}>
+      <div class="beat" data-at="0 0.3">
+        <p>Each column opens into six drawers, one a year. A year without reports is a drawer holding zero, not a missing row: this cell in Santa Catarina held nothing in 2020 or 2021.</p>
+      </div>
+      <div class="beat" data-at="0.3 0.52">
+        <p>That makes 13,446 rows: 2,241 cells by six years.</p>
+        <p class="small">The project first worked by month, with 161,352 rows. The month effect is common to all cells and added almost nothing, and sampling that panel would take hours rather than minutes.</p>
+      </div>
+      <div class="beat" data-at="0.52 0.82">
+        <p>Before any model is fitted, 2024 is taken out and sealed. The rule is fixed from the start: no model is compared on the data it was fitted to.</p>
+      </div>
+      <div class="beat" data-at="0.82 1">
+        <p>What stays is 11,205 rows, five years for each cell. Everything from here on learns from them alone.</p>
+        <p class="small">Two recent years predict 2024 better than five, yet in training a model prefers the five, because they include the years it is explaining. Only data it has not seen can settle that.</p>
+      </div>
+    </Scene>
+
+    <Scene name="die" fig={4} title="A die that will not hold still" source="Computed in this page, seed 42; real rows and fit from the project’s model" length={3.6}>
+      <div class="beat" data-at="0 0.35">
+        <p>One row: this cell in {model.die.municipality} in 2023, where the model expects {Math.round(model.die.mu)} reports and {model.die.y} were recorded.</p>
+        <p>The first guess is a Poisson die, its loading fixed. Replayed ten thousand times, the count stays close to {Math.round(model.die.mu)}.</p>
+        <p class="eqline"><TeX tex={String.raw`Y \sim \operatorname{Poisson}(\mu)`} /></p>
+      </div>
+      <div class="beat" data-at="0.35 0.52">
+        <p>Real rows do not. These are the {fmt(model.die.rows)} that expect about the same, each moved by its residual to sit on this one. Their variance is {model.die.varianceRatio} times the die’s.</p>
+      </div>
+      <div class="beat" data-at="0.52 0.84">
+        <p>So the loading itself is released. On each replay a rate is drawn first, from a Gamma, and the count after. A Poisson die with a Gamma rate is a negative binomial.</p>
+        <p class="eqline"><TeX tex={String.raw`Y \sim \mathrm{NB}(\mu, \theta), \quad \operatorname{Var}(Y) = \mu + \mu^2/\theta`} /></p>
+      </div>
+      <div class="beat" data-at="0.84 1">
+        <p>One number, θ = {model.theta.toFixed(1)}, sets how far it moves. Over all {fmt(model.pearson.rows)} rows the Pearson statistic, which should sit near 1, falls from {model.pearson.poisson.toFixed(2)} to {model.pearson.nb.toFixed(2)}.</p>
+        <p class="small">The real rows run inside the curve partly because the model was fitted to them: in simulation, fixing each cell’s level from its own five rows alone takes a quarter off the variance. The fair test is a year it has not seen, in Fig. 8.</p>
+      </div>
+    </Scene>
+
+    <Scene name="platforms" fig={5} title="Platforms and columns" source="Posterior medians of the project’s model, on a log scale" length={4.2}>
+      <div class="beat" data-at="0 0.18">
+        <p>The model writes each expected count as a sum. On a log scale, a sum is a stack, so the columns are redrawn in those units.</p>
+        <p class="eqline"><TeX tex={String.raw`\log \mu_{ia} = \beta_0 + m_{j(i),a} + u_i`} /></p>
+      </div>
+      <div class="beat" data-at="0.18 0.34">
+        <p>Each municipality is a platform on a jack: <i>m</i>, how much it reports that year, lifts every cell it carries at once. Each column is a cell’s <i>u</i>, its place inside its municipality, and it does not change with the year.</p>
+      </div>
+      <div class="beat" data-at="0.34 0.6">
+        <p>Now the years run. Most platforms barely move, and Guadalupe sinks. Then, in 2022, Santa Catarina’s rises by a factor of {model.catarinaJump}, its columns intact.</p>
+      </div>
+      <div class="beat" data-at="0.6 0.76">
+        <p class="statement">The city did not change. Its reporting did.</p>
+      </div>
+      <div class="beat" data-at="0.76 1">
+        <p>So the jacks move by heavy-tailed steps: small for most, huge for a few. With normal steps the typical move comes out at 0.61, inflated by the jumps; with <TeX tex="t_3" /> steps, at {model.hyper.srw.toFixed(2)}.</p>
+        <p class="small"><i>m</i> measures reporting, not risk, and <i>u</i> is the first map here that does not depend on how much a municipality reports: Guadalupe is compared with Guadalupe.</p>
+      </div>
+    </Scene>
+
+    <Scene name="springs" fig={6} title="Springs and heat" source="32 real cells. Relaxation at the posterior means; the tremor is real posterior draws" length={4}>
+      <div class="beat" data-at="0 0.22">
+        <p>Close up, each column is tied by a cable to what its own five rows say. The cable’s thickness is how much they say: a few reports, or thousands.</p>
+      </div>
+      <div class="beat" data-at="0.22 0.42">
+        <p>The prior adds springs. Each column is tied to its neighbours, and the energy of that network is, term by term, the prior on <i>u</i>.</p>
+        <p class="eqline"><TeX tex={String.raw`\mathbf{u} \sim \mathcal{N}\left(\mathbf{0},\ \sigma_u^2\,(D - \alpha A)^{-1}\right)`} /></p>
+        <p class="small">α = {model.hyper.alpha.toFixed(2)}, with a 94% interval from {model.hyper.alpha94[0]} to {model.hyper.alpha94[1]}: neighbours stay alike after the municipality is taken out.</p>
+      </div>
+      <div class="beat" data-at="0.42 0.66">
+        <p>Let go, and the network settles. Thin cables give way and heavy ones hold: over all cells, those with five reports or fewer move {model.relax.few} on the log scale, those with more than a hundred {model.relax.many}.</p>
+      </div>
+      <div class="beat" data-at="0.66 1">
+        <p>A posterior is not a position. These are its real draws, one after another, and the thinnest cells tremble three times as far: ±{model.uSd.few} against ±{model.uSd.many}.</p>
+        <p class="small">Two cells with the same <i>u</i> and different tremors do not deserve the same intervention.</p>
+      </div>
+    </Scene>
+
+    <Scene name="puck" fig={7} title="A puck on the posterior" source="Two of about 2,300 dimensions. Surface fitted to the project’s 8,000 draws; flights computed in this page, seed 42" length={3.8} controls>
+      <div class="beat" data-at="0 0.3">
+        <p>Everything so far is one surface over some 2,300 unknowns. The line that crosses this site descends such a surface and stops at the bottom. That gives a point. The model needs the whole basin.</p>
+      </div>
+      <div class="beat" data-at="0.3 0.62">
+        <p>So a puck is kicked in a random direction and coasts, climbing and falling, trading speed for height. Where it stops is one draw. Its energy is conserved, so it reaches far and is still accepted.</p>
+        <p class="small">It lingers where probability is high, so over many flights the places it stops are the posterior.</p>
+      </div>
+      <div class="beat" data-at="0.62 1">
+        <p>Four chains from far apart must end up agreeing. The project’s sampler adds one rule, stopping a flight when it starts to turn back: four chains of 2,000 draws in {Math.round(model.fit.minutos)} minutes, no divergences, largest <TeX tex={String.raw`\hat{R}`} /> {model.fit.rhat_max.toFixed(3)}.</p>
+        <p class="small">A BYM2 spatial term was tried first. In both parameterisations its chains ran to a degenerate edge, with <TeX tex={String.raw`\hat{R}`} /> of 2.06 and 1.65: the data could not split the effect in two.</p>
+      </div>
+    </Scene>
+
+    <Scene name="opening" fig={8} title="Opening 2024" source="Intervals fixed before 2024 was seen; coverage tallied cell by cell" length={3.8}>
+      <div class="beat" data-at="0 0.34">
+        <p>The seal is broken once. The model has never seen these {fmt(story.facts.celdas)} rows, and every interval was fixed before they were opened.</p>
+      </div>
+      <div class="beat" data-at="0.34 0.6">
+        <p>A 90% interval should hold the truth 90% of the time. The best average, the mean of 2022 and 2023 with a Poisson, holds it {model.test.baseCoverage}%. Each slab left red fell outside.</p>
+      </div>
+      <div class="beat" data-at="0.6 0.84">
+        <p>The model’s holds it {model.test.coverage}%. Its total for the metropolitan area is {fmt(model.test.total)} against {fmt(model.test.recorded)} recorded, 0.6% off.</p>
+      </div>
+      <div class="beat" data-at="0.84 1">
+        <p>It forecasts by persistence: each municipality keeps its 2023 level. One more <TeX tex="t_3" /> step has no mean, and in practice the sum came out at 2.3 million.</p>
+        <p class="small">These rows also settle Fig. 4. Expecting 45 to 75 reports, their variance is {model.test.band.seen}: the negative binomial says {model.test.band.nb}, the Poisson {model.test.band.poisson}.</p>
+      </div>
+    </Scene>
+
+    <Scene name="history" fig={9} title="History decides where" source="Forecast from the project; choices computed in this page on the recorded 2024" length={3.4}>
+      <div class="beat" data-at="0 0.32">
+        <p>The forecast for 2027 is 73,577 reports, with a margin of 3%. It holds only if no municipality changes how it reports, so its intervals are a floor.</p>
+      </div>
+      <div class="beat" data-at="0.32 0.6">
+        <p>Now the use of it. Choose 5% of the cells to act on. Counting 2019–2023 and asking the model pick nearly the same ones, and catch the same 42% of 2024.</p>
+      </div>
+      <div class="beat" data-at="0.6 1">
+        <p>The PAI did not move in any model. Where incidents happen is decided by history; the model changes how sure one can be, not where to look.</p>
+        <p class="small">Moving it would take measures that vary by cell and that the history does not hold: road exposure, land use, population.</p>
+      </div>
+    </Scene>
+  </div>
+
+  <section class="fig-section" aria-label="Figure 10, the map to explore">
     <HexMapFigure />
   </section>
 
-  <section aria-labelledby="problem-h">
-    <div class="r"><h2 class="m" id="problem-h">Problem</h2></div>
+  <section aria-labelledby="results-h">
+    <div class="r"><h2 class="m" id="results-h">Results</h2></div>
     <div class="r">
+      <div class="m">
+        <table class="data">
+          <caption class="vh">Validation on 2024, cell-by-year scale.</caption>
+          <thead>
+            <tr><th scope="col">Model</th><th scope="col" class="n">MAE</th><th scope="col" class="n">CRPS</th><th scope="col" class="n">90% coverage</th><th scope="col" class="n">PAI 5%</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Mean, 2019–2023</th><td class="n">9.59</td><td class="n">8.04</td><td class="n">63%</td><td class="n">8.41</td></tr>
+            <tr><th scope="row">Mean, 2022–2023</th><td class="n">8.15</td><td class="n">6.56</td><td class="n">68%</td><td class="n">8.38</td></tr>
+            <tr><th scope="row">Negative binomial, recent history</th><td class="n">8.18</td><td class="n">6.93</td><td class="n">90%</td><td class="n">8.38</td></tr>
+            <tr class="best"><th scope="row">Hierarchical, CAR and municipality</th><td class="n">8.19</td><td class="n">6.17</td><td class="n">87%</td><td class="n">8.42</td></tr>
+          </tbody>
+        </table>
+        <p class="table-note">Validation on 2024, from the project’s technical report.</p>
+      </div>
+      <aside class="note"><p>The hierarchical model predicted 70,815 incidents for 2024 against 71,249 recorded in the grid’s cells: 0.6% off the metropolitan total.</p></aside>
+    </div>
+    <div class="r after-table">
       <div class="m prose">
         <p>
-          The project asks three questions of the metropolitan area’s traffic incidents: where risk concentrates, who
-          bears its cost, and how well it can be anticipated. It was developed for the Semana de la Movilidad by
-          Angel Eduardo Luna, Jenaro Alcaraz, Roberto Pérez, Damián Yul Reynoso and Mateo Rodolfo Flores.
+          The hierarchical model ties the best baseline on absolute error and beats it on CRPS by 6%: its centre points
+          where a well-chosen average already points, but its distribution is better calibrated. The baseline’s 90%
+          interval covers 68% of cells; the model’s covers 87%. Spatial dependence net of the municipality is strong, <TeX tex={String.raw`\alpha = 0.85`} /> (94% interval 0.81 to 0.88). The central forecast for 2027 is 73,577
+          incidents, with a margin of 3%.
         </p>
+        <p>
+          The PAI of 8.4 did not move in any model, from the first spatial analysis to the hierarchical one: choosing
+          5% of cells from the 2019–2023 data captures 42% of 2024’s incidents by counting alone. Where incidents happen
+          is decided by history; changing that would need covariates that vary by cell, such as road exposure, land use
+          or population.
+        </p>
+      </div>
+    </div>
+    <div class="r">
+      <div class="m prose">
+        <h3>Where</h3>
+        <p>
+          The structure is strong. The Gini coefficient of counts per cell is 0.756, and Moran’s <TeX tex="I" /> on <TeX tex={String.raw`\log(1+n)`} /> is 0.648. Local statistics are corrected for multiple testing
+          (Benjamini–Hochberg): significant LISA cells fall from 682 to 287, and what survives is a compact core over
+          the consolidated urban area with no isolated hot spots. Risk follows corridors, not corners.
+        </p>
+        <h3>Who bears it</h3>
         <p>
           The human cost is the exception, but a heavy one. 92.9% of incidents cause material damage only; the rest
           left 25,642 people injured and 1,167 dead, and 64.4% of those deaths occurred at intersections in four
@@ -30,36 +238,17 @@ import HexMapFigure from '../components/HexMapFigure.astro';
           are most severe: central cells average 498 incidents and 4.7% leave casualties, peripheral cells 29 and
           8.4%. A ranking by count alone puts the periphery last.
         </p>
+        <h3>Limits</h3>
         <p>
-          The original question, how many incidents and in which census tracts, was reformulated before any data was
-          touched. If counts per unit are independent Poisson, the total and its distribution across units come from
-          one model, so a single model of the rate per unit answers both “how many” and “where”.
+          The dominant source of error is administrative, not statistical. Municipalities change how they report from
+          one year to the next: Santa Catarina recorded 77 incidents in 2021 and 1,795 in 2022; Guadalupe, 8,032 in
+          2020 and 2,721 in 2024. The municipal effect therefore measures reporting, not risk, and no model can
+          anticipate a change of reporting regime from earlier data. The forecasts are conditional on no such change,
+          and their intervals are a floor on the real uncertainty.
         </p>
       </div>
       <aside class="note">
-        <p>No model can predict a single crash. What can be estimated is how loaded the dice are in each place: the expected rate. The ranking, the total and the map all follow from it.</p>
-      </aside>
-    </div>
-  </section>
-
-  <section aria-labelledby="data-h">
-    <div class="r"><h2 class="m" id="data-h">Data and spatial unit</h2></div>
-    <div class="r">
-      <div class="m prose">
-        <p>
-          The source is INEGI’s <i>Accidentes de Tránsito Terrestre en Zonas Urbanas y Suburbanas</i> (ATUS), a census
-          of the reports filed by each municipality’s traffic police, not a survey. The records are cut to the 18
-          municipalities of the metropolitan area and assigned to a grid of regular hexagons 500 m a side
-          (0.65 km²). The 2,241 cells with at least one incident in six years are kept.
-        </p>
-        <p>
-          The structure is strong. The Gini coefficient of counts per cell is 0.766, and Moran’s <TeX tex="I" /> on <TeX tex={String.raw`\log(1+n)`} /> is 0.648. Local statistics are corrected for multiple testing
-          (Benjamini–Hochberg): significant LISA cells fall from 682 to 287, and what survives is a compact core over
-          the consolidated urban area with no isolated hot spots. Risk follows corridors, not corners.
-        </p>
-      </div>
-      <aside class="note">
-        <p>Hexagons rather than census tracts: tract boundaries run along the avenues, exactly where incidents happen, and tracts vary widely in size. Equal cells can be compared directly.</p>
+        <p>Toggle 2021 and 2022 in Fig. 10 and watch Santa Catarina, west of the centre, appear: the city did not change in a year; its reporting did.</p>
       </aside>
     </div>
   </section>
@@ -68,6 +257,11 @@ import HexMapFigure from '../components/HexMapFigure.astro';
     <div class="r"><h2 class="m" id="form-h">Formulation</h2></div>
     <div class="r">
       <div class="m prose">
+        <p>
+          The original question, how many incidents and in which census tracts, was reformulated before any data was
+          touched. If counts per unit are independent Poisson, the total and its distribution across units come from
+          one model, so a single model of the rate per unit answers both “how many” and “where”.
+        </p>
         <p>
           For cell <TeX tex="i" /> in municipality <TeX tex="j(i)" /> and year <span class="nowrap"><TeX tex="a" />,</span> the count of recorded
           incidents is negative binomial, with a municipal effect that changes over time and a spatial effect for each
@@ -125,64 +319,33 @@ import HexMapFigure from '../components/HexMapFigure.astro';
         </p>
       </div>
       <aside class="note">
+        <p>The project was developed for the Semana de la Movilidad by Angel Eduardo Luna, Jenaro Alcaraz, Roberto Pérez, Damián Yul Reynoso and Mateo Rodolfo Flores.</p>
         <p>CRPS scores the whole forecast distribution, not just its centre. Coverage asks whether a 90% interval contains the truth 90% of the time.</p>
-      </aside>
-    </div>
-  </section>
-
-  <section aria-labelledby="results-h">
-    <div class="r"><h2 class="m" id="results-h">Results</h2></div>
-    <div class="r">
-      <div class="m">
-        <table class="data">
-          <caption class="vh">Validation on 2024, cell-by-year scale.</caption>
-          <thead>
-            <tr><th scope="col">Model</th><th scope="col" class="n">MAE</th><th scope="col" class="n">CRPS</th><th scope="col" class="n">90% coverage</th><th scope="col" class="n">PAI 5%</th></tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">Mean, 2019–2023</th><td class="n">9.59</td><td class="n">8.04</td><td class="n">63%</td><td class="n">8.41</td></tr>
-            <tr><th scope="row">Mean, 2022–2023</th><td class="n">8.15</td><td class="n">6.56</td><td class="n">68%</td><td class="n">8.38</td></tr>
-            <tr><th scope="row">Negative binomial, recent history</th><td class="n">8.18</td><td class="n">6.93</td><td class="n">90%</td><td class="n">8.38</td></tr>
-            <tr class="best"><th scope="row">Hierarchical, CAR and municipality</th><td class="n">8.19</td><td class="n">6.17</td><td class="n">87%</td><td class="n">8.42</td></tr>
-          </tbody>
-        </table>
-        <p class="table-note">Validation on 2024, from the project’s technical report.</p>
-      </div>
-      <aside class="note"><p>The hierarchical model predicted 70,815 incidents for 2024 against 71,249 recorded in the grid’s cells: 0.6% off the metropolitan total.</p></aside>
-    </div>
-    <div class="r after-table">
-      <div class="m prose">
-        <p>
-          The hierarchical model ties the best baseline on absolute error and beats it on CRPS by 6%: its centre points
-          where a well-chosen average already points, but its distribution is better calibrated. The baseline’s 90%
-          interval covers 68% of cells; the model’s covers 87%. Spatial dependence net of the municipality is strong, <TeX tex={String.raw`\alpha = 0.85`} /> (94% interval 0.81 to 0.88). The central forecast for 2027 is 73,577
-          incidents, with a margin of 3%.
-        </p>
-        <p>
-          The PAI of 8.4 did not move in any model, from the first spatial analysis to the hierarchical one: choosing
-          5% of cells from the 2019–2023 data captures 42% of 2024’s incidents by counting alone. Where incidents happen
-          is decided by history; changing that would need covariates that vary by cell, such as road exposure, land use
-          or population.
-        </p>
-        <h3>Limits</h3>
-        <p>
-          The dominant source of error is administrative, not statistical. Municipalities change how they report from
-          one year to the next: Santa Catarina recorded 46 incidents in 2021 and 1,813 in 2022; Guadalupe, 7,868 in
-          2020 and 2,770 in 2024. The municipal effect therefore measures reporting, not risk, and no model can
-          anticipate a change of reporting regime from earlier data. The forecasts are conditional on no such change,
-          and their intervals are a floor on the real uncertainty.
-        </p>
-      </div>
-      <aside class="note">
-        <p>Toggle 2021 and 2022 in Fig. 1 and watch Santa Catarina, west of the centre, appear: the city did not change in a year; its reporting did.</p>
       </aside>
     </div>
   </section>
 </Project>
 
 <style>
+  .intro { margin-top: 28px; }
+  .skip { margin: 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .showcase { margin-top: 48px; border-bottom: 1px solid var(--rule); }
   .fig-section { margin-top: 56px; }
   .after-table { margin-top: 28px; }
   .table-note { margin: 8px 0 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
   .best th, .best td { font-weight: 600; color: var(--ink); }
 </style>
+
+<script>
+  import { mountScenes } from '../scripts/showcase/engine';
+  import reports from '../scripts/showcase/geostats/reports';
+  import sieve from '../scripts/showcase/geostats/sieve';
+  import sealed from '../scripts/showcase/geostats/sealed';
+  import die from '../scripts/showcase/geostats/die';
+  import platforms from '../scripts/showcase/geostats/platforms';
+  import springs from '../scripts/showcase/geostats/springs';
+  import puck from '../scripts/showcase/geostats/puck';
+  import opening from '../scripts/showcase/geostats/opening';
+  import history from '../scripts/showcase/geostats/history';
+  mountScenes({ reports, sieve, sealed, die, platforms, springs, puck, opening, history });
+</script>

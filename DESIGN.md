@@ -77,6 +77,12 @@ typography:
     fontSize: "18px"
     fontWeight: 400
     lineHeight: 1.6
+  statement:
+    fontFamily: "STIX Two Text Variable, STIX Two Text, Georgia, serif"
+    fontSize: "clamp(40px, 4.6vw, 72px)"
+    fontWeight: 400
+    lineHeight: 1.02
+    letterSpacing: "-0.02em"
   label:
     fontFamily: "IBM Plex Sans, system-ui, sans-serif"
     fontSize: "14px"
@@ -329,6 +335,14 @@ Columns: project, one-line description, Report (PDF), Repository. Report cells a
 - **Rendering budget:** scrolling never redraws the surface. Its canvases cover a window of the document twice the viewport height and are scrolled by the browser natively; they are redrawn only when the viewport nears the window's edge. The field renders at no more than 1.25× pixel density and the path at 1.5×; the shader receives at most 48 Gaussians per draw, culled to the window. The path is drawn incrementally, never cleared while it advances. Glows, rings and labels are DOM elements animated by CSS on the compositor; pointer probes live on a small canvas fixed to the viewport. The field is quietened by a CSS mask, not a per-frame compositing pass; home entries use `content-visibility: auto`. Measured on an Apple M4 in Chrome: 60 fps while scrolling, with the CPU throttled four times as well.
 - **Reduced motion:** the surface renders still and complete, with the path drawn to the reading position; no reveal, ripple, rings, probes or entry previews; view transitions and CSS transitions are off.
 
+### Scroll scenes (reforestation page)
+The reforestation page tells its method in nine pinned scenes (`src/components/Scene.astro`, `src/scripts/showcase/`), the pattern intended for the other featured pages if it is adopted there.
+- **Stage:** a full-bleed plate (`plate`, a 1 px `rule` above), pinned for a track of 2.4–3.6 viewport heights. Caption column at left (30 rem; below 900 px it moves under the drawing), the drawing at right on a canvas. No level set runs behind a stage; the surface's basins belong to the text sections only.
+- **Caption:** "Fig. n" and a provenance line in `label` (computed in the page with its seed, transcribed from the report, or illustrative), the scene title in `headline`, then beats in `lead` that cross-fade over their interval of progress (blur 4 px to sharp, 520–620 ms, exponential ease-out). One beat per page may be set in `statement`: on this page, "No polygon is feasible."
+- **Drawing:** scrubbed by the scroll, so scrolling back rewinds it; numbers live in a `readout` at top right. The plant glyph, genus colours and red same-species pairs are Fig. 1's. The one oxblood line is the memetic algorithm's best-so-far trace, the site's optimiser path made literal; nothing else in a scene is oxblood.
+- **Computed, not choreographed:** the Monte Carlo replays, the hundred hectares, the tabu search and the memetic algorithm run in the browser on the project's data with fixed seeds (`src/lib/tile.ts` reproduces the project's axial tile and its six keys exactly). The memetic scene runs on its own clock while pinned, with Pause and Replay, and stops off screen.
+- **Reduced motion and no JavaScript:** tracks collapse, every beat shows, each drawing renders once at its final state. Scenes do not print; the text after them carries the results.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -425,7 +439,8 @@ Each section of the page has a basin, beside the text to the right of the margin
 | Page | Figure | Interaction | Data |
 |---|---|---|---|
 | GeoStats | Hexagonal map on the project's own 2,241-cell grid | Year selector (native radio buttons) 2019–2024 and the 2027 forecast; pointing at a cell reads its municipality and count; yearly totals in a table beside the map | `scripts/extract-geostats.mjs` from the presentation's `datos.json` → `src/data/geostats.json`. One set of log class breaks for all years |
-| Reforestation | One 4 × 13 staggered planting tile, periodic borders, 156 neighbouring pairs | Switch random / competition-aware (radio buttons and CSS; works without JavaScript); competition, its random expectation, the coefficient and same-species pairs update | `scripts/extract-refinit.mjs` → `src/data/refinit.json` (real matrix *W*); composition proportional to the plan; arrangement from a seeded tabu search at build time. Labelled illustrative |
+| Reforestation (home preview) | One 4 × 13 staggered planting tile, periodic borders, 156 neighbouring pairs | Switch random / competition-aware (radio buttons and CSS; works without JavaScript) | `src/data/refinit.json` (real matrix *W*); composition proportional to the plan; arrangement from a seeded tabu search at build time. Labelled illustrative |
+| Reforestation (page) | Nine scroll scenes: the site, one hectare, negative-binomial replays, joint compliance, minimum budgets and the risk frontier, the tile as springs, the memetic algorithm, the current row order against key 1, key 1 over a polygon | Scroll; Pause and Replay on the memetic scene | `scripts/extract-refinit.mjs <data/processed> <datos.js>` → `src/data/refinit-story.json`: polygons, minimum budgets, frontier, six keys and exact bounds, the A. salmiana scenario, the current order; the one-hectare table transcribed from the final report |
 | Casa Monarca | Constraint matrix, 1,092 × 934 | Point at the matrix or choose a constraint family to highlight it and the matching equation; the readout gives exact nonzero counts | Built in `src/lib/casaMonarca.ts` from the formulation and the real recipe table; not schematic |
 
 ## Print and sharing

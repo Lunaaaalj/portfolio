@@ -74,7 +74,7 @@ export const featured: Featured[] = [
     links: [
       { label: 'Repository', href: gh('Stochastic_RefInit') },
       { label: 'Project site', href: 'https://stochastic-reforestation-initiative.vercel.app' },
-      { label: 'Report (PDF)', href: `${gh('Stochastic_RefInit')}/blob/main/reports/e2/main.pdf`, note: 'Second report: purchasing and spatial models, in Spanish.' },
+      { label: 'Report (PDF)', href: `${gh('Stochastic_RefInit')}/blob/main/reports/final/main.pdf`, note: 'Final report: models, algorithms, validation and results, in Spanish.' },
     ],
     figure: 'lattice',
     alt: 'One planting tile of 52 positions on a staggered grid: a random arrangement leaves 22 pairs of same-species neighbours; the competition-aware arrangement leaves none. Illustrative.',

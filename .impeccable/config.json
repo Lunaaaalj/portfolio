@@ -1,0 +1,152 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-03T13:17:48.237Z",
+        "reason": "agent: decision-page fixture that deliberately depicts the category-standard cliché; never shipped"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-03T13:17:48.252Z",
+        "reason": "agent: decision-page fixture that deliberately depicts the category-standard cliché; never shipped"
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-03T13:18:13.023Z",
+        "reason": "agent: single-line 96px display name in a decision sketch; display setting at 1.0 is intended"
+      },
+      {
+        "rule": "hero-eyebrow-chip",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-silk.html"
+        ],
+        "createdAt": "2026-11-03T13:18:13.037Z",
+        "reason": "agent: tracked labels are the challenger world's pinned banner-edge labels, not a hero eyebrow; decision sketch only"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/r1-canon.html"
+        ],
+        "createdAt": "2026-11-03T13:22:56.805Z",
+        "reason": "agent: copy of the decision-page fixture depicting the category-standard cliché; never shipped"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/r1-canon.html"
+        ],
+        "createdAt": "2026-11-03T13:22:56.822Z",
+        "reason": "agent: copy of the decision-page fixture depicting the category-standard cliché; never shipped"
+      },
+      {
+        "rule": "skipped-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/r1-canon.html"
+        ],
+        "createdAt": "2026-11-03T13:22:56.839Z",
+        "reason": "agent: copy of the decision-page fixture depicting the category-standard cliché; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.415Z",
+        "reason": "agent: decision-round sketch drawn before the new DESIGN.md existed; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.431Z",
+        "reason": "agent: decision-round sketch drawn before the new DESIGN.md existed; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-silk.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.446Z",
+        "reason": "agent: decision-round sketch drawn before the new DESIGN.md existed; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.461Z",
+        "reason": "agent: decision-round sketch drawn before the new DESIGN.md existed; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/r1-assigned.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.475Z",
+        "reason": "agent: decision-round sketch drawn before the new DESIGN.md existed; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/r1-pick.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.490Z",
+        "reason": "agent: decision-round sketch drawn before the new DESIGN.md existed; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/r1-canon.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.504Z",
+        "reason": "agent: decision-round sketch drawn before the new DESIGN.md existed; never shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "scripts/og-image.html"
+        ],
+        "createdAt": "2026-11-03T13:59:31.518Z",
+        "reason": "agent: false positive, the parser splits the quoted families in the font shorthand; the card uses STIX Two Text and IBM Plex Sans, both declared in DESIGN.md"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "scripts/og-image.html"
+        ],
+        "createdAt": "2026-11-03T14:32:17.017Z",
+        "reason": "user confirmed: asked for the light background to look like brownish paper; the social card matches the site's light theme"
+      }
+    ]
+  }
+}

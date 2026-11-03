@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Colour-Chord Lanes — sketch</title>
+<style>
+  *{box-sizing:border-box;margin:0}
+  html,body{width:1440px;height:900px;overflow:hidden;background:#FBFBF8;color:#1b1d2a;font-family:"Helvetica Neue",Arial,sans-serif}
+  .lane{position:absolute;left:-200px;width:1900px;height:150px;mix-blend-mode:multiply;transform-origin:center}
+  .l1{top:300px;background:rgba(46,58,135,.55);transform:rotate(-9deg)}
+  .l2{top:420px;background:rgba(168,50,62,.5);transform:rotate(6deg)}
+  .l3{top:520px;background:rgba(232,163,23,.6);transform:rotate(-2deg)}
+  .lab{position:absolute;font-size:13px;letter-spacing:.18em;font-weight:300;color:#1b1d2a;background:#FBFBF8;padding:4px 8px}
+  h1{position:absolute;left:96px;top:72px;font-size:84px;line-height:88px;font-weight:300;letter-spacing:-0.01em}
+  .sub{position:absolute;left:100px;top:180px;font-size:20px;font-weight:300;letter-spacing:.04em}
+  .chord{position:absolute;font-size:13px;line-height:18px;border-left:2px solid #1b1d2a;padding-left:8px;background:rgba(251,251,248,.85)}
+  nav{position:absolute;right:96px;top:84px;display:flex;gap:36px;font-size:14px;letter-spacing:.12em;font-weight:300}
+</style></head><body>
+<nav><span>WORK</span><span>METHODS</span><span>FURTHER</span><span>CONTACT</span></nav>
+<h1>Angel Eduardo Luna</h1>
+<p class="sub">Applied mathematics and data science · Tecnológico de Monterrey</p>
+<div class="lane l1"></div><div class="lane l2"></div><div class="lane l3"></div>
+<span class="lab" style="left:96px;top:330px">GEOSTATS</span>
+<span class="lab" style="left:96px;top:398px">STOCHASTIC_REFINIT</span>
+<span class="lab" style="left:96px;top:560px">CASA MONARCA</span>
+<div class="chord" style="left:640px;top:470px">Integer programming<br>RefInit × Casa Monarca</div>
+<div class="chord" style="left:1080px;top:330px">Spatial statistics<br>GeoStats × RefInit</div>
+<div class="chord" style="left:300px;top:690px">Python, validation on partner data<br>all three</div>
+</body></html>

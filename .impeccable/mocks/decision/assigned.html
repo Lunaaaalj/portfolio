@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Hinton Plate — sketch</title>
+<style>
+  :root{--field:#C8CBCE;--pos:#FFFFFF;--neg:#111418;--ink:#111418;--link:#1D4E89;--u:24px}
+  *{box-sizing:border-box;margin:0}
+  html,body{width:1440px;height:900px;overflow:hidden;background:var(--field);color:var(--ink);font-family:"Helvetica Neue",Arial,sans-serif}
+  body{background-image:radial-gradient(circle,#b4b8bc 1px,transparent 1.2px);background-size:var(--u) var(--u);background-position:12px 12px}
+  nav{position:absolute;left:96px;top:48px;display:flex;gap:48px;font-size:14px}
+  nav a{color:var(--ink);text-decoration:none}
+  nav a:first-child{font-weight:700}
+  .name{position:absolute;left:96px;top:168px;font-size:96px;line-height:96px;font-weight:700;letter-spacing:-0.02em;width:600px}
+  .sub{position:absolute;left:96px;top:384px;font-size:21px;line-height:24px;width:480px}
+  .abs{position:absolute;left:96px;top:456px;font-size:16px;line-height:24px;width:480px;color:#2a2f35}
+  .plate{position:absolute;left:744px;top:120px}
+  .grid{display:grid;grid-template-columns:repeat(10,48px);grid-auto-rows:48px}
+  .c{display:flex;align-items:center;justify-content:center}
+  .c i{display:block;background:var(--pos)}
+  .c.on i{outline:2px solid var(--link);outline-offset:3px}
+  .read{margin-top:24px;font-size:14px;line-height:24px;width:480px}
+  .read b{font-variant-numeric:tabular-nums}
+  .ylab{position:absolute;left:-24px;top:0;display:grid;grid-auto-rows:48px;font-size:12px;align-items:center}
+  .rows{position:absolute;left:96px;top:648px;width:1248px;display:grid;grid-template-columns:repeat(3,1fr);gap:48px}
+  .row{display:grid;grid-template-columns:96px 1fr;gap:24px;font-size:14px;line-height:20px}
+  .row h2{font-size:21px;line-height:24px;margin-bottom:6px}
+  .mini{display:grid;gap:2px;align-content:start}
+  .mini i{display:block;background:var(--neg)}
+  .cap{position:absolute;left:744px;top:624px;font-size:12px;color:#3a4048;width:480px}
+</style></head><body>
+<nav><a>Angel Eduardo Luna</a><a>Selected work</a><a>Methods</a><a>Further work</a><a>Contact</a></nav>
+<h1 class="name">Angel Eduardo Luna</h1>
+<p class="sub">Applied mathematics and data science, Tecnológico de Monterrey</p>
+<p class="abs">Models formulated, implemented and used to inform a decision for a named partner: CONAFOR, Casa Monarca and the Monterrey metropolitan area.</p>
+<div class="plate">
+  <div class="grid" id="g"></div>
+  <p class="read">W<sub>27</sub> · Agave salmiana × Opuntia streptacantha · <b>0.90</b></p>
+</div>
+<p class="cap" style="top:732px;display:none"></p>
+<div class="rows">
+  <div class="row"><div class="mini" id="m1" style="grid-template-columns:repeat(8,10px);grid-auto-rows:10px"></div><div><h2>GeoStats</h2>Where traffic risk concentrates in Monterrey.</div></div>
+  <div class="row"><div class="mini" id="m2" style="grid-template-columns:repeat(8,10px);grid-auto-rows:10px"></div><div><h2>Stochastic_RefInit</h2>Reforestation planning under survival uncertainty.</div></div>
+  <div class="row"><div class="mini" id="m3" style="grid-template-columns:repeat(8,10px);grid-auto-rows:10px"></div><div><h2>Casa Monarca</h2>Food purchasing for a migrant shelter.</div></div>
+</div>
+<script>
+const W=[[0.2,0.5,0.3,0.21,0.3,0.42,0.24,0.54,0.2,0.49],[0.5,1.29,0.67,0.57,0.67,0.79,0.61,0.9,0.2,0.82],[0.3,0.67,0.72,0.38,0.48,0.6,0.42,0.71,0.2,0.65],[0.21,0.57,0.38,0.43,0.38,0.5,0.32,0.62,0.2,0.56],[0.3,0.67,0.48,0.38,0.72,0.6,0.42,0.72,0.17,0.63],[0.42,0.79,0.6,0.5,0.6,1.07,0.54,0.84,0.17,0.74],[0.24,0.61,0.42,0.32,0.42,0.54,0.54,0.66,0.17,0.58],[0.54,0.9,0.71,0.62,0.72,0.84,0.66,1.43,0.17,0.84],[0.2,0.2,0.2,0.2,0.17,0.17,0.17,0.17,1.5,0.45],[0.49,0.82,0.65,0.56,0.63,0.74,0.58,0.84,0.45,1.43]];
+const g=document.getElementById('g');
+W.forEach((r,i)=>r.forEach((w,j)=>{const c=document.createElement('div');c.className='c'+(i==1&&j==7?' on':'');const s=Math.round(44*Math.sqrt(w/1.5));c.innerHTML=`<i style="width:${s}px;height:${s}px"></i>`;g.appendChild(c)}));
+function mini(id,f){const m=document.getElementById(id);for(let k=0;k<64;k++){const v=f(k%8,Math.floor(k/8));const s=Math.max(0,Math.round(10*v));m.insertAdjacentHTML('beforeend',`<i style="width:${s}px;height:${s}px;justify-self:center;align-self:center"></i>`)}}
+mini('m1',(x,y)=>Math.exp(-((x-4)**2+(y-3)**2)/8));
+mini('m2',(x,y)=>W[y][x]/1.5);
+mini('m3',(x,y)=>((x+2*y)%5==0||x==y)?1:0);
+</script>
+</body></html>

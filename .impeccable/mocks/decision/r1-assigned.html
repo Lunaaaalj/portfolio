@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Perceptron Report — sketch</title>
+<style>
+  :root{--stock:#E4E7EA;--ink:#14171A;--blue:#1F3A5F;--grey:#4F5A66}
+  *{box-sizing:border-box;margin:0}
+  html,body{width:1440px;height:900px;overflow:hidden;background:var(--stock);color:var(--ink);font-family:"Iowan Old Style","Palatino",Georgia,serif}
+  canvas{position:absolute;inset:0}
+  .cover{position:absolute;left:128px;top:96px;width:640px}
+  .series{font-family:"Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:20px;color:var(--blue);border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);padding:10px 0;display:flex;justify-content:space-between;background:var(--stock)}
+  h1{font-size:88px;line-height:96px;font-weight:400;letter-spacing:-0.01em;margin-top:56px;background:var(--stock);display:inline}
+  .sub{font-size:24px;line-height:34px;margin-top:32px;font-style:italic;max-width:520px;background:var(--stock)}
+  .abs{font-size:17px;line-height:28px;margin-top:28px;max-width:540px;background:var(--stock)}
+  .plate{position:absolute;left:128px;top:700px;width:640px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink);font-family:"Helvetica Neue",Arial,sans-serif;background:var(--stock)}
+  .plate div{padding:12px 16px 0 0;font-size:13px;line-height:18px;color:var(--grey)}
+  .plate b{display:block;font-family:"Iowan Old Style",Georgia,serif;font-weight:400;font-size:30px;line-height:38px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .legend{position:absolute;right:96px;bottom:48px;font-family:"Helvetica Neue",Arial,sans-serif;font-size:12px;color:var(--grey);text-align:right;width:300px}
+</style></head><body>
+<canvas id="c" width="1440" height="900"></canvas>
+<div class="cover">
+  <div class="series"><span>Applied mathematics and data science</span><span>Tecnológico de Monterrey</span></div>
+  <div style="margin-top:56px"><h1>Angel Eduardo Luna</h1></div>
+  <p class="sub">Models formulated, implemented and used for a decision by a named partner.</p>
+  <p class="abs">Three studies: traffic risk in the Monterrey metropolitan area, reforestation under survival uncertainty for CONAFOR, and food purchasing for Casa Monarca.</p>
+</div>
+<div class="plate">
+  <div><b>379,294</b>geocoded collision records</div>
+  <div><b>10 × 10</b>species competition matrix</div>
+  <div><b>1,092 × 934</b>constraint matrix</div>
+</div>
+<p class="legend">Decorative: the sensory-to-association wiring of a perceptron, randomly seeded.</p>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');let s=11;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+const R0=880,C0=150,cell=14;
+// association units column
+const A=[];for(let i=0;i<24;i++)A.push([1340,120+i*28]);
+// wires
+for(let k=0;k<520;k++){const i=Math.floor(r()*20),j=Math.floor(r()*20);const sx=R0+j*cell+cell/2,sy=C0+i*cell+cell/2;const a=A[Math.floor(r()*A.length)];
+ const hot=a===A[9];x.strokeStyle=hot?'rgba(31,58,95,.85)':'rgba(20,23,26,.10)';x.lineWidth=hot?1:0.6;
+ x.beginPath();x.moveTo(sx,sy);x.bezierCurveTo(sx-360-r()*400,sy+(r()-.5)*500,a[0]-200,a[1],a[0],a[1]);x.stroke();}
+// retina, stipple cells
+for(let i=0;i<20;i++)for(let j=0;j<20;j++){const on=Math.hypot(i-9.5,j-6)<5||(j>11&&j<15&&i>3&&i<16);x.fillStyle=on?'#14171A':'rgba(20,23,26,.18)';
+ for(let d=0;d<(on?9:2);d++){x.fillRect(R0+j*cell+2+(d%3)*4,C0+i*cell+2+Math.floor(d/3)*4,2,2)}}
+x.strokeStyle='#14171A';x.lineWidth=1;x.strokeRect(R0-4,C0-4,20*cell+8,20*cell+8);
+A.forEach((a,i)=>{x.beginPath();x.arc(a[0],a[1],i===9?6:4,0,7);x.fillStyle=i===9?'#1F3A5F':'#E4E7EA';x.fill();x.strokeStyle='#14171A';x.stroke()});
+</script>
+</body></html>

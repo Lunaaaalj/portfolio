@@ -1,12 +1,20 @@
-/* ---------- Tokens (DESIGN.md §5; colours shared with the profile README) ---------- */
+/* ---------- Tokens: the loss-surface engraving ---------- */
 :root {
-  --paper: #FFFFFF;
-  --ink: #1B2430;
-  --graphite: #5B6675;
-  --rule: #C9D1DA;
-  --survey: #1D4E89;
+  --paper: #EDE5D8;         /* engraving paper, warm: the ground the surface is drawn on */
+  --plate: #FAF6EF;         /* plates mounted on the paper: figures, title blocks */
+  --ink: #241F1A;           /* sepia-black printing ink */
+  --graphite: #5C5246;
+  --rule: #D3C8B7;
+  --contour: #A39482;       /* the level sets of the background surface, in sepia */
+  /* Light: the optimiser is engraved in ink. Dark: it emits light. 0 or 1 */
+  --sx-glow: 0;
+  --sx-core-shadow: none;
+  --sx-ring-shadow: none;
+  /* Paper grain: fractal noise tinted brown, about 7% strong, tiled */
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .27 0 0 0 0 .17 0 0 0 .075 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --accent: #8C2F39;        /* oxblood: the optimiser's path, links, focus. Nothing else */
+  --survey: #1D4E89;        /* sequential-ramp endpoint and data highlights */
   --hazard: #A23B2A;
-  --line-accent: #6E5A5F;   /* generative line figures only */
   --ramp-1: #DCE6F0; --ramp-2: #A9C3DE; --ramp-3: #6E9CCB; --ramp-4: #3A6FAE; --ramp-5: #1D4E89;  /* sequential data only */
   --genus-1: #3D7A5B; --genus-2: #8A9A2B; --genus-3: #7A4E2D; --genus-4: #C08A1E;                 /* categorical: genus */
 
@@ -22,16 +30,22 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #141B24; --ink: #D3DAE3; --graphite: #8B96A5; --rule: #30363D;
-    --survey: #8FB8EC; --hazard: #F2766B; --line-accent: #B39CA1;
+    --paper: #17181B; --plate: #1F2024; --ink: #E3E3E5; --graphite: #A0A1A7; --rule: #303136;
+    --contour: #50525A; --accent: #E58A94;
+    --sx-glow: 1; --paper-grain: none;
+    --sx-core-shadow: 0 0 6px 1px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
+    --sx-ring-shadow: 0 0 10px color-mix(in srgb, var(--accent) 35%, transparent); --survey: #8FB8EC; --hazard: #F2766B;
     --ramp-1: #1A2A3D; --ramp-2: #24476E; --ramp-3: #3468A3; --ramp-4: #5A8FD0; --ramp-5: #8FB8EC;
     --genus-1: #6CBF94; --genus-2: #B9C95A; --genus-3: #C08A62; --genus-4: #E5B84B;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #141B24; --ink: #D3DAE3; --graphite: #8B96A5; --rule: #30363D;
-  --survey: #8FB8EC; --hazard: #F2766B; --line-accent: #B39CA1;
+  --paper: #17181B; --plate: #1F2024; --ink: #E3E3E5; --graphite: #A0A1A7; --rule: #303136;
+  --contour: #50525A; --accent: #E58A94;
+    --sx-glow: 1; --paper-grain: none;
+    --sx-core-shadow: 0 0 6px 1px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
+    --sx-ring-shadow: 0 0 10px color-mix(in srgb, var(--accent) 35%, transparent); --survey: #8FB8EC; --hazard: #F2766B;
   --ramp-1: #1A2A3D; --ramp-2: #24476E; --ramp-3: #3468A3; --ramp-4: #5A8FD0; --ramp-5: #8FB8EC;
   --genus-1: #6CBF94; --genus-2: #B9C95A; --genus-3: #C08A62; --genus-4: #E5B84B;
   color-scheme: dark;
@@ -42,17 +56,18 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--paper-grain) var(--paper);
   color: var(--ink);
   font: 400 18px/1.6 var(--serif);
   text-rendering: optimizeLegibility;
 }
-::selection { background: var(--survey); color: var(--paper); }
-a { color: var(--survey); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
-a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 2px solid var(--survey); outline-offset: 2px; border-radius: 1px; }
+::selection { background: var(--accent); color: var(--plate); }
+html { scrollbar-color: var(--contour) var(--paper); scrollbar-width: thin; caret-color: var(--accent); }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent); transition: text-decoration-color 200ms cubic-bezier(.16,1,.3,1); }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 1px; }
 p { margin: 0 0 1em; }
-h1, h2, h3 { font-weight: 600; text-wrap: balance; margin: 0; }
+h1, h2, h3 { font-weight: 500; text-wrap: balance; margin: 0; }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* ---------- Page grid: main column + margin column ---------- */
@@ -69,7 +84,129 @@ h1, h2, h3 { font-weight: 600; text-wrap: balance; margin: 0; }
 .note p { margin: 0 0 0.6em; }
 
 section { margin-top: 88px; }
-h2 { font-size: 24px; line-height: 1.3; margin-bottom: 24px; }
+h2 { font-size: 27px; line-height: 1.25; letter-spacing: -0.005em; margin-bottom: 24px; }
+
+/* ---------- The surface, behind the page (src/scripts/surface.ts) ----------
+   The host covers the whole document and clips; its canvases cover a window of it taller than the
+   screen and are scrolled by the browser itself. Glows, rings and labels are positioned in
+   document pixels and animated by CSS. */
+body { position: relative; }
+.surface-host { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; contain: strict; }
+.surface { position: absolute; left: 0; top: 0; display: block; will-change: transform; }
+.surface-probes { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.sx-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+
+/* The optimiser's head: a soft glow that breathes */
+.sx-head { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.sx-head::before, .sx-head::after { content: ""; position: absolute; border-radius: 50%; }
+.sx-head::before {
+  left: -70px; top: -70px; width: 140px; height: 140px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 34%, transparent) 0, color-mix(in srgb, var(--accent) 10%, transparent) 38%, transparent 70%);
+  opacity: var(--sx-glow);
+  animation: sx-pulse 2.8s cubic-bezier(.45,0,.55,1) infinite;
+}
+.sx-head::after {
+  left: -4px; top: -4px; width: 8px; height: 8px; background: var(--accent);
+  box-shadow: var(--sx-core-shadow);
+}
+@keyframes sx-pulse { 0%, 100% { transform: scale(.78); } 50% { transform: scale(1.12); } }
+
+/* On paper the head is a survey benchmark: a hairline ring around the point, and a second ring that
+   slowly spreads and fades, in place of the glow */
+.sx-mark { position: absolute; left: 0; top: 0; opacity: calc(1 - var(--sx-glow)); }
+.sx-mark::before, .sx-mark::after { content: ""; position: absolute; border-radius: 50%; border: 1px solid var(--accent); }
+.sx-mark::after { left: -9px; top: -9px; width: 18px; height: 18px; opacity: .55; }
+.sx-mark::before { left: -9px; top: -9px; width: 18px; height: 18px; animation: sx-spread 2.8s cubic-bezier(.16,1,.3,1) infinite; }
+@keyframes sx-spread { 0% { transform: scale(1); opacity: .5; } 100% { transform: scale(3.2); opacity: 0; } }
+
+/* A basin the optimiser has reached keeps a steady glow; arriving, or pointing at its project, rings it */
+.sx-basin { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.sx-basin::before {
+  content: ""; position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 26%, transparent) 0, transparent 68%);
+  opacity: 0; transform: scale(.6);
+  transition: opacity 900ms cubic-bezier(.16,1,.3,1), transform 900ms cubic-bezier(.16,1,.3,1);
+}
+.sx-basin.is-on::before { opacity: var(--sx-glow); transform: none; }
+/* On paper a reached minimum is marked as a summit is on a survey: two tight concentric hairlines */
+.sx-basin::after {
+  content: ""; position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%;
+  border: 1px solid var(--accent); outline: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 4px;
+  opacity: 0; transform: scale(.4);
+  transition: opacity 700ms cubic-bezier(.16,1,.3,1), transform 700ms cubic-bezier(.16,1,.3,1);
+}
+.sx-basin.is-on::after { opacity: calc(1 - var(--sx-glow)); transform: none; }
+.sx-ring {
+  position: absolute; left: -80px; top: -56px; width: 160px; height: 112px; border-radius: 50%;
+  border: 1px solid var(--accent); opacity: 0; transform: rotate(-17deg) scale(.12);
+  box-shadow: var(--sx-ring-shadow);
+}
+.sx-basin.is-ringing .sx-ring { animation: sx-ring 1.8s cubic-bezier(.16,1,.3,1) both; }
+.sx-basin.is-ringing .sx-ring:nth-child(2) { animation-delay: .2s; }
+.sx-basin.is-ringing .sx-ring:nth-child(3) { animation-delay: .4s; }
+@keyframes sx-ring { 0% { opacity: .7; transform: rotate(-17deg) scale(.12); } 100% { opacity: 0; transform: rotate(-17deg) scale(1); } }
+
+/* The update rules, written along the path as the optimiser passes them */
+.sx-label {
+  position: absolute; left: 0; top: 0; white-space: nowrap;
+  font: italic 400 15px/1.3 var(--serif); color: var(--graphite);
+  opacity: 0; filter: blur(4px);
+  transition: opacity 700ms cubic-bezier(.16,1,.3,1), filter 700ms cubic-bezier(.16,1,.3,1);
+}
+.sx-label i { font-style: italic; }
+.sx-label:not(.sx-algo) { font-style: normal; }
+.sx-label.is-on { opacity: 1; filter: none; }
+.sx-label sub { font-size: .72em; }
+.sx-sm { font-size: 13px; }
+.sx-min { font: 400 12px/1.3 var(--sans); font-variant-numeric: tabular-nums; }
+.sx-min i { font-family: var(--serif); font-size: 13px; }
+.sx-hop { color: color-mix(in srgb, var(--accent) 80%, var(--graphite)); }
+
+/* Algorithm 1, set as a paper sets one: rules above and below, numbered lines */
+.sx-algo {
+  white-space: normal; font: 400 13px/1.5 var(--serif); color: var(--ink);
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  padding: 0 0 6px;
+}
+.sx-algo-h { margin: 0 0 4px; padding: 4px 0 3px; border-bottom: 1px solid var(--rule); font-size: 13px; }
+.sx-algo ol { margin: 0; padding: 0 0 0 26px; font-variant-numeric: tabular-nums; }
+.sx-algo li { white-space: nowrap; }
+.sx-algo li::marker { font: 400 10px var(--sans); color: var(--graphite); }
+.sx-algo .in1 { padding-left: 14px; }
+.sx-algo .in2 { padding-left: 28px; }
+.sx-algo b { font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sx-head::before { animation: none; }
+  .sx-label { transition: none; filter: none; }
+  .sx-basin::before, .sx-basin::after { transition: none; }
+  .sx-mark::before { animation: none; opacity: 0; }
+}
+.surface-readout {
+  position: fixed; right: 20px; bottom: 16px; z-index: 1; margin: 0; pointer-events: none;
+  font: 400 12px/1.3 var(--sans); color: var(--graphite); font-variant-numeric: tabular-nums;
+  white-space: pre; background: color-mix(in srgb, var(--paper) 80%, transparent); padding: 3px 6px;
+}
+@media (max-width: 1099px) { .surface-readout { display: none; } }
+
+/* ---------- Transitions between pages: the project title travels; the rest settles ---------- */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 220ms cubic-bezier(.4,0,1,1) both vt-out; }
+::view-transition-new(root) { animation: 520ms cubic-bezier(.16,1,.3,1) 60ms both vt-in; }
+::view-transition-group(*) { animation-duration: 560ms; animation-timing-function: cubic-bezier(.16,1,.3,1); }
+@keyframes vt-out { to { opacity: 0; filter: blur(3px); } }
+/* The travelling title: the old text leaves fast, the new one is never scaled, so it never reads twice */
+::view-transition-old(title-geostats), ::view-transition-old(title-lattice), ::view-transition-old(title-sparsity) {
+  animation: 150ms cubic-bezier(.4,0,1,1) both vt-fade;
+}
+::view-transition-new(title-geostats), ::view-transition-new(title-lattice), ::view-transition-new(title-sparsity) {
+  animation: 360ms cubic-bezier(.16,1,.3,1) 60ms both vt-fade-in;
+  object-fit: none; object-position: left top; height: 100%; width: 100%;
+}
+@keyframes vt-fade { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(14px); filter: blur(4px); } }
 
 /* ---------- Summary ---------- */
 .summary { padding-top: 72px; }
@@ -95,11 +232,13 @@ math.tml-display { display: block math; width: 100%; }
   transition: background-color 160ms ease-out;
 }
 .eq .eqn { font: 400 14px/1 var(--sans); color: var(--graphite); font-variant-numeric: tabular-nums; }
-.eq.is-hl { background: color-mix(in srgb, var(--survey) 9%, transparent); }
+.eq.is-hl { background: color-mix(in srgb, var(--survey) 9%, var(--plate)); }
 .eq-label { font: 500 14px/1.45 var(--sans); color: var(--ink); margin: 18px 0 0; }
 
-/* ---------- Numbered figures ---------- */
+/* ---------- Numbered figures: plates mounted on the stock, so no level set runs behind data ---------- */
 .fig { margin: 0; }
+.fig-section .fig { background: var(--plate); border: 1px solid var(--rule); padding: 20px 20px 16px; }
+.data, .matrix-wrap { background: var(--plate); }
 .fig figcaption { margin-top: 12px; font: 400 14px/1.45 var(--sans); color: var(--graphite); max-width: 62ch; }
 .fig figcaption b { color: var(--ink); font-weight: 600; }
 
@@ -149,6 +288,7 @@ footer code { font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 
 /* ---------- Print: the page as a paper, margin notes as side notes ---------- */
@@ -156,7 +296,7 @@ footer code { font-size: 13px; }
 @media print {
   :root, :root[data-theme], :root:not([data-theme="light"]) {
     --paper: #FFFFFF !important; --ink: #000000 !important; --graphite: #444B55 !important;
-    --rule: #B8C0CA !important; --survey: #1D4E89 !important; --hazard: #A23B2A !important;
+    --rule: #B8C0CA !important; --survey: #1D4E89 !important; --plate: #FFFFFF !important; --accent: #8C2F39 !important; --paper-grain: none !important; --sx-glow: 0 !important; --hazard: #A23B2A !important;
     --ramp-1: #DCE6F0 !important; --ramp-2: #A9C3DE !important; --ramp-3: #6E9CCB !important;
     --ramp-4: #3A6FAE !important; --ramp-5: #1D4E89 !important;
     --genus-1: #3D7A5B !important; --genus-2: #8A9A2B !important; --genus-3: #7A4E2D !important; --genus-4: #C08A1E !important;
@@ -167,7 +307,7 @@ footer code { font-size: 13px; }
   .page { padding: 0; max-width: none; }
 
   /* Decoration and on-screen controls do not print */
-  canvas, .bg-canvas, .hero-canvas, .theme-btn, .running-head, .hero nav, .bar nav,
+  canvas, .surface-host, .surface-probes, .surface-readout, .theme-btn, .running-head, .hero nav, .bar nav,
   .hint, .scroll-hint, .readout, .years, .switch, .families, .legend .hint,
   astro-dev-toolbar { display: none !important; }
 

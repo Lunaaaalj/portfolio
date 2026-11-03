@@ -29,7 +29,7 @@ const abs = (path: string) => (Astro.site ? new URL(path, Astro.site).href : pat
     <meta property="og:image" content={abs('/og.png')} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Angel Eduardo Luna, applied mathematics and data science, Tecnológico de Monterrey, over a logarithmic spiral drawn by its tangent lines." />
+    <meta property="og:image:alt" content="Angel Eduardo Luna, applied mathematics and data science, Tecnológico de Monterrey, over a loss surface drawn by its level sets, with a gradient-descent path settling into a basin." />
     {Astro.site && <meta property="og:url" content={abs(Astro.url.pathname)} />}
     <meta name="twitter:card" content="summary_large_image" />
     <!-- Apply a stored theme before first paint, so there is no flash -->

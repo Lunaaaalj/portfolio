@@ -5,13 +5,14 @@ import FeaturedEntry from '../components/FeaturedEntry.astro';
 import MethodsMatrix from '../components/MethodsMatrix.astro';
 import FurtherWork from '../components/FurtherWork.astro';
 import RunningHead from '../components/RunningHead.astro';
+import Surface from '../components/Surface.astro';
 import { person, summary, featured, methods } from '../data/site';
 ---
 <Base title={person.name} description={summary.lead}>
   <Hero />
   <RunningHead title={person.name} after=".hero" />
 
-  <canvas class="bg-canvas" aria-hidden="true"></canvas>
+  <Surface start=".hero .start" basins=".hero, #summary, .entry, #methods, #further, #contact" anchor=".anchor > .note" algorithm />
 
   <main class="page">
     <div class="summary" id="summary">
@@ -60,7 +61,7 @@ import { person, summary, featured, methods } from '../data/site';
         </dl>
         <aside class="note colophon">
           <p><b>Colophon.</b> The figures are drawn when the site is built, from each project’s own data: the GeoStats grid, the competition matrix of the reforestation study and the Casa Monarca model specification.</p>
-          <p>The background lines are decorative: each curve is the envelope of straight lines (astroid, parabola, cardioid to nephroid, deltoid, circle). Set in STIX Two and IBM Plex.</p>
+          <p>The background is decorative. It is a synthetic loss surface, a tilted plane with a Gaussian well beside each section, drawn by its level sets; the dark red line is basin hopping on that surface, computed in the browser. Set in STIX Two and IBM Plex.</p>
         </aside>
       </div>
     </section>
@@ -72,24 +73,7 @@ import { person, summary, featured, methods } from '../data/site';
   </main>
 </Base>
 
-<script>
-  import { mountEnvelopes } from '../scripts/envelopes';
-
-  mountEnvelopes(
-    document.querySelector<HTMLCanvasElement>('.bg-canvas')!,
-    [
-      { selector: '#summary', kind: 'astroid' },
-      { selector: '#work', kind: 'parabola' },
-      { selector: '#methods', kind: 'times', m0: 2, m1: 3 },
-      { selector: '#further', kind: 'times', m0: -2, m1: -2, spin: Math.PI / 3 },
-      { selector: '#contact', kind: 'circle' },
-    ],
-    document.querySelector<HTMLElement>('.anchor > .note')!, // right edge of the margin column
-  );
-</script>
-
 <style>
-  .bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
   .entries { list-style: none; margin: 0; padding: 0; }
   .libs { margin-top: 20px; font: 400 14px/1.6 var(--sans); color: var(--graphite); }
   .libs b { color: var(--ink); font-weight: 500; }

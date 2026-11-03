@@ -17,7 +17,7 @@ const hint: Record<string, string> = {
 ---
 <li class="entry">
   <a href={entry.page}>
-    <h3><span>{entry.title}</span></h3>
+    <h3><span style={`view-transition-name: title-${entry.figure}`}>{entry.title}</span></h3>
     <figure class={`plate plate-${entry.figure}`} role="img" aria-label={entry.alt}>
       {entry.figure === 'geostats' && <HexMapFigure compact />}
       {entry.figure === 'lattice' && <MosaicFigure compact />}
@@ -85,17 +85,18 @@ const hint: Record<string, string> = {
   .entry:last-child > a { border-bottom: 1px solid var(--rule); }
   /* Skip rendering an entry, and its large figure, until it nears the viewport */
   .entry { content-visibility: auto; contain-intrinsic-size: auto 760px; }
-  h3 { grid-column: 1; font-size: 24px; line-height: 1.25; margin-bottom: 18px; }
+  h3 { grid-column: 1; font-size: 27px; line-height: 1.22; margin-bottom: 18px; }
   h3 span {
+    display: inline-block;
     text-decoration: underline; text-decoration-color: transparent;
     text-decoration-thickness: 1px; text-underline-offset: 0.18em;
-    transition: text-decoration-color 160ms ease-out;
+    transition: text-decoration-color 240ms cubic-bezier(.16,1,.3,1);
   }
   .plate {
     grid-column: 1; grid-row: 2; position: relative;
     margin: 0;
-    border: 1px solid var(--rule); background: var(--paper);
-    transition: border-color 160ms ease-out;
+    border: 1px solid var(--rule); background: var(--plate);
+    transition: border-color 240ms cubic-bezier(.16,1,.3,1);
   }
   /* Each plate takes its figure's proportions, so the figure fills it at every width */
   .plate-geostats { aspect-ratio: 1.15; max-height: 520px; }
@@ -107,15 +108,15 @@ const hint: Record<string, string> = {
   .plate :global(.tag) {
     position: absolute; right: -12px; bottom: -26px;
     font: 400 13px/1.3 var(--sans); color: var(--graphite); font-variant-numeric: tabular-nums;
-    background: var(--paper); padding: 2px 4px;
+    background: var(--plate); padding: 2px 4px;
   }
   .tb { grid-column: 2; grid-row: 2; }
   .text { grid-column: 1; grid-row: 3; }
   .hint { margin: 10px 0 0; font: 400 13px/1.45 var(--sans); color: var(--graphite); }
   p { margin: 14px 0 0; max-width: 60ch; }
   .method { color: var(--graphite); font: 400 14px/1.5 var(--sans); margin-top: 8px; max-width: 64ch; }
-  a:hover .plate, a:focus-visible .plate { border-color: var(--survey); }
-  a:hover h3 span, a:focus-visible h3 span { text-decoration-color: var(--survey); }
+  a:hover .plate, a:focus-visible .plate { border-color: var(--accent); }
+  a:hover h3 span, a:focus-visible h3 span { text-decoration-color: var(--accent); }
   a:focus-visible { outline-offset: 6px; }
 
   /* Reduced title block: a column of drawing-sheet cells; 1px gaps over the rule colour draw the dividers */
@@ -125,7 +126,7 @@ const hint: Record<string, string> = {
     border: 1px solid var(--rule); background: var(--rule);
     display: grid; gap: 1px;
   }
-  .tb div { padding: 7px 12px 8px; background: var(--paper); min-width: 0; }
+  .tb div { padding: 7px 12px 8px; background: var(--plate); min-width: 0; }
   dt { color: var(--graphite); font-size: 12px; }
   dd { margin: 1px 0 0; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
   .num { font-variant-numeric: tabular-nums; }
@@ -140,8 +141,9 @@ const hint: Record<string, string> = {
     h3 { font-size: 21px; }
     .plate :global(.preview) { inset: 10px 10px 24px; }
     /* The tile is too wide to read at phone width: show its left part at a legible size */
-    .plate-lattice { aspect-ratio: 1.5; overflow: hidden; }
-    .plate-lattice :global(.preview svg) { width: 210%; }
+    .plate-lattice { aspect-ratio: auto; overflow: hidden; }
+    .plate-lattice :global(.preview) { position: relative; inset: auto; padding: 10px 10px 28px; }
+    .plate-lattice :global(.preview svg) { width: 170%; height: auto; }
     .hint { display: none; }
     .tb div { flex-basis: 40%; }
   }

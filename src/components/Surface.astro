@@ -1,0 +1,37 @@
+---
+// The background surface and its optimiser (src/scripts/surface.ts), behind the whole page.
+// start: the element the path starts beside; basins: one well per matching element, in order;
+// anchor: the element whose right edge is the right edge of the text; startAt: see surface.ts;
+// algorithm: set the algorithm box beside the second basin.
+interface Props { start: string; basins: string; anchor: string; startAt?: 'beside' | 'edge'; algorithm?: boolean }
+const { start, basins, anchor, startAt = 'beside', algorithm = false } = Astro.props;
+---
+<div class="surface-host" data-start={start} data-basins={basins} data-anchor={anchor} data-start-at={startAt} data-algorithm={algorithm ? '1' : undefined} aria-hidden="true">
+  <canvas class="surface surface-field"></canvas>
+  <canvas class="surface surface-ink"></canvas>
+</div>
+<canvas class="surface-probes" aria-hidden="true"></canvas>
+<p class="surface-readout" aria-hidden="true"></p>
+
+<script>
+  import { mountSurface } from '../scripts/surface';
+
+  const host = document.querySelector<HTMLElement>('.surface-host')!;
+  const q = (s: string) => document.querySelector<HTMLElement>(s);
+  const start = q(host.dataset.start!), anchor = q(host.dataset.anchor!);
+  const basins = [...document.querySelectorAll<HTMLElement>(host.dataset.basins!)];
+  // Each page has its own surface: the seed is the page's path
+  let seed = 7;
+  for (const c of location.pathname) seed = (seed * 31 + c.charCodeAt(0)) % 2147483647;
+  if (start && anchor && basins.length) {
+    mountSurface({
+      host, start, basins, anchor, seed,
+      field: host.querySelector<HTMLCanvasElement>('.surface-field')!,
+      ink: host.querySelector<HTMLCanvasElement>('.surface-ink')!,
+      probes: document.querySelector<HTMLCanvasElement>('.surface-probes')!,
+      readout: document.querySelector<HTMLElement>('.surface-readout'),
+      startAt: host.dataset.startAt as 'beside' | 'edge',
+      algorithm: host.dataset.algorithm === '1',
+    });
+  }
+</script>

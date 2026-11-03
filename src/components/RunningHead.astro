@@ -39,7 +39,8 @@ const { title, after } = Astro.props;
     left: calc(var(--inset) + var(--main) + var(--gap));
     width: var(--margin);
     padding: 18px 0 10px;
-    background: var(--paper);
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--rule);
     font: 400 13px/1.4 var(--sans); color: var(--graphite);
     opacity: 0; transform: translateY(-6px); pointer-events: none;
@@ -47,7 +48,7 @@ const { title, after } = Astro.props;
   }
   .running-head.is-shown { opacity: 1; transform: none; pointer-events: auto; }
   a { display: block; color: var(--ink); font-weight: 500; text-decoration: none; }
-  a:hover { color: var(--survey); }
+  a:hover { color: var(--accent); }
   .current { display: block; min-height: 1.4em; }
   @media (max-width: 1099px) { .running-head { display: none; } }
   @media (prefers-reduced-motion: reduce) { .running-head { transition: none; } }

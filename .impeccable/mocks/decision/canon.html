@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Category standard — sketch</title>
+<style>
+  *{box-sizing:border-box;margin:0}
+  html,body{width:1440px;height:900px;overflow:hidden;background:#0B0F17;color:#E6EDF3;font-family:"Helvetica Neue",Arial,sans-serif}
+  svg{position:absolute;inset:0;width:1440px;height:900px}
+  nav{position:absolute;left:96px;right:96px;top:36px;display:flex;justify-content:space-between;font-size:15px;color:#9aa4b2}
+  h1{position:absolute;left:96px;top:200px;font-size:80px;line-height:84px;font-weight:700;letter-spacing:-0.02em;width:760px}
+  h1 span{background:linear-gradient(90deg,#7C5CFF,#22D3EE);-webkit-background-clip:text;color:transparent}
+  .sub{position:absolute;left:96px;top:390px;font-size:21px;color:#9aa4b2;width:600px}
+  .btn{position:absolute;left:96px;top:460px;padding:14px 24px;border-radius:10px;background:#7C5CFF;font-size:16px}
+  .cards{position:absolute;left:96px;right:96px;top:600px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .card{height:220px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);padding:24px}
+  .card h2{font-size:22px;margin-bottom:10px}.card p{font-size:15px;color:#9aa4b2}
+</style></head><body>
+<svg id="s"></svg>
+<nav><span>AEL</span><span>Work · About · Contact</span></nav>
+<h1>Angel Eduardo Luna <span>Data scientist</span></h1>
+<p class="sub">Applied mathematics and data science, Tecnológico de Monterrey.</p>
+<div class="btn">View projects</div>
+<div class="cards">
+  <div class="card"><h2>GeoStats</h2><p>Where traffic risk concentrates in Monterrey.</p></div>
+  <div class="card"><h2>Stochastic_RefInit</h2><p>Reforestation planning under survival uncertainty.</p></div>
+  <div class="card"><h2>Casa Monarca</h2><p>Food purchasing for a migrant shelter.</p></div>
+</div>
+<script>
+const s=document.getElementById('s');let h='';const P=[];let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+for(let i=0;i<70;i++)P.push([760+rnd()*680,40+rnd()*520]);
+P.forEach((a,i)=>P.forEach((b,j)=>{if(j>i&&Math.hypot(a[0]-b[0],a[1]-b[1])<120)h+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#22D3EE" stroke-opacity=".18"/>`}));
+P.forEach(a=>h+=`<circle cx="${a[0]}" cy="${a[1]}" r="3" fill="#7C5CFF"/>`);s.innerHTML=h;
+</script>
+</body></html>

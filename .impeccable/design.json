@@ -1,0 +1,878 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T14:31:47+00:00",
+  "title": "Design System: Angel Eduardo Luna, portfolio",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Engraving Stock",
+        "canonical": "#EDE5D8",
+        "oklch": "oklch(92.5% 0.019 80.1)",
+        "tonalRamp": [
+          "#0F0A03",
+          "#292319",
+          "#453F34",
+          "#635D51",
+          "#837C71",
+          "#A59D91",
+          "#CBC3B6",
+          "#F5EDE0"
+        ]
+      },
+      "plate": {
+        "role": "neutral",
+        "displayName": "Plate White",
+        "canonical": "#FAF6EF",
+        "oklch": "oklch(97.4% 0.010 81.8)",
+        "tonalRamp": [
+          "#0D0B07",
+          "#26241F",
+          "#423F3A",
+          "#605D57",
+          "#807D77",
+          "#A29E97",
+          "#C7C4BD",
+          "#F2EEE7"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#241F1A",
+        "oklch": "oklch(24.3% 0.012 67.2)",
+        "tonalRamp": [
+          "#0F0A06",
+          "#28231E",
+          "#443F39",
+          "#625C57",
+          "#827C76",
+          "#A49D97",
+          "#CAC3BC",
+          "#F4EDE6"
+        ]
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "#5C5246",
+        "oklch": "oklch(44.5% 0.023 72.2)",
+        "tonalRamp": [
+          "#110902",
+          "#2B2218",
+          "#483E32",
+          "#665C50",
+          "#867B6F",
+          "#A89C8F",
+          "#CEC2B4",
+          "#F9ECDE"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#D3C8B7",
+        "oklch": "oklch(83.7% 0.026 78.9)",
+        "tonalRamp": [
+          "#110A01",
+          "#2B2315",
+          "#473E30",
+          "#665C4D",
+          "#867C6C",
+          "#A79D8D",
+          "#CDC3B2",
+          "#F8EDDB"
+        ]
+      },
+      "contour": {
+        "role": "neutral",
+        "displayName": "Contour Blue-Grey",
+        "canonical": "#A39482",
+        "oklch": "oklch(67.5% 0.031 72.3)",
+        "tonalRamp": [
+          "#130900",
+          "#2D2213",
+          "#4A3D2D",
+          "#695B4A",
+          "#897B69",
+          "#AB9C8A",
+          "#D1C1AF",
+          "#FCECD8"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Oxblood",
+        "canonical": "#8C2F39",
+        "oklch": "oklch(44.5% 0.126 17.6)",
+        "tonalRamp": [
+          "#260000",
+          "#4B0010",
+          "#711C27",
+          "#983A42",
+          "#BC5A61",
+          "#E07D82",
+          "#FFA7AA",
+          "#FFD6D8"
+        ]
+      },
+      "survey": {
+        "role": "secondary",
+        "displayName": "Survey Blue",
+        "canonical": "#1D4E89",
+        "oklch": "oklch(42.3% 0.111 255.1)",
+        "tonalRamp": [
+          "#000530",
+          "#002155",
+          "#0B3F79",
+          "#2E5E9B",
+          "#4D7FBE",
+          "#6EA1E2",
+          "#94C7FF",
+          "#C5F2FF"
+        ]
+      },
+      "hazard": {
+        "role": "tertiary",
+        "displayName": "Hazard Red",
+        "canonical": "#A23B2A",
+        "oklch": "oklch(49.5% 0.140 31.7)",
+        "tonalRamp": [
+          "#270000",
+          "#4B0200",
+          "#711F11",
+          "#9A3A2A",
+          "#C05A48",
+          "#E0806E",
+          "#FFAA99",
+          "#FFD8C8"
+        ]
+      },
+      "ramp-1": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 1",
+        "canonical": "#DCE6F0",
+        "oklch": "oklch(92.0% 0.017 248.0)",
+        "tonalRamp": [
+          "#060C12",
+          "#1D252C",
+          "#394149",
+          "#565F67",
+          "#757E87",
+          "#96A0A9",
+          "#BCC5CF",
+          "#E6F0FA"
+        ]
+      },
+      "ramp-2": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 2",
+        "canonical": "#A9C3DE",
+        "oklch": "oklch(80.7% 0.048 249.4)",
+        "tonalRamp": [
+          "#000B1E",
+          "#10253A",
+          "#2C4258",
+          "#496078",
+          "#688099",
+          "#88A1BB",
+          "#ADC7E2",
+          "#D7F2FF"
+        ]
+      },
+      "ramp-3": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 3",
+        "canonical": "#6E9CCB",
+        "oklch": "oklch(67.8% 0.086 249.7)",
+        "tonalRamp": [
+          "#00082D",
+          "#00244B",
+          "#15426B",
+          "#35618C",
+          "#5481AF",
+          "#75A3D2",
+          "#99C9FA",
+          "#C3F4FF"
+        ]
+      },
+      "ramp-4": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 4",
+        "canonical": "#3A6FAE",
+        "oklch": "oklch(53.5% 0.115 254.1)",
+        "tonalRamp": [
+          "#000530",
+          "#002155",
+          "#043F7A",
+          "#2A5F9C",
+          "#4A7FC0",
+          "#6BA1E4",
+          "#93C8FF",
+          "#C4F2FF"
+        ]
+      },
+      "ramp-5": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 5",
+        "canonical": "#1D4E89",
+        "oklch": "oklch(42.3% 0.111 255.1)",
+        "tonalRamp": [
+          "#000530",
+          "#002155",
+          "#0B3F79",
+          "#2E5E9B",
+          "#4D7FBE",
+          "#6EA1E2",
+          "#94C7FF",
+          "#C5F2FF"
+        ]
+      },
+      "genus-1": {
+        "role": "tertiary",
+        "displayName": "Genus 1 (Agave)",
+        "canonical": "#3D7A5B",
+        "oklch": "oklch(52.9% 0.081 159.7)",
+        "tonalRamp": [
+          "#001401",
+          "#002F15",
+          "#064C30",
+          "#2E6C4D",
+          "#4F8C6C",
+          "#71AE8D",
+          "#96D5B2",
+          "#C0FFDC"
+        ]
+      },
+      "genus-2": {
+        "role": "tertiary",
+        "displayName": "Genus 2 (Opuntia)",
+        "canonical": "#8A9A2B",
+        "oklch": "oklch(65.2% 0.134 117.4)",
+        "tonalRamp": [
+          "#0A0E00",
+          "#212900",
+          "#3C4600",
+          "#596600",
+          "#78870B",
+          "#99A849",
+          "#BECE7B",
+          "#E9F7B1"
+        ]
+      },
+      "genus-3": {
+        "role": "tertiary",
+        "displayName": "Genus 3 (Prosopis)",
+        "canonical": "#7A4E2D",
+        "oklch": "oklch(46.6% 0.076 56.4)",
+        "tonalRamp": [
+          "#200000",
+          "#3E1700",
+          "#5D3411",
+          "#7E5231",
+          "#A07150",
+          "#C39370",
+          "#EBB894",
+          "#FFE2BE"
+        ]
+      },
+      "genus-4": {
+        "role": "tertiary",
+        "displayName": "Genus 4 (Yucca)",
+        "canonical": "#C08A1E",
+        "oklch": "oklch(67.0% 0.131 78.8)",
+        "tonalRamp": [
+          "#1E0200",
+          "#3E1900",
+          "#603400",
+          "#845100",
+          "#A67200",
+          "#C79439",
+          "#EABC70",
+          "#FFE8A8"
+        ]
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "Deep Slate Stock (dark theme)",
+        "canonical": "#17181B",
+        "oklch": "oklch(20.9% 0.006 271.1)",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#232427",
+          "#3E4043",
+          "#5C5D61",
+          "#7C7D81",
+          "#9D9EA2",
+          "#C2C4C8",
+          "#EDEEF3"
+        ]
+      },
+      "plate-dark": {
+        "role": "neutral",
+        "displayName": "Plate White (dark theme)",
+        "canonical": "#1F2024",
+        "oklch": "oklch(24.4% 0.008 274.6)",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#232428",
+          "#3E3F44",
+          "#5C5D62",
+          "#7C7D82",
+          "#9D9EA3",
+          "#C2C4C9",
+          "#EDEEF4"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Ink (dark theme)",
+        "canonical": "#E3E3E5",
+        "oklch": "oklch(91.6% 0.003 286.3)",
+        "tonalRamp": [
+          "#0B0B0C",
+          "#242425",
+          "#3F3F41",
+          "#5D5D5F",
+          "#7D7D7F",
+          "#9E9EA0",
+          "#C4C4C6",
+          "#EEEEF0"
+        ]
+      },
+      "graphite-dark": {
+        "role": "neutral",
+        "displayName": "Graphite (dark theme)",
+        "canonical": "#A0A1A7",
+        "oklch": "oklch(71.0% 0.009 278.6)",
+        "tonalRamp": [
+          "#0A0B0F",
+          "#232428",
+          "#3E3F44",
+          "#5C5D63",
+          "#7C7D83",
+          "#9D9EA4",
+          "#C3C4CA",
+          "#EDEEF4"
+        ]
+      },
+      "rule-dark": {
+        "role": "neutral",
+        "displayName": "Rule (dark theme)",
+        "canonical": "#303136",
+        "oklch": "oklch(31.4% 0.009 276.8)",
+        "tonalRamp": [
+          "#0A0B0F",
+          "#232428",
+          "#3E3F45",
+          "#5C5D63",
+          "#7C7D83",
+          "#9D9EA4",
+          "#C2C4CA",
+          "#EDEEF5"
+        ]
+      },
+      "contour-dark": {
+        "role": "neutral",
+        "displayName": "Contour Blue-Grey (dark theme)",
+        "canonical": "#50525A",
+        "oklch": "oklch(44.0% 0.013 274.6)",
+        "tonalRamp": [
+          "#090B11",
+          "#22242B",
+          "#3D3F47",
+          "#5B5D65",
+          "#7B7D85",
+          "#9C9EA7",
+          "#C1C4CD",
+          "#ECEEF8"
+        ]
+      },
+      "accent-dark": {
+        "role": "primary",
+        "displayName": "Muted Rose (dark-theme oxblood)",
+        "canonical": "#E58A94",
+        "oklch": "oklch(73.2% 0.111 13.1)",
+        "tonalRamp": [
+          "#260002",
+          "#4A0015",
+          "#6E1F2E",
+          "#913F4B",
+          "#B55F6A",
+          "#DA808A",
+          "#FFA7B0",
+          "#FFD6DD"
+        ]
+      },
+      "survey-dark": {
+        "role": "secondary",
+        "displayName": "Survey Blue (dark theme)",
+        "canonical": "#8FB8EC",
+        "oklch": "oklch(77.2% 0.087 254.7)",
+        "tonalRamp": [
+          "#00062E",
+          "#00234D",
+          "#1C406C",
+          "#3A5F8E",
+          "#5980B0",
+          "#79A1D4",
+          "#9EC7FC",
+          "#C7F2FF"
+        ]
+      },
+      "hazard-dark": {
+        "role": "tertiary",
+        "displayName": "Hazard Red (dark theme)",
+        "canonical": "#F2766B",
+        "oklch": "oklch(70.8% 0.155 26.9)",
+        "tonalRamp": [
+          "#270000",
+          "#4B0003",
+          "#711D1A",
+          "#9A3933",
+          "#C05950",
+          "#E07F75",
+          "#FFA99F",
+          "#FFD7CD"
+        ]
+      },
+      "ramp-1-dark": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 1 (dark theme)",
+        "canonical": "#1A2A3D",
+        "oklch": "oklch(28.0% 0.041 253.4)",
+        "tonalRamp": [
+          "#010B1C",
+          "#152538",
+          "#304155",
+          "#4D5F75",
+          "#6C7F96",
+          "#8DA0B8",
+          "#B2C6DF",
+          "#DCF1FF"
+        ]
+      },
+      "ramp-2-dark": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 2 (dark theme)",
+        "canonical": "#24476E",
+        "oklch": "oklch(39.1% 0.078 252.6)",
+        "tonalRamp": [
+          "#00082A",
+          "#012448",
+          "#1E4168",
+          "#3C6089",
+          "#5B80AB",
+          "#7BA2CE",
+          "#A0C8F6",
+          "#CAF3FF"
+        ]
+      },
+      "ramp-3-dark": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 3 (dark theme)",
+        "canonical": "#3468A3",
+        "oklch": "oklch(51.0% 0.110 253.2)",
+        "tonalRamp": [
+          "#000630",
+          "#002254",
+          "#064077",
+          "#2B5F99",
+          "#4B80BD",
+          "#6CA2E1",
+          "#92C8FF",
+          "#C3F3FF"
+        ]
+      },
+      "ramp-4-dark": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 4 (dark theme)",
+        "canonical": "#5A8FD0",
+        "oklch": "oklch(64.1% 0.113 254.3)",
+        "tonalRamp": [
+          "#000530",
+          "#002155",
+          "#063F79",
+          "#2B5F9C",
+          "#4B7FBF",
+          "#6CA1E4",
+          "#93C8FF",
+          "#C4F2FF"
+        ]
+      },
+      "ramp-5-dark": {
+        "role": "secondary",
+        "displayName": "Sequential Ramp 5 (dark theme)",
+        "canonical": "#8FB8EC",
+        "oklch": "oklch(77.2% 0.087 254.7)",
+        "tonalRamp": [
+          "#00062E",
+          "#00234D",
+          "#1C406C",
+          "#3A5F8E",
+          "#5980B0",
+          "#79A1D4",
+          "#9EC7FC",
+          "#C7F2FF"
+        ]
+      },
+      "genus-1-dark": {
+        "role": "tertiary",
+        "displayName": "Genus 1 (Agave) (dark theme)",
+        "canonical": "#6CBF94",
+        "oklch": "oklch(74.0% 0.104 159.8)",
+        "tonalRamp": [
+          "#001400",
+          "#003110",
+          "#004F2B",
+          "#106F49",
+          "#3C9067",
+          "#5FB288",
+          "#86D9AD",
+          "#B8FFD9"
+        ]
+      },
+      "genus-2-dark": {
+        "role": "tertiary",
+        "displayName": "Genus 2 (Opuntia) (dark theme)",
+        "canonical": "#B9C95A",
+        "oklch": "oklch(80.1% 0.137 116.4)",
+        "tonalRamp": [
+          "#0B0D00",
+          "#222800",
+          "#3D4600",
+          "#5A6500",
+          "#798601",
+          "#9AA848",
+          "#C0CD7B",
+          "#EAF7B0"
+        ]
+      },
+      "genus-3-dark": {
+        "role": "tertiary",
+        "displayName": "Genus 3 (Prosopis) (dark theme)",
+        "canonical": "#C08A62",
+        "oklch": "oklch(67.7% 0.086 57.2)",
+        "tonalRamp": [
+          "#220000",
+          "#411500",
+          "#613205",
+          "#825029",
+          "#A47048",
+          "#C79169",
+          "#EFB68D",
+          "#FFE1B6"
+        ]
+      },
+      "genus-4-dark": {
+        "role": "tertiary",
+        "displayName": "Genus 4 (Yucca) (dark theme)",
+        "canonical": "#E5B84B",
+        "oklch": "oklch(80.3% 0.135 86.2)",
+        "tonalRamp": [
+          "#1B0400",
+          "#3A1C00",
+          "#5B3800",
+          "#7E5600",
+          "#A07600",
+          "#C09837",
+          "#E3BF6F",
+          "#FFEBA7"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The name on the home title screen only."
+      },
+      "display-role": {
+        "displayName": "Display role",
+        "purpose": "The italic role line beneath the name."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Project title on a featured page; 30px on phones."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings and featured-entry titles."
+      },
+      "subtitle": {
+        "displayName": "Subtitle",
+        "purpose": "Subsection headings in running prose."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Home summary and project abstracts; 19px on phones."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text, about 66 characters per line; 17px on phones."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Margin notes, captions, navigation, tables."
+      },
+      "title-block": {
+        "displayName": "Title block",
+        "purpose": "Plex Sans Condensed, inside title blocks only."
+      },
+      "caption-small": {
+        "displayName": "Small caption",
+        "purpose": "Title-screen caption and figure hints."
+      },
+      "readout": {
+        "displayName": "Readout",
+        "purpose": "The optimiser readout: step and f, tabular figures."
+      },
+      "math": {
+        "displayName": "Mathematics",
+        "purpose": "MathML from Temml, set in the complete STIX Two Math."
+      }
+    },
+    "shadows": [
+      {
+        "name": "none",
+        "value": "none",
+        "purpose": "The system is flat. Depth is stock versus mounted plate (1px rule frame) and the CSS mask that quietens the field behind text."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-arrive",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Exponential ease-out for everything that arrives: hovers, settles, view-transition entry."
+      },
+      {
+        "name": "ease-leave",
+        "value": "cubic-bezier(.4,0,1,1)",
+        "purpose": "Quick ease-in for what leaves: the outgoing page and title."
+      },
+      {
+        "name": "engraving-reveal",
+        "value": "1.5s",
+        "purpose": "Contours spread from the path start, once per session."
+      },
+      {
+        "name": "title-settle",
+        "value": "1100ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Name, role and affiliation sharpen from a slight blur (delays 140ms, 240ms)."
+      },
+      {
+        "name": "abstract-settle",
+        "value": "900ms cubic-bezier(.16,1,.3,1) 120ms",
+        "purpose": "Project abstract settles under the travelling title."
+      },
+      {
+        "name": "vt-out",
+        "value": "220ms cubic-bezier(.4,0,1,1)",
+        "purpose": "Old page fades and blurs out (3px)."
+      },
+      {
+        "name": "vt-in",
+        "value": "520ms cubic-bezier(.16,1,.3,1) 60ms",
+        "purpose": "New page rises 14px from a 4px blur."
+      },
+      {
+        "name": "vt-group",
+        "value": "560ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Travelling project title between home entry and page."
+      },
+      {
+        "name": "settling-ring",
+        "value": "1800ms",
+        "purpose": "Three oxblood ellipses spread from a basin as the head arrives or an entry is pointed at."
+      },
+      {
+        "name": "probe",
+        "value": "grow 0.9s, fade to 2.6s",
+        "purpose": "Graphite descent from the pointer."
+      },
+      {
+        "name": "breathing",
+        "value": "30fps",
+        "purpose": "Slow ripple of the surface, only while the tab is visible."
+      },
+      {
+        "name": "hover",
+        "value": "240ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Entry plate frame and title underline turning oxblood; links 200ms."
+      },
+      {
+        "name": "figure-crossfade",
+        "value": "200ms",
+        "purpose": "Lattice assignment and hex-map year changes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "margin-inline",
+        "value": "1099px",
+        "purpose": "At and below: margin notes inline, running head and readout hidden."
+      },
+      {
+        "name": "hero-narrow",
+        "value": "760px",
+        "purpose": "Title screen name 44-64px, title anchored low."
+      },
+      {
+        "name": "phone",
+        "value": "640px",
+        "purpose": "Body 17px, sections 72px apart, nav on one row with theme switch below."
+      },
+      {
+        "name": "small-phone",
+        "value": "374px",
+        "purpose": "Tighter nav gaps at 13px."
+      }
+    ],
+    "surface": {
+      "source": "src/scripts/surface.ts",
+      "levelSpacing": 0.07,
+      "tilt": "1 per 1400px down the page",
+      "indexContourEvery": 5,
+      "lineWidths": {
+        "level": "0.8px",
+        "index": "1.25px",
+        "path": "2px (1.2px narrow)"
+      },
+      "descent": {
+        "step": 3600,
+        "momentum": 0.9,
+        "maxSpeed": "6px/step"
+      },
+      "maxGaussiansPerFrame": 48,
+      "maxDpr": 1.5,
+      "fieldQuiet": "mask to 0.34 behind text (0.3 narrow), full strength beyond the margin column",
+      "readingLine": "62% of viewport height",
+      "fallback": "marching squares on 2D canvas without WebGL2"
+    }
+  },
+  "components": [
+    {
+      "name": "Text link",
+      "kind": "custom",
+      "refersTo": "link",
+      "description": "Oxblood link with a 45% underline that firms on hover.",
+      "html": "<p class=\"ds-p\">The model is in the <a class=\"ds-link\" href=\"#\">Repository</a> and the <a class=\"ds-link\" href=\"#\">Report (PDF)</a>.</p>",
+      "css": ".ds-p{font:400 18px/1.6 var(--serif,\"STIX Two Text\",Georgia,serif);color:var(--ink,#1B2430);margin:0}.ds-link{color:var(--accent,#8C2F39);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em;text-decoration-color:color-mix(in srgb,var(--accent,#8C2F39) 45%,transparent);transition:text-decoration-color 200ms cubic-bezier(.16,1,.3,1)}.ds-link:hover{text-decoration-color:currentColor}.ds-link:focus-visible{outline:2px solid var(--accent,#8C2F39);outline-offset:2px;border-radius:1px}"
+    },
+    {
+      "name": "Section navigation",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Title-screen section links and the theme switch, Plex 14px graphite.",
+      "html": "<div class=\"ds-top\"><nav class=\"ds-nav\"><a href=\"#\">Selected work</a><a href=\"#\">Methods</a><a href=\"#\">Further work</a><a href=\"#\">Contact</a></nav><button class=\"ds-theme\" type=\"button\">Dark theme</button></div>",
+      "css": ".ds-top{display:flex;justify-content:space-between;align-items:baseline;gap:24px;font:400 14px/1.45 var(--sans,\"IBM Plex Sans\",system-ui,sans-serif);color:var(--graphite,#56606D)}.ds-nav{display:flex;flex-wrap:wrap;gap:4px 24px}.ds-nav a{color:var(--graphite,#56606D);text-decoration:none}.ds-nav a:hover{color:var(--ink,#1B2430)}.ds-nav a:focus-visible,.ds-theme:focus-visible{outline:2px solid var(--accent,#8C2F39);outline-offset:2px;border-radius:1px}.ds-theme{font:inherit;color:var(--graphite,#56606D);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--rule,#C9D1DA);text-underline-offset:.25em}.ds-theme:hover{color:var(--ink,#1B2430);text-decoration-color:currentColor}"
+    },
+    {
+      "name": "Switch (radio options)",
+      "kind": "chip",
+      "refersTo": "switch-option",
+      "description": "Native radio buttons styled as small square options; checked is ink.",
+      "html": "<fieldset class=\"ds-switch\"><label><input type=\"radio\" name=\"ds-a\" checked><span>Random</span></label><label><input type=\"radio\" name=\"ds-a\"><span>Competition-aware</span></label></fieldset>",
+      "css": ".ds-switch{border:0;margin:0;padding:0;display:flex;gap:6px;font:400 14px/1.45 var(--sans,\"IBM Plex Sans\",system-ui,sans-serif)}.ds-switch label{position:relative}.ds-switch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}.ds-switch span{display:inline-block;padding:3px 8px;border:1px solid var(--rule,#C9D1DA);border-radius:2px;color:var(--ink,#1B2430)}.ds-switch input:checked+span{background:var(--ink,#1B2430);border-color:var(--ink,#1B2430);color:var(--paper,#F4F6F8)}.ds-switch label:hover span{border-color:var(--graphite,#56606D)}.ds-switch input:focus-visible+span{outline:2px solid var(--accent,#8C2F39);outline-offset:2px}"
+    },
+    {
+      "name": "Figure plate",
+      "kind": "card",
+      "refersTo": "plate",
+      "description": "White plate mounted on the stock for a numbered figure, with its caption.",
+      "html": "<figure class=\"ds-fig\"><div class=\"ds-fig-body\"></div><figcaption><b>Fig. 1.</b> Collisions per hexagonal cell, 2024. Source: the project’s geocoded records.</figcaption></figure>",
+      "css": ".ds-fig{margin:0;background:var(--plate,#FFFFFF);border:1px solid var(--rule,#C9D1DA);padding:20px 20px 16px}.ds-fig-body{height:160px;background:linear-gradient(var(--ramp-1,#DCE6F0),var(--ramp-1,#DCE6F0))}.ds-fig figcaption{margin-top:12px;font:400 14px/1.45 var(--sans,\"IBM Plex Sans\",system-ui,sans-serif);color:var(--graphite,#56606D);max-width:62ch}.ds-fig figcaption b{color:var(--ink,#1B2430);font-weight:600}"
+    },
+    {
+      "name": "Title block",
+      "kind": "custom",
+      "refersTo": "title-block-cell",
+      "description": "Drawing-sheet title block opening each featured page; 1px gaps over the rule colour draw the dividers.",
+      "html": "<dl class=\"ds-tb\"><div><dt>Project</dt><dd>Food purchasing for a migrant shelter<span>Optimizacion-de-recursos</span></dd></div><div><dt>Partner and place</dt><dd>Casa Monarca<span>Santa Catarina, Nuevo León</span></dd></div><div><dt>Coordinates</dt><dd>25.67° N<span>100.46° W</span></dd></div><div><dt>Sheet</dt><dd>3 of 3<span>2026</span></dd></div></dl>",
+      "css": ".ds-tb{margin:0;display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr;gap:1px;background:var(--rule,#C9D1DA);border:1px solid var(--rule,#C9D1DA);font:400 14px/1.4 var(--cond,\"IBM Plex Sans Condensed\",\"IBM Plex Sans\",system-ui,sans-serif)}.ds-tb>div{background:var(--plate,#FFFFFF);padding:8px 12px 10px;min-width:0}.ds-tb dt{font-size:12px;color:var(--graphite,#56606D)}.ds-tb dd{margin:2px 0 0;font-weight:500;color:var(--ink,#1B2430)}.ds-tb dd span{display:block;font-weight:400;color:var(--graphite,#56606D)}"
+    },
+    {
+      "name": "Featured entry",
+      "kind": "card",
+      "refersTo": "plate",
+      "description": "Home-page entry: title, figure plate and text, divided by rules, not a card; hover turns the frame and underline oxblood.",
+      "html": "<a class=\"ds-entry\" href=\"#\"><h3><span>GeoStats</span></h3><div class=\"ds-entry-plate\"></div><p>Where traffic risk concentrates in Monterrey.</p></a>",
+      "css": ".ds-entry{display:block;color:inherit;text-decoration:none;padding:36px 0 44px;border-top:1px solid var(--rule,#C9D1DA);border-bottom:1px solid var(--rule,#C9D1DA);font:400 18px/1.6 var(--serif,\"STIX Two Text\",Georgia,serif)}.ds-entry h3{margin:0 0 18px;font-size:27px;line-height:1.22;font-weight:500}.ds-entry h3 span{text-decoration:underline;text-decoration-color:transparent;text-decoration-thickness:1px;text-underline-offset:.18em;transition:text-decoration-color 240ms cubic-bezier(.16,1,.3,1)}.ds-entry-plate{height:140px;border:1px solid var(--rule,#C9D1DA);background:var(--plate,#FFFFFF);transition:border-color 240ms cubic-bezier(.16,1,.3,1)}.ds-entry p{margin:14px 0 0;color:var(--ink,#1B2430)}.ds-entry:hover .ds-entry-plate,.ds-entry:focus-visible .ds-entry-plate{border-color:var(--accent,#8C2F39)}.ds-entry:hover h3 span,.ds-entry:focus-visible h3 span{text-decoration-color:var(--accent,#8C2F39)}.ds-entry:focus-visible{outline:2px solid var(--accent,#8C2F39);outline-offset:6px}"
+    },
+    {
+      "name": "Margin note",
+      "kind": "custom",
+      "refersTo": "margin-note",
+      "description": "Plain-language restatement beside the formal content, in the 240px margin column.",
+      "html": "<div class=\"ds-r\"><p class=\"ds-main\">The stock balance links consecutive days.</p><aside class=\"ds-note\">Stock at the end of today equals yesterday’s stock, plus purchases and donations, minus what was cooked.</aside></div>",
+      "css": ".ds-r{display:grid;grid-template-columns:minmax(0,1fr) 240px;column-gap:48px}.ds-main{margin:0;font:400 18px/1.6 var(--serif,\"STIX Two Text\",Georgia,serif);color:var(--ink,#1B2430)}.ds-note{font:400 14px/1.45 var(--sans,\"IBM Plex Sans\",system-ui,sans-serif);color:var(--graphite,#56606D);padding-top:.3em}"
+    },
+    {
+      "name": "Surface with optimiser path",
+      "kind": "custom",
+      "refersTo": "surface-readout",
+      "description": "Still rendering of the signature: hairline level sets, an index contour in ink, the oxblood path with its head, and the readout.",
+      "html": "<div class=\"ds-surface\"><svg viewBox=\"0 0 400 200\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"var(--contour,#8E9CAD)\" stroke-width=\".8\" opacity=\".6\"><ellipse cx=\"290\" cy=\"100\" rx=\"30\" ry=\"20\"/><ellipse cx=\"290\" cy=\"100\" rx=\"60\" ry=\"42\"/><ellipse cx=\"290\" cy=\"100\" rx=\"125\" ry=\"88\"/><ellipse cx=\"290\" cy=\"100\" rx=\"160\" ry=\"112\"/></g><ellipse cx=\"290\" cy=\"100\" rx=\"92\" ry=\"64\" fill=\"none\" stroke=\"var(--ink,#1B2430)\" stroke-width=\"1.25\" opacity=\".6\"/><path d=\"M60 120 C130 140 200 96 288 100\" fill=\"none\" stroke=\"var(--accent,#8C2F39)\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\".9\"/><circle cx=\"288\" cy=\"100\" r=\"3.5\" fill=\"var(--accent,#8C2F39)\"/><circle cx=\"288\" cy=\"100\" r=\"9\" fill=\"none\" stroke=\"var(--accent,#8C2F39)\" stroke-opacity=\".3\"/></svg><p class=\"ds-readout\">step 94   f = −1.541</p></div>",
+      "css": ".ds-surface{position:relative;background:var(--paper,#F4F6F8)}.ds-surface svg{display:block;width:100%;height:auto}.ds-readout{position:absolute;right:8px;bottom:6px;margin:0;font:400 12px/1.3 var(--sans,\"IBM Plex Sans\",system-ui,sans-serif);color:var(--graphite,#56606D);font-variant-numeric:tabular-nums;white-space:pre;background:color-mix(in srgb,var(--paper,#F4F6F8) 80%,transparent);padding:3px 6px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Loss-Surface Engraving",
+    "overview": "The base system is a **technical journal**: text set like a well-typeset paper, numbered figures with captions, formulations in typeset mathematics, and a wide **margin column for plain-language notes** in the manner of Tufte. The main column carries the technical argument; the margin translates it for non-specialists. This is how one page serves both audiences.\n\nThe page is printed on warm engraving paper, and the stock is a loss surface. A synthetic surface (a gentle tilt down the page, a Gaussian well beside each section and each featured project, ridges between them, and seeded bumps for structure) is drawn behind everything by its level sets, as hairlines with every fifth level an index contour in ink, in the manner of an engraved survey sheet. One line moves: an optimiser running basin hopping on that same surface, drawn in oxblood up to the reader's position, settling into one basin per section as the page is read. The surface is decorative, and the page says so in the title-screen caption and in the colophon.\n\nFigures and title blocks are white plates mounted on the stock, so no level set runs behind data. One element is borrowed from **engineering drawing and survey plates**: each featured page opens with a small **title block** in the style of a drawing sheet (plus a reduced version in the home-page entries). The drawing-sheet framing is not applied anywhere else. The memorable elements are the surface and the interactive figures; everything set on the stock stays quiet.",
+    "keyCharacteristics": [
+      "Engraving stock with hairline level sets; every fifth level an index contour in ink.",
+      "One oxblood line, the optimiser's path, and the same oxblood for links, hover and focus.",
+      "White plates for figures and title blocks; no level set behind data.",
+      "STIX Two Text in the main column, IBM Plex Sans in the margin, labels and readouts.",
+      "Flat: no shadows, no cards, no gradients other than the mask that quietens the field behind text.",
+      "Motion is computed, not choreographed: the path is the result of an algorithm on the drawn surface."
+    ],
+    "rules": [
+      {
+        "name": "The One Oxblood Rule",
+        "body": "Oxblood belongs to the optimiser and to what the reader acts on: the path, links, hover, focus and selection. It never fills an area, never marks data, and never decorates.",
+        "section": "colors"
+      },
+      {
+        "name": "The Plate Rule",
+        "body": "Data colours (`survey`, the ramp, `hazard`, the genera) appear only on plates, where no level set runs behind them. The two reds, `accent` and `hazard`, therefore never compete: one lives on the stock, the other only inside figures.",
+        "section": "colors"
+      },
+      {
+        "name": "The Sentence-Case Rule",
+        "body": "Headings are in sentence case. No all-caps labels, no tracked-out eyebrow text above headings, and no single accented word in a headline.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two-Voice Rule",
+        "body": "Serif carries the argument; Plex carries everything that labels, annotates or measures. Plex Condensed is used inside title blocks and nowhere else.",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Shadow Rule",
+        "body": "No box shadows, no glows, no glass cards. Separation is by plate, rule and the field's mask. One exception, in the dark theme only: the optimiser emits light (its path, head, reached basins and rings glow). On paper a glow could only stain, so there the optimiser is engraved in ink.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Mask-Only Gradient Rule",
+        "body": "The only gradient in the system is the mask that quietens the level sets behind text. No gradient fills, no gradient text.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the surface behind every page that has sections, seeded from the page's path, and keep its caption or colophon saying that it is decorative and what it is.",
+      "Do mount every figure, data table and title block on a `plate` with a 1 px `rule` frame, so no level set runs behind data.",
+      "Do compute whatever moves on the surface from the surface itself: the path, the rings and the probes are descents on the drawn f.",
+      "Do use oxblood for the path, links, hover, focus and selection, and for nothing else.",
+      "Do keep the main column at about 66 characters, the 48 px gutter and the 240 px margin column, left-aligned.",
+      "Do set headings in sentence case, labels in Plex, title blocks in Plex Condensed."
+    ],
+    "donts": [
+      "Don't use shadows, glows, glass cards or gradient fills; the field's mask is the only gradient. The optimiser's glow in the dark theme is the one exception.",
+      "Don't let oxblood mark data or fill an area, or let `hazard` leave the plates.",
+      "Don't add a second moving line, particles, or node-and-edge networks to the surface.",
+      "Don't add tracked-out eyebrow labels, all-caps labels, or a single accented word in a headline.",
+      "Don't apply the drawing-sheet framing beyond title blocks.",
+      "Don't animate anything on load beyond the engraving reveal, the descent into the first basin and the title settle."
+    ]
+  }
+}

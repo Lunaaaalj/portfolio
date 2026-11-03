@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Explorable Article — sketch</title>
+<style>
+  *{box-sizing:border-box;margin:0}
+  html,body{width:1440px;height:900px;overflow:hidden;background:#fff;color:#1A1D21;font-family:"Helvetica Neue",Arial,sans-serif}
+  header{padding:56px 160px 0;display:grid;grid-template-columns:1fr 320px;gap:64px}
+  h1{font-size:64px;line-height:68px;font-weight:600;letter-spacing:-0.015em}
+  .dek{font-size:21px;line-height:30px;color:#3d434a;margin-top:20px;max-width:720px}
+  .meta{font-size:14px;line-height:22px;color:#5b616a;border-top:1px solid #e2e5e9;padding-top:12px;align-self:end}
+  .fig{margin:44px 160px 0;display:grid;grid-template-columns:1fr 360px;gap:48px}
+  svg{width:100%;height:400px;background:#f6f7f9}
+  .eq{font-family:"Times New Roman",serif;font-size:28px;line-height:40px}
+  .t1{color:#D9480F;background:#fff0e6;padding:0 4px}
+  .t2{color:#1971C2}.t3{color:#2F9E44}
+  .slider{margin-top:28px;font-size:14px;color:#5b616a}
+  .track{height:4px;background:#e2e5e9;margin:16px 0 8px;position:relative}
+  .track b{position:absolute;left:0;width:72%;height:4px;background:#D9480F}
+  .track i{position:absolute;left:72%;top:-8px;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #D9480F;margin-left:-10px}
+  .years{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+  .note{margin-top:28px;font-size:15px;line-height:23px;color:#3d434a}
+</style></head><body>
+<header>
+  <div><h1>Angel Eduardo Luna</h1><p class="dek">Applied models, explained by moving them. Each project below is an article whose figures you can operate.</p></div>
+  <div class="meta">Applied mathematics and data science<br>Tecnológico de Monterrey<br>GeoStats · Stochastic_RefInit · Casa Monarca</div>
+</header>
+<div class="fig">
+  <svg id="s" viewBox="0 0 900 400"></svg>
+  <div>
+    <p class="eq"><span class="t1">λ<sub>h,t</sub></span> = exp(<span class="t2">β<sub>0</sub></span> + <span class="t3">u<sub>h</sub></span>)</p>
+    <div class="slider">Year t
+      <div class="track"><b></b><i></i></div>
+      <div class="years"><span>2019</span><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span></div>
+    </div>
+    <p class="note">Drag the year: the highlighted term is recomputed for every hexagon of the Monterrey grid. Fig. 1, illustrative layout.</p>
+  </div>
+</div>
+<script>
+const s=document.getElementById('s');let h='';const R=14,dx=R*1.732;
+for(let r=0;r<16;r++)for(let c=0;c<36;c++){const x=40+c*dx+(r%2?dx/2:0),y=30+r*R*1.5;const d=Math.hypot(x-470,y-200)/260;const v=Math.max(0,1-d+0.15*Math.sin(c*0.9+r));
+const col=v>0.75?'#D9480F':v>0.55?'#F08C4A':v>0.35?'#FBC49A':v>0.15?'#FDE6D3':'#EEF0F3';
+let p='';for(let k=0;k<6;k++){const a=Math.PI/3*k+Math.PI/6;p+=(x+R*Math.cos(a)).toFixed(1)+','+(y+R*Math.sin(a)).toFixed(1)+' '}h+=`<polygon points="${p}" fill="${col}" stroke="#fff" stroke-width="1.5"/>`}
+s.innerHTML=h;
+</script>
+</body></html>

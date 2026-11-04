@@ -1,0 +1,44 @@
+---
+// The ozone project's compact figure on the home page: a west–east section of the Monterrey valley
+// with the 15 SIMA stations at their real longitudes and elevations, each carrying its share of
+// days above 51 ppb. Pointing at it steps through the seasons. Drawn at build time, so it reads
+// without JavaScript. The sierra beyond the westernmost station is schematic, and the alt text
+// and the page say that the elevation is an association, not a cause.
+import story from '../data/ozone-story.json';
+
+const W = 600, H = 276, L = 22, R = 22, B = 40;
+const stations = [...story.stations].sort((a, b) => b.lon - a.lon);   // east on the right
+const lonW = 100.68, lonE = 99.96;
+const X = (lon: number) => L + ((lonW - lon) / (lonW - lonE)) * (W - L - R);
+const G = (msnm: number) => H - B - ((msnm - 250) / 1050) * 96;      // ground, exaggerated
+const ground = [...story.stations].sort((a, b) => b.lon - a.lon);
+const pts = [[lonW, 1250], [100.63, 980], ...ground.map((s) => [s.lon, s.msnm]), [lonE, 320]] as [number, number][];
+const line = pts.map(([lo, m], i) => `${i ? 'L' : 'M'}${X(lo).toFixed(1)} ${G(m).toFixed(1)}`).join(' ');
+const scale = 240;                                                    // px per unit of rate
+const rate = stations.map((s) => s.rate);
+const seasons = [['Winter', 'invierno'], ['Spring', 'primavera'], ['Summer', 'verano'], ['Autumn', 'otoño']]
+  .map(([name, key]) => [name, stations.map((s) => s.seasons[key as keyof typeof s.seasons])]);
+---
+<div class="preview" data-preview="valley" data-seasons={JSON.stringify(seasons)} data-base={JSON.stringify(rate)} data-scale={scale}>
+  <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+    <defs><pattern id="valley-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(68)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--contour)" stroke-width="0.8" /></pattern></defs>
+    <path d={`${line} L ${W - R} ${H - 18} L ${L} ${H - 18} Z`} fill="url(#valley-hatch)" />
+    <path d={line} fill="none" stroke="var(--ink)" stroke-width="1" />
+    {stations.map((s) => {
+      const x = X(s.lon), y = G(s.msnm), h = s.rate * scale;
+      return (
+        <>
+          <rect data-bar={y.toFixed(1)} x={(x - 4.5).toFixed(1)} y={(y - h).toFixed(1)} width="9" height={h.toFixed(1)} fill="var(--ramp-4)" />
+          <circle cx={x.toFixed(1)} cy={y.toFixed(1)} r="2.2" fill="var(--plate)" stroke="var(--ink)" />
+        </>
+      );
+    })}
+    <text x={L} y={H - 4} class="ax">West</text>
+    <text x={W - R} y={H - 4} class="ax" text-anchor="end">East</text>
+  </svg>
+  <span class="tag">Days over 51 ppb, 2021–2025</span>
+</div>
+
+<style>
+  .ax { font: 400 12px/1 var(--sans); fill: var(--graphite); }
+</style>

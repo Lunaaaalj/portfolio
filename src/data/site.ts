@@ -66,6 +66,27 @@ export const featured: Featured[] = [
     ],
   },
   {
+    title: 'Ozone exceedances in metropolitan Monterrey',
+    repo: 'MA2003B.102.07',
+    href: gh('MA2003B.102.07'),
+    page: '/ozone',
+    // Partner confirmed by the author; the repository says only "socioformador". Coordinates: the
+    // mean of the 15 stations in reports/secciones/contexto_estaciones.tex.
+    sheetInfo: { partner: 'SIMA, Nuevo León', place: ['Monterrey metropolitan area', '15 SIMA stations'], coords: ['25.72° N', '100.29° W'], year: '2026' },
+    links: [
+      { label: 'Repository', href: gh('MA2003B.102.07') },
+    ],
+    figure: 'ozone',
+    alt: 'West–east section of the Monterrey valley with the 15 SIMA monitoring stations at their real elevations; the share of days above 51 ppb rises towards the western foot of the sierra.',
+    problem: 'Which days and stations exceed the 51 ppb ozone limit of NOM-020-SSA1-2021 across the Monterrey metropolitan area, under which conditions, and how far ahead that can be told.',
+    method: 'Factor analysis of 640,583 hourly records, logistic regression and linear discriminant analysis on 2021–2024, and an autoregressive logistic nowcast, all validated on 2025.',
+    cells: [
+      { label: 'Partner', value: 'SIMA, Nuevo León' },
+      { label: 'Period', value: '2021–2025' },
+      { label: 'With', value: 'J. Alcaraz, E. Rico, M. Fernández, S. Fernández', full: true },
+    ],
+  },
+  {
     title: 'Reforestation planning under uncertainty',
     repo: 'Stochastic_RefInit',
     href: gh('Stochastic_RefInit'),
@@ -111,6 +132,7 @@ export const featured: Featured[] = [
 export const methods = {
   projects: [
     { short: 'GeoStats', href: '/geostats', featured: true },
+    { short: 'Ozone', href: '/ozone', featured: true },
     { short: 'RefInit', href: '/reforestation', featured: true },
     { short: 'Casa Monarca', href: '/casa-monarca', featured: true },
     { short: 'GBM', href: gh('random_walk_simulator') },
@@ -121,15 +143,17 @@ export const methods = {
   rows: [
     { method: 'Hierarchical Bayesian models', uses: [0] },
     { method: 'Spatial statistics', uses: [0] },
-    { method: 'Mixed-integer programming', uses: [1, 2] },
-    { method: 'Chance constraints', uses: [1] },
-    { method: 'Metaheuristics', uses: [1] },
-    { method: 'Monte Carlo simulation', uses: [3] },
-    { method: 'Differential equations', uses: [5] },
-    { method: 'Regression', uses: [0, 5] },
-    { method: 'Deep learning', uses: [4] },
+    { method: 'Factor analysis and PCA', uses: [1] },
+    { method: 'Classification', uses: [1] },
+    { method: 'Mixed-integer programming', uses: [2, 3] },
+    { method: 'Chance constraints', uses: [2] },
+    { method: 'Metaheuristics', uses: [2] },
+    { method: 'Monte Carlo simulation', uses: [4] },
+    { method: 'Differential equations', uses: [6] },
+    { method: 'Regression', uses: [0, 1, 6] },
+    { method: 'Deep learning', uses: [5] },
   ],
-  implementation: ['Python', 'C++', 'Python', 'Python', 'Python', 'Python'],
+  implementation: ['Python', 'Python, R', 'C++', 'Python', 'Python', 'Python', 'Python'],
   libraries: 'PyMC, statsmodels, scikit-learn, SciPy, pandas, GeoPandas, PySAL, Pyomo with GLPK, TensorFlow and Keras, Dear ImGui.',
   tooling: 'uv, CMake, Quarto, LaTeX, Jupyter, Streamlit, Weights & Biases, Neovim.',
 };

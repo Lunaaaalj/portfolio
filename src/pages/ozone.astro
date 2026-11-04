@@ -1,0 +1,369 @@
+---
+// Sources: Lunaaaalj/MA2003B.102.07: reports/secciones (method and results), docs/*.pdf and
+// notebooks/*.qmd (the forecast by horizon). Scene data comes from scripts/extract-ozone-story.py,
+// which refits the project's models and checks every stated result against the report.
+//
+// The page follows one real day, the specimen, through a cabinet of instruments
+// (src/scripts/showcase/ozone): each stage of the pipeline and the model is one apparatus doing
+// that stage's mathematics. The text after them carries the results and the formulation.
+import Project from '../layouts/Project.astro';
+import TeX from '../components/TeX.astro';
+import Scene from '../components/Scene.astro';
+import story from '../data/ozone-story.json';
+
+const S = story.specimen, f = story.facts, G = story.gate, M = story.memory, Y = story.year;
+const [H1, H2] = [story.horizon[1], story.horizon[2]], H7 = story.horizon[7];
+const day = `${S.weekday} ${S.label}`;
+---
+<Project
+  slug="ozone"
+  abstract="Fifteen stations of the SIMA network recorded Monterrey's air hour by hour from 2021 to 2025. A pipeline and a set of multivariate models turn those 640,583 hours into a daily question: did ozone pass 51 ppb, and could that have been told? On 2025, a year none of the models saw, the answer is an area under the ROC curve of 0.850 by station and 0.898 for the metropolitan area."
+>
+  <script is:inline>
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('sx-live');
+  </script>
+  <div class="r intro">
+    <p class="m skip">The pipeline and the models are told as a cabinet of instruments, each doing the mathematics of its stage on one real day. <a href="#results-h">Skip to the results</a></p>
+  </div>
+
+  <div class="showcase">
+    <p class="act"><span>I</span> The air</p>
+    <Scene name="flask" fig={1} title="Nothing puts it there" source="Illustrative, seeded; the chemistry as the report states it" length={3}>
+      <div class="beat" data-at="0 0.26">
+        <p>Most pollutants leave a chimney or an exhaust. Ozone at street level does not. In a flask with only its precursors and no light, there is none.</p>
+      </div>
+      <div class="beat" data-at="0.26 0.66">
+        <p>Add heat and sunlight and it forms where it stands, from nitrogen oxides and volatile organic compounds. It is a secondary pollutant, which is why no single variable explains a bad day.</p>
+      </div>
+      <div class="beat" data-at="0.66 1">
+        <p>One ingredient stays a ghost. The network does not measure volatile organic compounds, so everything on this page describes conditions that go with ozone, not the mechanism that makes it.</p>
+      </div>
+    </Scene>
+
+    <Scene name="valley" fig={2} title="A valley with fifteen intakes" source="Stations at their real longitude and elevation, exaggerated; the sierra is schematic" length={2.8}>
+      <div class="beat" data-at="0 0.6">
+        <p>The Monterrey metropolitan area sits in a valley closed by the Sierra Madre to the south and west. Fifteen stations of the state’s monitoring network, SIMA, breathe its air every hour.</p>
+      </div>
+      <div class="beat" data-at="0.6 0.86">
+        <p>They climb 368 metres from the eastern plain to the foot of the western sierra, and the prevailing wind blows along that line, from the east.</p>
+      </div>
+      <div class="beat" data-at="0.86 1">
+        <p>One station, and one day of it, will be followed through the rest of the page. It was not chosen for being interesting: of the 56 spring days of 2025 on which station NO exceeded the limit, it is the one with the median predicted probability.</p>
+      </div>
+    </Scene>
+
+    <p class="act"><span>II</span> The pipeline</p>
+    <Scene name="recorder" fig={3} title="Six rolls, one pen" source="Real stretches of the raw hourly records" length={3.8}>
+      <div class="beat" data-at="0 0.2">
+        <p>The records arrive as six yearly workbooks that do not agree. 2024 glues units to its headers, 2025 renames the date, and stations go from 13 to 15. A single import has to read them all. The 2020 roll is torn out: seven stations are more than 89% empty.</p>
+      </div>
+      <div class="beat" data-at="0.2 0.48">
+        <p>What the instrument cannot have measured is cut. A particle sensor pinned at 1,000 is at the end of its range, not at a value.</p>
+      </div>
+      <div class="beat" data-at="0.48 0.7">
+        <p>So is the logger’s own code for a missing reading, −9999, which would drop the pen off the paper. Together with readings outside the physical range of the sensor, under 0.02% of the cells go.</p>
+      </div>
+      <div class="beat" data-at="0.7 1">
+        <p>Gaps of up to three hours are bridged with a straight rule. Longer ones stay open: a stopped station is not interpolated. And the high peaks are not touched, because they are what is being looked for.</p>
+        <p class="small">Bridging fills 1.66% of the cells. After the cut, 640,583 station-hours remain.</p>
+      </div>
+    </Scene>
+
+    <Scene name="rule" fig={4} title="The rubber rule" source={`1,400 real day-stations; the skewness is measured here at each λ`} length={3.2}>
+      <div class="beat" data-at="0 0.16">
+        <p>Most mornings have little nitric oxide and a few have a great deal: a long tail, skewness {f.skewBefore}. Methods built on correlation are led by that tail.</p>
+      </div>
+      <div class="beat" data-at="0.16 0.76">
+        <p>So the rule itself is made of rubber. The Box–Cox family stretches the low end and compresses the high end, by an amount set by one number, λ. At 1 nothing changes; at −{Math.abs(f.lambdaNo)} the tail is drawn in, and the values keep their order.</p>
+        <p class="eqline"><TeX tex={String.raw`x^{(\lambda)} = \frac{x^\lambda - 1}{\lambda}`} /></p>
+      </div>
+      <div class="beat" data-at="0.76 1">
+        <p>Each variable gets its own λ. Then every one is put in standard deviations from its mean, so that none dominates by its units.</p>
+        <p class="small">One leak remains and the report declares it: λ was estimated over the whole period, including 2025.</p>
+      </div>
+    </Scene>
+
+    <Scene name="clock" fig={5} title="The clock of the day" source="Median hour over 640,583 station-hours, each series to its own scale" length={3.2}>
+      <div class="beat" data-at="0 0.68">
+        <p>Twenty-four hours round a dial. Nitric oxide peaks with the morning traffic. The sun peaks at midday. Ozone comes after both, in the afternoon, which is the order to expect of something made rather than emitted.</p>
+      </div>
+      <div class="beat" data-at="0.68 0.78">
+        <p>That order decides how a day is summarised. The precursors are read through a shutter, 06–09 h, before the ozone they accompany exists.</p>
+      </div>
+      <div class="beat" data-at="0.78 1">
+        <p>The sun is a sum and temperature a maximum. Sixteen numbers per station per day: 26,691 rows, of which 25,100 have a valid ozone reading.</p>
+      </div>
+    </Scene>
+
+    <Scene name="watermark" fig={6} title="The high-water mark" source="The specimen’s real hours, to scale; every valid day-station beside it" length={3.6}>
+      <div class="beat" data-at="0 0.14">
+        <p>Follow the day: {day}, at station {S.station}, in the northwest of the valley. Each tube holds one hour of ozone, in parts per billion.</p>
+      </div>
+      <div class="beat" data-at="0.14 0.6">
+        <p>The standard is not set on a single hour. A carriage eight hours wide runs along the day, and what it spans is poured into the tank, so the tank’s level is the eight-hour mean.</p>
+        <p class="small">A day counts only if at least 18 of its 24 windows are valid.</p>
+      </div>
+      <div class="beat" data-at="0.6 0.72">
+        <p>The highest level stays on the wall. That mark is the MDA8, the day’s single number: {S.mda8} ppb, reached between noon and eight in the evening.</p>
+      </div>
+      <div class="beat" data-at="0.72 0.88">
+        <p>Every other day stands at its own mark. At the limit in force, 65 ppb, {f.over65}% of them clear the wall, and a rule that always answers “no” is right {f.constant}% of the time while finding nothing.</p>
+      </div>
+      <div class="beat" data-at="0.88 1">
+        <p>So the line is drawn at 51 ppb, the five-year goal of NOM-020-SSA1-2021: {f.over51}% of days. Now there is something to identify.</p>
+      </div>
+    </Scene>
+
+    <p class="act"><span>III</span> The model</p>
+    <Scene name="lamp" fig={7} title="The longest shadow" source="900 fitting days in three summaries of one emission, computed here; the 15-variable result is the report’s" length={3.2}>
+      <div class="beat" data-at="0 0.14">
+        <p>NO, NO₂ and NOₓ are close to one emission measured three times. Fifteen variables are not fifteen independent facts about a day.</p>
+      </div>
+      <div class="beat" data-at="0.14 0.76">
+        <p>Principal components asks one question: from where does the lamp throw the longest shadow? A shadow keeps one number per day, and the direction with the widest shadow keeps the most of what distinguishes days.</p>
+      </div>
+      <div class="beat" data-at="0.76 1">
+        <p>On all fifteen variables, three lamps hold 55.9% of the variance. Fitting used 2021–2024 only; 2025 stays out of everything that follows.</p>
+      </div>
+    </Scene>
+
+    <Scene name="marionette" fig={8} title="Three hidden hands" source="The project’s loadings and uniquenesses; the motion of the hands is illustrative" length={4}>
+      <div class="beat" data-at="0 0.2">
+        <p>The summaries of a day are thirteen dials, and they do not move independently. NO and NO₂ rise together; so do the sun and the temperature. Something behind them moves several at once.</p>
+      </div>
+      <div class="beat" data-at="0.2 0.42">
+        <p>Factor analysis supposes that something exists and asks how strongly each dial hangs from it: three hands, thirteen sets of strings. The thicker the string, the larger the loading. What a dial does beyond its strings is its own.</p>
+        <p class="eqline"><TeX tex={String.raw`\mathbf{x} = \Lambda \mathbf{f} + \boldsymbol{\varepsilon}`} /></p>
+      </div>
+      <div class="beat" data-at="0.42 0.72">
+        <p>As estimated, the hands mean nothing: a single dial hangs from all three at once. But the solution can be turned without changing what it explains. Turned, each dial hangs mostly from one hand, and the hands can be named.</p>
+        <p class="small">A rotation changes the strings, not the dials: each dial’s communality, the share its strings explain, stays exactly where it was.</p>
+      </div>
+      <div class="beat" data-at="0.72 0.88">
+        <p>One string goes slack. Principal components had called the third axis stagnation, on the strength of pressure. Here pressure’s communality is 0.13: nearly all of its motion is its own. The third axis was wind.</p>
+      </div>
+      <div class="beat" data-at="0.88 1">
+        <p>The hands were found in 2021–2024. In 2025, unseen, the same three reappear, with Tucker congruence of {f.tucker.join(', ')}.</p>
+        <p class="small">Horn’s parallel analysis asked for seven factors. With 16,028 rows the noise band narrows to almost a point and any eigenvalue clears it, so the count is an artefact of sample size and was rejected.</p>
+      </div>
+    </Scene>
+
+    <Scene name="balance" fig={9} title="The balance" source="The project’s logistic model, refitted, weighing the specimen" length={4}>
+      <div class="beat" data-at="0 0.12">
+        <p>Odds multiply and log-odds add, and what adds can be weighed. In the left pan stands the reference day: a working winter day in the Northeast, every factor at its mean. Alone, it reads 0.06.</p>
+        <p class="eqline"><TeX tex={String.raw`\operatorname{logit} P(y = 1) = \beta_0 + \sum_k \beta_k x_k`} /></p>
+      </div>
+      <div class="beat" data-at="0.12 0.72">
+        <p>Each condition of {S.label} goes on the right, by the weight the model gave it. Place and season outweigh everything measured that morning.</p>
+        <p class="small">Photochemical forcing is the heaviest continuous factor, 2.78 per standard deviation, but this day stood only {S.z.foto.toFixed(2)} above the mean. A Saturday adds almost nothing.</p>
+      </div>
+      <div class="beat" data-at="0.72 0.86">
+        <p>The pointer stops at {S.p.toFixed(3)}, past the cut of {story.gate.threshold.toFixed(3)} fixed on the fitting years. The model says this day exceeded. It did.</p>
+      </div>
+      <div class="beat" data-at="0.86 1">
+        <p>Now the balance is locked. Its weights came from 2021–2024 alone, and nothing in 2025 may move them.</p>
+      </div>
+    </Scene>
+
+    <Scene name="gate" fig={10} title="The gate" source="The 2,927 day-stations of 2025; the curves are computed here" length={3.8}>
+      <div class="beat" data-at="0 0.2">
+        <p>Here is 2025, which no weight has seen: 2,927 day-stations laid out by the probability the balance gave them, those that exceeded above the rail and the clean ones below.</p>
+      </div>
+      <div class="beat" data-at="0.2 0.68">
+        <p>A gate slides along the rail. Everything past it is called an exceedance. Each position finds so many of the true ones at the cost of so many false alarms, and traces one point of a curve.</p>
+        <p class="small">The area under that curve does not depend on where the gate stops. The target was at least 0.75.</p>
+      </div>
+      <div class="beat" data-at="0.68 0.76">
+        <p>The gate stops at {G.threshold.toFixed(3)}, fixed on the fitting years: it finds {(G.sensitivity * 100).toFixed(1)}% of exceedances and leaves {(G.specificity * 100).toFixed(1)}% of clean days alone. The area is {G.auc.toFixed(3)}.</p>
+      </div>
+      <div class="beat" data-at="0.76 1">
+        <p>A second instrument, linear discriminant analysis, assumes much more about the shape of the data, and one of its assumptions fails. Its curve lies almost on top: {G.aucLda.toFixed(3)}, with the two agreeing on {G.agreement}% of days.</p>
+        <p class="small">So reading the balance’s weights does not depend on the assumption it breaks.</p>
+      </div>
+    </Scene>
+
+    <Scene name="sierra" fig={11} title="The foot of the sierra" source="Exceedance rates are real; the particles are illustrative" length={3.2}>
+      <div class="beat" data-at="0 0.3">
+        <p>The balance gave place a heavy weight. Back in the valley, each station carries its share of days over the limit, and the shares rise to the west.</p>
+      </div>
+      <div class="beat" data-at="0.3 0.72">
+        <p>The report’s reading: the prevailing wind carries precursors towards the sierra, and the rising ground slows their way out. In the same season and conditions, the Northwest has 3.84 times the odds of the Northeast.</p>
+      </div>
+      <div class="beat" data-at="0.72 1">
+        <p>Across the stations, the rate of exceedance correlates {f.elevationCorr} with elevation. That is a description of 15 neighbouring points, not an effect of altitude: elevation also goes with distance from sources, wind and land use.</p>
+        <p class="small">Whatever it is, the measured weather does not account for it.</p>
+      </div>
+    </Scene>
+
+    <Scene name="ball" fig={12} title="Three bounces of memory" source="Two-state chain fitted on 2021–2024; heights to scale" length={3.2}>
+      <div class="beat" data-at="0 0.22">
+        <p>The rest of the page asks about the whole city: a day counts when most reporting stations exceed. And that series remembers. After a clean day, {M.P[0][1]} of days exceed; after an exceedance, {M.P[1][1]}. The difference, 0.46, is yesterday.</p>
+      </div>
+      <div class="beat" data-at="0.22 0.86">
+        <p>The memory fades at a fixed rate. Each day keeps {M.lambda} of the one before, the second eigenvalue of the chain, so it behaves like a ball whose every bounce is that fraction of the last.</p>
+        <p class="eqline"><TeX tex={String.raw`P(y_{t+h}=1\mid y_t=1) - P(y_{t+h}=1\mid y_t=0) = \lambda_2^{\,h}`} /></p>
+      </div>
+      <div class="beat" data-at="0.86 1">
+        <p>Three bounces and little is left. Added to the model, one lag is enough: exceeding yesterday multiplies today’s odds by {M.orYesterday}, with the day’s own factors already counted.</p>
+      </div>
+    </Scene>
+
+    <Scene name="wheel" fig={13} title="The wheel of 2025" source="The autoregressive model, refitted; 365 days it did not see" length={3.6}>
+      <div class="beat" data-at="0 0.64">
+        <p>The year as a wheel, January at the top. Each spoke is as long as the probability the model gave that day, using that day’s measurements and yesterday’s outcome. The ring is the cut, fixed beforehand.</p>
+      </div>
+      <div class="beat" data-at="0.64 0.86">
+        <p>It finds {Y.hits} of {Y.exceedances} exceedances with {Y.falseAlarms} false alarms in 195 clean days, an area of {Y.auc} against {Y.climatology} for the calendar and {Y.persistence} for “today will be like yesterday”.</p>
+        <p class="small">The hub is the share of exceedance days by year. In 2024 the water rises and no predictor explains why, so the model, which saw mostly the lower level, runs short: it predicts {Y.meanPredicted} on average against {Y.meanObserved} observed. It is not recalibrated, because that would mean tuning it on its own test.</p>
+      </div>
+      <div class="beat" data-at="0.86 1">
+        <p>2024 and 2025 are also the easiest years to classify. Leaving each earlier year out in turn gives {Y.pooled}, and that is the number to expect from an ordinary year.</p>
+      </div>
+    </Scene>
+
+    <Scene name="panes" fig={14} title="Frosted panes" source="One refitted model per horizon, validated on 2025" length={3.4}>
+      <div class="beat" data-at="0 0.6">
+        <p>All of this reads the day as it happens. Looking ahead, each day puts another pane of frosted glass in the way: {H1.forecast} one day out, {H2.forecast} two days out, and from the third no clear gain over the calendar.</p>
+        <p class="small">The calendar stands at {H1.climatology}. At seven days the forecast is below it, and only the first day is worth reporting.</p>
+      </div>
+      <div class="beat" data-at="0.6 0.82">
+        <p>Then the panes are lifted. Give the same model the true weather of the target day, which no one has, and it holds {H7.oracle} seven days out.</p>
+      </div>
+      <div class="beat" data-at="0.82 1">
+        <p class="statement">The limit is tomorrow’s weather.</p>
+      </div>
+    </Scene>
+  </div>
+
+  <section aria-labelledby="results-h">
+    <div class="r"><h2 class="m" id="results-h">Results</h2></div>
+    <div class="r">
+      <div class="m">
+        <table class="data">
+          <thead><tr><th scope="col">Validation on 2025</th><th scope="col" class="n">AUC</th><th scope="col" class="n">Sensitivity</th><th scope="col" class="n">Specificity</th><th scope="col" class="n">Expected</th></tr></thead>
+          <tbody>
+            <tr class="group"><th scope="rowgroup" colspan="5">Day-station, n = 2,927</th></tr>
+            <tr><th scope="row">Logistic regression</th><td class="n">0.850</td><td class="n">0.615</td><td class="n">0.890</td><td class="n">0.80</td></tr>
+            <tr><th scope="row">Linear discriminant</th><td class="n">0.846</td><td class="n">0.667</td><td class="n">0.850</td><td class="n">0.80</td></tr>
+            <tr class="group"><th scope="rowgroup" colspan="5">Metropolitan area, n = 365</th></tr>
+            <tr class="best"><th scope="row">Autoregressive logistic</th><td class="n">0.898</td><td class="n">0.759</td><td class="n">0.841</td><td class="n">0.878</td></tr>
+            <tr><th scope="row">Calendar alone</th><td class="n">0.668</td><td class="n">–</td><td class="n">–</td><td class="n">–</td></tr>
+            <tr><th scope="row">Persistence</th><td class="n">0.717</td><td class="n">–</td><td class="n">–</td><td class="n">–</td></tr>
+          </tbody>
+        </table>
+        <p class="table-note">The two blocks answer different questions and their areas are not comparable. Thresholds are fixed by Youden’s index on 2021–2024. Expected is the area out of sample, leaving one year out.</p>
+      </div>
+      <aside class="note"><p>Sensitivity is the share of exceedances found; specificity is the share of clean days left alone. The criterion set in advance was an AUC of at least 0.75 on data not used for fitting.</p></aside>
+    </div>
+    <div class="r after-table">
+      <div class="m prose">
+        <p>
+          An exceedance is first a matter of season and place. Against winter, spring multiplies the odds by 3.54 and
+          autumn by 3.04; against the Northeast, the Northwest multiplies them by 3.84 and the Southwest by 3.48. Among
+          the continuous factors, photochemical forcing weighs most (2.78 per standard deviation), then primary
+          combustion (1.92), and ventilation is the only protective one (0.90). The working calendar barely matters:
+          Sunday has a small clear effect (1.43), and Saturday’s disappears once standard errors are corrected for
+          the dependence between stations on the same day.
+        </p>
+        <p>
+          The project recommends the autoregressive model as a nowcast of the day’s exceedance, with a threshold that
+          favours sensitivity, because the cost of missing a bad day exceeds that of a needless alert; specific
+          attention to the Northwest and Southwest, whose risk exceeds what their measured conditions explain; and the
+          measurement of volatile organic compounds, the only way from association to mechanism.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          The network measures no volatile organic compounds, so the axes are described as consistent with combustion,
+          ventilation and photochemistry, and no statement about the chemical regime can be made. Exceedance stepped up
+          in 2024 for reasons no predictor explains, which the data cannot assign to emissions, instruments or two
+          unusual years. The zone contrasts rest on 15 stations. The Box–Cox parameters were estimated over all years.
+          And the headline model is a nowcast: its factors belong to the same day as the response, so it separates days
+          within a season but does not anticipate tomorrow.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="form-h">
+    <div class="r"><h2 class="m" id="form-h">Formulation</h2></div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Response</p>
+        <div class="eq"><TeX display tex={String.raw`\mathrm{MDA8}_{st} = \max_{h}\ \frac{1}{8}\sum_{k=0}^{7} \mathrm{O}_{3,\,s,\,h-k}, \qquad y_{st} = \mathbb{1}\{\mathrm{MDA8}_{st} > 51\ \mathrm{ppb}\}`} /><span class="eqn">(1)</span></div>
+      </div>
+      <aside class="note"><p>The 51 ppb line is the five-year goal of NOM-020-SSA1-2021. At the 65 ppb in force, exceedances are 11.25% of day-stations, and a constant answer would be right 88.75% of the time.</p></aside>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Day-station model</p>
+        <div class="eq"><TeX display tex={String.raw`\operatorname{logit} P(y_{st}=1) = \beta_0 + \boldsymbol{\beta}^{\top}\mathbf{f}_{st} + \gamma_{z(s)} + \delta_{d(t)} + \eta_{e(t)}`} /><span class="eqn">(2)</span></div>
+      </div>
+      <aside class="note"><p>The three factor scores <TeX tex={String.raw`\mathbf{f}_{st}`} /> enter with indicators for zone, type of day and season: 12 in all, against the Northeast, a working day and winter.</p></aside>
+    </div>
+    <div class="r">
+      <div class="m">
+        <p class="eq-label">Metropolitan nowcast</p>
+        <div class="eq"><TeX display tex={String.raw`\operatorname{logit} P(y_t = 1 \mid y_{t-1}, \mathbf{x}_t) = \mathbf{x}_t^{\top}\boldsymbol{\beta} + \alpha\, y_{t-1}`} /><span class="eqn">(3)</span></div>
+      </div>
+      <aside class="note"><p><TeX tex={String.raw`\mathbf{x}_t`} /> holds the mean factor scores, the squares of ventilation and forcing, and annual and semi-annual harmonics. One lag: the partial autocorrelation falls from 0.463 to 0.100, and BIC agrees.</p></aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="method-h">
+    <div class="r"><h2 class="m" id="method-h">Method</h2></div>
+    <div class="r">
+      <div class="m prose">
+        <p>
+          Raw workbooks are immutable; import, cleaning and daily aggregation are versioned code with tests, and the
+          analyses are Quarto documents rendered to PDF. All fitting, scaling and factor extraction uses 2021–2024, and
+          2025 is a whole year held out. Factor scores are rescaled by the fitting mean and standard deviation, so
+          that each odds ratio reads per standard deviation. Standard errors of the day-station model are also
+          corrected for clustering by day, which inflates them by up to 2.5 times; the conclusions hold, except for
+          Saturday.
+        </p>
+        <p>
+          Two factor-analytic choices were tested and rejected in writing, Horn’s parallel analysis and maximum
+          likelihood extraction, and two variables were withdrawn after producing impossible communalities. The
+          scenes on this page come from a refit in Python of the project’s R models, with the same specification and
+          split, which reproduces each area and odds ratio stated here.
+        </p>
+      </div>
+      <aside class="note">
+        <p>Developed with SIMA for course MA2003B at Tecnológico de Monterrey, by Angel Eduardo Luna, Jenaro Alcaraz, Emilia Rico, Mar Fernández and Sofía Fernández.</p>
+        <p>The DeLong test is the one used for correlated ROC curves: the two models are scored on the same days.</p>
+      </aside>
+    </div>
+  </section>
+</Project>
+
+<style>
+  .intro { margin-top: 28px; }
+  .skip { margin: 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .showcase { margin-top: 48px; border-bottom: 1px solid var(--rule); }
+  .act { margin: 0; padding: 56px 0 18px; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .act span { display: inline-block; min-width: 2em; font-variant-numeric: lining-nums; color: var(--ink); }
+  .after-table { margin-top: 28px; }
+  .table-note { margin: 8px 0 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
+  .best th, .best td { font-weight: 600; color: var(--ink); }
+  .group th { font: 500 13px/1.45 var(--sans); color: var(--graphite); padding-top: 14px; }
+  @media (max-width: 640px) { .data { font-size: 12.5px; } .data th, .data td { padding-right: 6px; } }
+</style>
+
+<script>
+  import { mountScenes } from '../scripts/showcase/engine';
+  import flask from '../scripts/showcase/ozone/flask';
+  import valley from '../scripts/showcase/ozone/valley';
+  import recorder from '../scripts/showcase/ozone/recorder';
+  import rule from '../scripts/showcase/ozone/rule';
+  import clock from '../scripts/showcase/ozone/clock';
+  import watermark from '../scripts/showcase/ozone/watermark';
+  import lamp from '../scripts/showcase/ozone/lamp';
+  import marionette from '../scripts/showcase/ozone/marionette';
+  import balance from '../scripts/showcase/ozone/balance';
+  import gate from '../scripts/showcase/ozone/gate';
+  import sierra from '../scripts/showcase/ozone/sierra';
+  import ball from '../scripts/showcase/ozone/ball';
+  import wheel from '../scripts/showcase/ozone/wheel';
+  import panes from '../scripts/showcase/ozone/panes';
+  mountScenes({ flask, valley, recorder, rule, clock, watermark, lamp, marionette, balance, gate, sierra, ball, wheel, panes });
+</script>

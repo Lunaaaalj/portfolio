@@ -25,7 +25,7 @@ This is the professional and academic portfolio of Angel Eduardo Luna (applied m
 
 ## Positioning
 
-The work is applied modelling done with named partners and real data: CONAFOR, Casa Monarca, and traffic-collision data for the Monterrey metropolitan area. Each featured project goes from formulation to implementation to a live tool or report. Coursework-only portfolios cannot honestly claim this.
+The work is applied modelling done with named partners and real data: CONAFOR, SIMA (air quality, Nuevo León), Casa Monarca, and traffic-collision data for the Monterrey metropolitan area. Each featured project goes from formulation to implementation to a live tool or report. Coursework-only portfolios cannot honestly claim this.
 
 ## Operating Context
 
@@ -37,6 +37,7 @@ The work is applied modelling done with named partners and real data: CONAFOR, C
 
 - **Featured projects, each with a full page:**
   - GeoStats ([live app](https://geo-stats-three.vercel.app))
+  - MA2003B.102.07, ozone exceedances in Monterrey (repository and report; partner SIMA, confirmed by the author, since the repository says only "socioformador")
   - Stochastic_RefInit ([live app](https://stochastic-reforestation-initiative.vercel.app))
   - Optimizacion-de-recursos for Casa Monarca ([Streamlit app](https://diseno-de-un-modelo-de-optimizacion-agrusbtims2qhtgdq75k6s.streamlit.app/))
 - **Further work:** a one-row listing with links to the report and repository only. Candidates are random_walk_simulator, NeuralNetworksTeamEnvironment, MSED and snake_game, among others.

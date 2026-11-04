@@ -6,6 +6,7 @@ import type { Featured } from '../data/site';
 import HexMapFigure from './HexMapFigure.astro';
 import MosaicFigure from './MosaicFigure.astro';
 import SparsityFigure from './SparsityFigure.astro';
+import ValleyFigure from './ValleyFigure.astro';
 
 interface Props { entry: Featured; sheet: number; of: number }
 const { entry, sheet, of } = Astro.props;
@@ -13,6 +14,7 @@ const hint: Record<string, string> = {
   geostats: 'Point at the map to step through 2019 to 2024.',
   lattice: 'Point at the tile to see the competition-aware arrangement.',
   sparsity: 'Point at the matrix to step through its constraint families.',
+  ozone: 'Point at the valley to step through the four seasons.',
 };
 ---
 <li class="entry">
@@ -22,6 +24,7 @@ const hint: Record<string, string> = {
       {entry.figure === 'geostats' && <HexMapFigure compact />}
       {entry.figure === 'lattice' && <MosaicFigure compact />}
       {entry.figure === 'sparsity' && <SparsityFigure compact />}
+      {entry.figure === 'ozone' && <ValleyFigure />}
     </figure>
     <dl class="tb">
       <div><dt>Repository</dt><dd>{entry.repo}</dd></div>
@@ -41,6 +44,7 @@ const hint: Record<string, string> = {
   for (const entry of document.querySelectorAll<HTMLAnchorElement>('.entry > a')) {
     const hex = entry.querySelector<HTMLElement>('[data-preview="hex"]');
     const sp = entry.querySelector<HTMLElement>('[data-preview="sparsity"]');
+    const valley = entry.querySelector<HTMLElement>('[data-preview="valley"]');
     let timer = 0;
 
     let start = () => {}, stop = () => {};
@@ -61,6 +65,16 @@ const hint: Record<string, string> = {
       let i = 0;
       start = () => { i = 0; show(0); if (!still.matches) timer = window.setInterval(() => { i = (i + 1) % bands.length; show(i); }, 800); };
       stop = () => { clearInterval(timer); rect.setAttribute('height', '0'); tag.textContent = base; };
+    }
+    if (valley) {
+      const seasons = JSON.parse(valley.dataset.seasons!) as [string, number[]][], base = JSON.parse(valley.dataset.base!) as number[];
+      const bars = [...valley.querySelectorAll<SVGRectElement>('[data-bar]')], tag = valley.querySelector<HTMLElement>('.tag')!;
+      const scale = Number(valley.dataset.scale), floor = bars.map((b) => Number(b.dataset.bar));
+      const label = tag.textContent;
+      const show = (values: number[]) => bars.forEach((b, k) => { const h = values[k] * scale; b.setAttribute('height', String(h)); b.setAttribute('y', String(floor[k] - h)); });
+      let i = 0;
+      start = () => { if (still.matches) return; i = 0; show(seasons[0][1]); tag.textContent = seasons[0][0]; timer = window.setInterval(() => { i = (i + 1) % seasons.length; show(seasons[i][1]); tag.textContent = seasons[i][0]; }, 900); };
+      stop = () => { clearInterval(timer); show(base); tag.textContent = label; };
     }
     entry.addEventListener('pointerenter', () => start());
     entry.addEventListener('pointerleave', () => stop());
@@ -102,6 +116,7 @@ const hint: Record<string, string> = {
   .plate-geostats { aspect-ratio: 1.15; max-height: 520px; }
   .plate-lattice { aspect-ratio: 2.7; }
   .plate-sparsity { aspect-ratio: 1.42; }
+  .plate-ozone { aspect-ratio: 1.9; }
   /* The preview fills the plate's inner box; each SVG's viewBox fits itself inside it */
   .plate :global(.preview) { position: absolute; inset: 20px 20px 30px; }
   .plate :global(.preview svg) { display: block; width: 100%; height: 100%; max-height: none; min-width: 0; }

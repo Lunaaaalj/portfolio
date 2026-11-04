@@ -42,6 +42,19 @@ export function rgba(hex: string, a: number): string {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${clamp(a)})`;
 }
 
+/** Mixes two colours, hex or `rgb()`, in sRGB: t = 0 gives a, t = 1 gives b. */
+export function mix(a: string, b: string, t: number): string {
+  const rgb = (hex: string) => {
+    if (hex.startsWith('rgb')) return hex.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+    let h = hex.replace('#', '');
+    if (h.length === 3) h = h.replace(/./g, '$&$&');
+    const n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const x = rgb(a), y = rgb(b);
+  return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], t))).join(',')})`;
+}
+
 export function plant(g: CanvasRenderingContext2D, c: Colors, x: number, y: number, r: number, genus: number, code?: string, a = 1) {
   if (r <= 0 || a <= 0) return;
   g.globalAlpha = a;

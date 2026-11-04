@@ -1,5 +1,5 @@
 ---
-// Fig. 1 on the GeoStats page: recorded traffic incidents per hexagonal cell, by year, on the
+// Fig. 10 on the GeoStats page, after the scroll scenes: recorded traffic incidents per hexagonal cell, by year, on the
 // project's own 2,241-cell grid (src/data/geostats.json, from scripts/extract-geostats.mjs).
 // Drawn at build time for the default year; the script swaps the year and reads out cells.
 import geo from '../data/geostats.json';
@@ -69,7 +69,7 @@ const data = JSON.stringify({ layers, classes, mun: geo.municipality, names: geo
       <use class="focus-cell" href="#hx" x="-99" y="-99" />
     </svg>
     <figcaption id="hex-cap">
-      <b>Fig. 1.</b> Traffic incidents recorded by INEGI (ATUS) in each hexagonal cell of the Monterrey metropolitan
+      <b>Fig. 10.</b> Traffic incidents recorded by INEGI (ATUS) in each hexagonal cell of the Monterrey metropolitan
       area, <span class="cap-year">in 2024</span>. Cells are 500 m a side, about one kilometre across; only the 2,241
       cells with at least one incident in six years are drawn. The 2027 layer is the model’s forecast, the posterior
       median of each cell’s expected count. The view is cropped to the cells that hold 99% of incidents.

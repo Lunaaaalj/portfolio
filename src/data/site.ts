@@ -1,6 +1,6 @@
 // Every fact on the home page lives here. Sources: the profile README
-// (Lunaaaalj/Lunaaaalj) and each project's repository README. Nothing is added
-// that is not stated in one of them.
+// (Lunaaaalj/Lunaaaalj), each project's repository README, and, for the summary's education,
+// experience and interests, the author's own About text (November 2026). Nothing else is added.
 
 const gh = (repo: string) => `https://github.com/Lunaaaalj/${repo}`;
 
@@ -14,10 +14,15 @@ export const person = {
 };
 
 export const summary = {
-  lead: 'Quantitative modelling for operational decisions under uncertainty: spatial risk, resource allocation and stochastic planning. Undergraduate in Data Science and Mathematics at Tecnológico de Monterrey.',
-  plain: 'In plain terms: mathematical models that help an organisation decide where to act, how to spend and how to plan when the outcome is not certain.',
+  // The hero reads `tagline` after the role; `lead` opens the summary window and is the meta description
+  tagline: 'Quantitative modelling under uncertainty, and the interpretability and safety of AI systems.',
+  lead: 'Undergraduate in Data Science and Mathematics at Tecnológico de Monterrey (expected 2028), building towards research in mathematics and in the interpretability and safety of AI systems.',
+  plain: 'In plain terms: mathematical models that help an organisation decide where to act and how to plan when the outcome is not certain, and a growing interest in how AI systems work inside and how to keep them safe.',
+  background: 'Coursework and independent study span probability theory, stochastic processes and multivariate statistics: a multivariate analysis project classifying ozone exceedances from air-quality station data with factor analysis, logistic regression and autoregressive models. Independent work includes studies and research in explainable AI models, a project to build a GPT from scratch, and implementations of other machine learning algorithms.',
+  experience: 'As a data analyst intern at Tecnológico de Monterrey I applied predictive models (hidden Markov models, ARIMA, linear regression) to alumni outreach data and built a web-scraping pipeline for record enrichment. As a statistical-analysis volunteer with GeoStats I applied Markov chain Monte Carlo and spatial statistics to municipal traffic data to study collision patterns across the Monterrey metropolitan area.',
   practice: 'Raw data is immutable; every derived table and figure is regenerated from versioned code. Formulations are specified in LaTeX before implementation and, where tractable, validated against an exact solution. Solvers are written in C++; analysis and modelling in Python.',
   current: 'Chance-constrained optimisation and metaheuristics for reforestation planning; hierarchical Bayesian models for spatial count data; dataset distillation for convolutional networks.',
+  interests: 'Deepening the mathematical training behind quantitative modelling, with an eye on research in probability, optimisation and stochastic methods, and increasingly on interpretability and safety: understanding what a model has learned and why it behaves as it does. The background of this page is a small character-level transformer, trained on the text of this site and drawn as it reads it.',
 };
 
 export interface Cell { label: string; value: string; full?: boolean }

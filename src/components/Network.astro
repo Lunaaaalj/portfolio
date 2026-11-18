@@ -1,0 +1,40 @@
+---
+// The character transformer behind the page (src/scripts/network/), on two fixed canvases: the
+// back one blurred for depth, the front one sharp. The weights (~340 KB) load after the page is
+// interactive, so they never hold up the text. The model reads every element with data-feed.
+---
+<canvas class="field field-back" aria-hidden="true"></canvas>
+<canvas class="field field-front" aria-hidden="true"></canvas>
+
+<script>
+  import { load, type Weights } from '../scripts/network/forward';
+  import { mountNetwork } from '../scripts/network/eclipse';
+
+  async function boot() {
+    const W = (await import('../data/network-weights.json')).default as unknown as Weights;
+    const model = load(W);
+    const q = (k: string) => document.querySelector<HTMLElement>(`[data-sl="${k}"]`);
+    const column = document.querySelector<HTMLElement>('main.col');
+    const feeds = [...document.querySelectorAll<HTMLElement>('[data-feed]')];
+    if (!column || !feeds.length) return;
+    const net = mountNetwork({
+      model, feeds, column,
+      back: document.querySelector<HTMLCanvasElement>('.field-back')!,
+      front: document.querySelector<HTMLCanvasElement>('.field-front')!,
+      status: { mode: q('mode'), feed: q('feed'), edges: q('edges'), next: q('next'), nll: q('nll'), step: q('step') },
+    });
+    const m = q('model');
+    if (m) m.textContent = `2×4 · ${model.params.toLocaleString('en-US')} params`;
+    addEventListener('networkpause', () => net.togglePause());
+  }
+  const idle = (window as any).requestIdleCallback ?? ((f: () => void) => setTimeout(f, 200));
+  idle(() => { boot(); }, { timeout: 1500 });
+</script>
+
+<style>
+  .field { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; }
+  .field-back { filter: blur(1.6px); opacity: .58; z-index: 0; }
+  .field-front { z-index: 1; }
+  @media (max-width: 1099px) { .field-back { opacity: .3; } }
+  @media print { .field { display: none; } }
+</style>

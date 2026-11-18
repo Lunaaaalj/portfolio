@@ -1,0 +1,134 @@
+---
+// One featured project on the home page, as a terminal window: the bar names it by number and
+// repository with its coordinates; inside, the title, the project's Fig. 1 in its compact form,
+// the question and the method, a key/value title block, and the links. Pointing at the figure
+// previews its interaction (years, constraint families, seasons).
+import type { Featured } from '../data/site';
+import HexMapFigure from './HexMapFigure.astro';
+import MosaicFigure from './MosaicFigure.astro';
+import SparsityFigure from './SparsityFigure.astro';
+import ValleyFigure from './ValleyFigure.astro';
+
+interface Props { entry: Featured; n: number }
+const { entry, n } = Astro.props;
+const no = String(n).padStart(2, '0');
+const hint: Record<string, string> = {
+  geostats: 'Point at the map to step through 2019 to 2024.',
+  lattice: 'Point at the tile to see the competition-aware arrangement.',
+  sparsity: 'Point at the matrix to step through its constraint families.',
+  ozone: 'Point at the valley to step through the four seasons.',
+};
+const live = (l: { label: string }) => /live|viewer|site/i.test(l.label);
+const links = [{ label: 'Read the project', href: entry.page }, ...entry.links];
+---
+<section class="win work" id={entry.figure} data-feed={entry.repo.toLowerCase()} aria-labelledby={`h-${entry.figure}`}>
+  <div class="win-bar">
+    <span>{no}</span><span class="t">{entry.repo}</span><span class="rule"></span>
+    <span class="reading">reading</span>
+    <span class="opt">{entry.sheetInfo.coords.join(' ')}</span>
+  </div>
+  <div class="win-body">
+    <h2 id={`h-${entry.figure}`}><a href={entry.page}><span style={`view-transition-name: title-${entry.figure}`}>{entry.title}</span></a></h2>
+    <div class="r">
+      <div>
+        <p class="lead">{entry.problem}</p>
+        <p class="dimtext">{entry.method}</p>
+      </div>
+      <aside class="note"><p>{hint[entry.figure]}</p></aside>
+    </div>
+
+    <a class="fig" href={entry.page} tabindex="-1" aria-hidden="true">
+      <span class={`plate plate-${entry.figure}`}>
+        {entry.figure === 'geostats' && <HexMapFigure compact />}
+        {entry.figure === 'lattice' && <MosaicFigure compact />}
+        {entry.figure === 'sparsity' && <SparsityFigure compact />}
+        {entry.figure === 'ozone' && <ValleyFigure />}
+      </span>
+    </a>
+    <p class="vh">{entry.alt}</p>
+
+    <dl class="kv">
+      <div><dt>{(entry.sheetInfo.partnerLabel ?? 'partner').toLowerCase()}</dt><dd>{entry.sheetInfo.partner}</dd></div>
+      <div><dt>place</dt><dd>{entry.sheetInfo.place.join(', ')}</dd></div>
+      {entry.cells.filter((c) => !/partner|place/i.test(c.label)).map((c) => <div><dt>{c.label.toLowerCase()}</dt><dd>{c.value}</dd></div>)}
+      <div><dt>year</dt><dd>{entry.sheetInfo.year}</dd></div>
+    </dl>
+
+    <div class="links">
+      {links.map((l, i) => (
+        <a href={l.href} title={'note' in l ? l.note : undefined}>
+          {live(l) && <span class="live" aria-hidden="true"></span>}
+          {l.label.toLowerCase()}
+          <span class="arrow" aria-hidden="true">{i === 0 ? '→' : '↗'}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  for (const fig of document.querySelectorAll<HTMLElement>('.work .fig')) {
+    const hex = fig.querySelector<HTMLElement>('[data-preview="hex"]');
+    const sp = fig.querySelector<HTMLElement>('[data-preview="sparsity"]');
+    const valley = fig.querySelector<HTMLElement>('[data-preview="valley"]');
+    let timer = 0, start = () => {}, stop = () => {};
+    if (hex) {
+      const classes = JSON.parse(hex.dataset.classes!) as Record<string, string>;
+      const years = Object.keys(classes), cells = [...hex.querySelectorAll<SVGUseElement>('use')];
+      const tag = hex.querySelector<HTMLElement>('.tag')!;
+      const show = (y: string) => { cells.forEach((u, k) => u.setAttribute('class', `c${classes[y][k]}`)); tag.textContent = y; };
+      let i = 0;
+      start = () => { if (still.matches) return; i = 0; show(years[0]); timer = window.setInterval(() => { i = (i + 1) % years.length; show(years[i]); }, 650); };
+      stop = () => { clearInterval(timer); show(years[years.length - 1]); };
+    }
+    if (sp) {
+      const bands = JSON.parse(sp.dataset.bands!) as [string, number, number][];
+      const rect = sp.querySelector<SVGRectElement>('.band')!, tag = sp.querySelector<HTMLElement>('.tag')!;
+      const base = tag.textContent;
+      const show = (k: number) => { rect.setAttribute('y', String(bands[k][1])); rect.setAttribute('height', String(bands[k][2])); tag.textContent = bands[k][0]; };
+      let i = 0;
+      start = () => { i = 0; show(0); if (!still.matches) timer = window.setInterval(() => { i = (i + 1) % bands.length; show(i); }, 800); };
+      stop = () => { clearInterval(timer); rect.setAttribute('height', '0'); tag.textContent = base; };
+    }
+    if (valley) {
+      const seasons = JSON.parse(valley.dataset.seasons!) as [string, number[]][], base = JSON.parse(valley.dataset.base!) as number[];
+      const bars = [...valley.querySelectorAll<SVGRectElement>('[data-bar]')], tag = valley.querySelector<HTMLElement>('.tag')!;
+      const scale = Number(valley.dataset.scale), floor = bars.map((b) => Number(b.dataset.bar));
+      const label = tag.textContent;
+      const show = (values: number[]) => bars.forEach((b, k) => { const h = values[k] * scale; b.setAttribute('height', String(h)); b.setAttribute('y', String(floor[k] - h)); });
+      let i = 0;
+      start = () => { if (still.matches) return; i = 0; show(seasons[0][1]); tag.textContent = seasons[0][0]; timer = window.setInterval(() => { i = (i + 1) % seasons.length; show(seasons[i][1]); tag.textContent = seasons[i][0]; }, 900); };
+      stop = () => { clearInterval(timer); show(base); tag.textContent = label; };
+    }
+    fig.addEventListener('pointerenter', () => start());
+    fig.addEventListener('pointerleave', () => stop());
+  }
+</script>
+
+<style>
+  h2 a { text-decoration: none; }
+  h2 a:hover span { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 2px; }
+  .lead { margin-bottom: 10px; }
+  .fig { display: block; margin: 22px 0 0; color: inherit; text-decoration: none; }
+  .plate { display: block; position: relative; border: 1px solid var(--edge); background: var(--glass-hi); transition: border-color .2s; }
+  .fig:hover .plate { border-color: var(--red); }
+  /* Each plate takes its figure's proportions, so the figure fills it at every width */
+  .plate-geostats { aspect-ratio: 1.15; max-height: 520px; }
+  .plate-lattice { aspect-ratio: 2.7; }
+  .plate-sparsity { aspect-ratio: 1.42; }
+  .plate-ozone { aspect-ratio: 1.9; }
+  .plate :global(.preview) { position: absolute; inset: 20px 20px 30px; }
+  .plate :global(.preview svg) { display: block; width: 100%; height: 100%; max-height: none; min-width: 0; }
+  .plate :global(.tag) {
+    position: absolute; right: 8px; bottom: -22px;
+    font: 400 12px/1.3 var(--mono); color: var(--dim); font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 640px) {
+    .plate :global(.preview) { inset: 10px 10px 24px; }
+    .plate-lattice { aspect-ratio: auto; overflow: hidden; }
+    .plate-lattice :global(.preview) { position: relative; inset: auto; padding: 10px 10px 28px; }
+    .plate-lattice :global(.preview svg) { width: 170%; height: auto; }
+    .note { display: none; }
+  }
+</style>

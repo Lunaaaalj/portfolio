@@ -1,93 +1,197 @@
 ---
-import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
-import FeaturedEntry from '../components/FeaturedEntry.astro';
+import Terminal from '../layouts/Terminal.astro';
+import WorkWindow from '../components/WorkWindow.astro';
 import MethodsMatrix from '../components/MethodsMatrix.astro';
-import FurtherWork from '../components/FurtherWork.astro';
-import RunningHead from '../components/RunningHead.astro';
-import Surface from '../components/Surface.astro';
-import { person, summary, featured, methods } from '../data/site';
+import { person, summary, featured, methods, further } from '../data/site';
+import W from '../data/network-weights.json';
+
+const [last, ...rest] = person.name.split(' ').reverse();
+const first = rest.reverse().join(' ');
+const tagline = summary.tagline.replace(/\.$/, '');
+const partners = new Set(featured.map((f) => f.sheetInfo.partner)).size;
+const repos = featured.length + methods.projects.filter((p) => !p.featured).length + further.filter((f) => !methods.projects.some((p) => p.href === f.href)).length;
+const live = (label: string) => /live|viewer|site/i.test(label);
+const sections = [
+  { id: 'work', label: 'work' },
+  { id: 'methods', label: 'methods' },
+  { id: 'further', label: 'further' },
+  { id: 'contact', label: 'contact' },
+];
 ---
-<Base title={person.name} description={summary.lead}>
-  <Hero />
-  <RunningHead title={person.name} after=".hero" />
+<Terminal title={person.name} description={summary.lead} sections={sections}>
+  <main class="col">
+    <section class="hero" data-feed="hero">
+      <p class="prompt" aria-hidden="true">~/portfolio $ <span class="cmd">whoami</span></p>
+      <h1 class="name">{first} <span class="last">{last}</span></h1>
+      <p class="role">{person.role}, {person.affiliation}. {tagline}.</p>
+      <p class="facts">
+        <b>{featured.length}</b> featured projects<span class="dot" aria-hidden="true">·</span><b>{partners}</b> partners<span class="dot" aria-hidden="true">·</span><b>{methods.rows.length}</b> methods<span class="dot" aria-hidden="true">·</span><b>{repos}</b> repositories
+      </p>
+      <p class="keys" aria-hidden="true"><kbd>j</kbd> next<span class="dot">·</span><kbd>k</kbd> previous<span class="dot">·</span><kbd>1</kbd>–<kbd>4</kbd> sections<span class="dot">·</span><kbd>t</kbd> theme<span class="dot">·</span><kbd>p</kbd> pause the network</p>
+    </section>
 
-  <Surface start=".hero .start" basins=".hero, #summary, .entry, #methods, #further, #contact" anchor=".anchor > .note" algorithm />
-
-  <main class="page">
-    <div class="summary" id="summary">
-      <div class="r anchor">
-        <div class="m">
-          <p class="lead">{summary.lead}</p>
-          <p><b>Practice.</b> {summary.practice}</p>
+    <section class="win" id="summary" data-feed="summary" aria-label="Summary">
+      <div class="win-bar"><span>cat</span><span class="t">summary.txt</span><span class="rule"></span><span class="reading">reading</span></div>
+      <div class="win-body">
+        <div class="r">
+          <div>
+            <p class="lead">{summary.lead}</p>
+            <p>{summary.background}</p>
+            <p>{summary.experience}</p>
+            <p><b>Practice.</b> {summary.practice}</p>
+            <p><b>Current work.</b> {summary.current}</p>
+            <p class="last-p"><b>Interests.</b> {summary.interests}</p>
+          </div>
+          <aside class="note"><p>{summary.plain}</p></aside>
         </div>
-        <aside class="note"><p>{summary.plain}</p></aside>
-      </div>
-      <div class="r">
-        <p class="m"><b>Current work.</b> {summary.current}</p>
-      </div>
-    </div>
-
-    <section id="work" aria-labelledby="work-h">
-      <div class="r"><h2 class="m" id="work-h">Selected work</h2></div>
-      <ol class="entries">
-        {featured.map((entry, i) => <FeaturedEntry entry={entry} sheet={i + 1} of={featured.length} />)}
-      </ol>
-    </section>
-
-    <section id="methods" aria-labelledby="methods-h">
-      <div class="r"><h2 class="m" id="methods-h">Methods by project</h2></div>
-      <div class="r"><div class="wide"><MethodsMatrix /></div></div>
-      <div class="r">
-        <p class="m libs"><b>Libraries.</b> {methods.libraries}<br /><b>Tooling.</b> {methods.tooling}</p>
-        <aside class="note">
-          <p>Each column is a project and each row a method. The first four columns are the featured projects above.<span class="scroll-hint"> The table scrolls sideways.</span></p>
-        </aside>
       </div>
     </section>
 
-    <section id="further" aria-labelledby="further-h">
-      <div class="r"><h2 class="m" id="further-h">Further work</h2></div>
-      <div class="r"><div class="wide"><FurtherWork /></div></div>
-    </section>
-
-    <section id="contact" aria-labelledby="contact-h">
-      <div class="r"><h2 class="m" id="contact-h">Contact</h2></div>
-      <div class="r">
-        <dl class="m contact">
-          <div><dt>Email</dt><dd><a href={`mailto:${person.email}`}>{person.email}</a></dd></div>
-          <div><dt>LinkedIn</dt><dd><a href={person.linkedin}>angel-eduardo-luna</a></dd></div>
-          <div><dt>GitHub</dt><dd><a href={person.github}>Lunaaaalj</a></dd></div>
-        </dl>
-        <aside class="note colophon">
-          <p><b>Colophon.</b> The figures are drawn when the site is built, from each project’s own data: the GeoStats grid, the competition matrix of the reforestation study and the Casa Monarca model specification.</p>
-          <p>The background is decorative. It is a synthetic loss surface, a tilted plane with a Gaussian well beside each section, drawn by its level sets; the dark red line is basin hopping on that surface, computed in the browser. Set in STIX Two and IBM Plex.</p>
-        </aside>
+    <section class="win" id="work" data-feed="work" aria-labelledby="work-h">
+      <div class="win-bar"><span>ls -l</span><span class="t">./work</span><span class="rule"></span><span class="reading">reading</span><span class="opt">{featured.length} entries</span></div>
+      <div class="win-body">
+        <h2 id="work-h" class="vh">Selected work</h2>
+        <ol class="ls">
+          <li class="hd" aria-hidden="true"><span>#</span><span>title</span><span class="pt">partner</span><span class="y">year</span><span>status</span></li>
+          {featured.map((f, i) => (
+            <li>
+              <span class="n">{String(i + 1).padStart(2, '0')}</span>
+              <a href={`#${f.figure}`}><span class="ti">{f.title}</span></a>
+              <span class="pt">{f.sheetInfo.partner}</span>
+              <span class="y">{f.sheetInfo.year}</span>
+              {f.links.some((l) => live(l.label)) ? <span class="st live">live</span> : <span class="st repo">repo</span>}
+            </li>
+          ))}
+        </ol>
+        <p class="ls-key">● live: a running application or site · ○ repository and report</p>
       </div>
     </section>
 
-    <footer>
-      <span>{person.name}, {person.affiliation}</span>
-      <a href="#top">Back to top</a>
-    </footer>
+    {featured.map((entry, i) => <WorkWindow entry={entry} n={i + 1} />)}
+
+    <section class="win" id="methods" data-feed="methods" aria-labelledby="methods-h">
+      <div class="win-bar"><span>column -t</span><span class="t">methods.tsv</span><span class="rule"></span><span class="reading">reading</span><span class="opt">{methods.rows.length} × {methods.projects.length}</span></div>
+      <div class="win-body">
+        <h2 id="methods-h">Methods by project</h2>
+        <MethodsMatrix />
+        <div class="r after">
+          <p class="dimtext"><b>Libraries.</b> {methods.libraries}<br /><b>Tooling.</b> {methods.tooling}</p>
+          <aside class="note"><p>Each column is a project and each row a method; the first four are the featured projects. Pointing at a cell lights its row and column.</p></aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="win" id="further" data-feed="further" aria-labelledby="further-h">
+      <div class="win-bar"><span>tree</span><span class="t">./further</span><span class="rule"></span><span class="reading">reading</span><span class="opt">{further.length} repositories</span></div>
+      <div class="win-body">
+        <h2 id="further-h" class="vh">Further work</h2>
+        <ul class="tree">
+          {further.map((f, i) => (
+            <li>
+              <span class="g" aria-hidden="true">{i === further.length - 1 ? '└──' : '├──'}</span>
+              <span class="nm"><a href={f.href}>{f.repo}</a></span>
+              <span class="s"><span class="tt">{f.title}.</span> {f.subject}.{f.report && <> <a class="rep" href={f.report}>report (pdf) ↗</a></>}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="win" id="contact" data-feed="contact" aria-labelledby="contact-h">
+      <div class="win-bar"><span>man</span><span class="t">ael(1)</span><span class="rule"></span><span class="reading">reading</span></div>
+      <div class="win-body">
+        <h2 id="contact-h">Contact</h2>
+        <div class="links contact">
+          <a href={`mailto:${person.email}`}>{person.email} <span class="arrow" aria-hidden="true">↗</span></a>
+          <a href={person.linkedin}>linkedin <span class="arrow" aria-hidden="true">↗</span></a>
+          <a href={person.github}>github <span class="arrow" aria-hidden="true">↗</span></a>
+        </div>
+
+        <h3>colophon</h3>
+        <div class="r">
+          <div>
+            <p>Behind this page a character-level transformer reads the section in view, one character a second. It has two layers, four attention heads and {W.params.toLocaleString('en-US')} parameters, and was trained on the text of this site (validation loss {W.val_loss} nats per character).</p>
+            <p class="dimtext">The wheel is the network, drawn too large for the screen. From the centre out: the residual stream after the embedding (48 dimensions), the first and second MLP layers (192 neurons each), and the 50 characters it can predict, on the rim; the red one is its current guess. With each character read, the eight most active units of each layer fire along their two strongest direct-path weights, with LayerNorm’s gain folded in; the new connections flash, layer after layer, from the centre out. Scrolling turns the wheel. The statusline reports the last characters read, the guess, and how surprised the model was (nll, in nats).</p>
+            <p class="dimtext">The figures are drawn when the site is built, from each project’s own data. Set in IBM Plex Sans and IBM Plex Mono.</p>
+          </div>
+          <aside class="note"><p>Decorative, but computed: every mark is the output of the forward pass, not an animation. Press <kbd>p</kbd> to pause it.</p></aside>
+        </div>
+      </div>
+    </section>
   </main>
-</Base>
+
+  <footer class="col foot">
+    <span>-- end of buffer --</span>
+    <span>{person.name}, {person.affiliation}</span>
+    <a href="#top">back to top ↑</a>
+  </footer>
+</Terminal>
 
 <style>
-  .entries { list-style: none; margin: 0; padding: 0; }
-  .libs { margin-top: 20px; font: 400 14px/1.6 var(--sans); color: var(--graphite); }
-  .libs b { color: var(--ink); font-weight: 500; }
-  .scroll-hint { display: none; }
-  .contact { margin: 0; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 12px 40px; }
-  .contact dt { font: 400 14px/1.45 var(--sans); color: var(--graphite); }
-  .contact dd { margin: 2px 0 0; font-size: 21px; line-height: 1.35; }
-  .colophon b { color: var(--ink); font-weight: 500; }
-  footer { display: flex; justify-content: space-between; gap: 24px; }
-  footer a { color: var(--graphite); }
+  /* ---------- hero ---------- */
+  .hero { min-height: calc(100svh - 40px); display: flex; flex-direction: column; justify-content: center; padding: 48px 0 64px; }
+  .prompt { font: 400 14px/1 var(--mono); color: var(--dim); margin: 0 0 28px; }
+  .cmd { color: var(--ink); }
+  .name { font: 500 clamp(46px, 7.6vw, 112px)/.9 var(--mono); letter-spacing: -.055em; margin: 0; }
+  .last { color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
+  .role { font: 400 clamp(17px, 1.7vw, 21px)/1.45 var(--sans); margin: 26px 0 0; max-width: 34em; }
+  .facts, .keys { font: 400 13px/1.9 var(--mono); color: var(--dim); margin: 22px 0 0; }
+  .facts b { color: var(--ink); font-weight: 600; }
+  .keys { margin-top: 6px; }
+  .dot { color: var(--faint); padding: 0 .5em; }
+  @media (hover: none) { .keys { display: none; } }
+  @media (forced-colors: active) { .last { color: CanvasText; -webkit-text-stroke: 0; } }
+
+  .last-p { margin-bottom: 0; }
+  #summary b, .after b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- ls -l ---------- */
+  .ls { list-style: none; margin: 0; padding: 0; font: 400 13px/1.4 var(--mono); }
+  .ls li { display: grid; grid-template-columns: 34px minmax(0, 1fr) 190px 46px 56px; gap: 14px; align-items: baseline; padding: 11px 0; border-bottom: 1px solid var(--edge); }
+  .ls .hd { color: var(--faint); font-size: 11px; padding-top: 0; }
+  .ls .ti { font: 500 16px/1.35 var(--sans); }
+  .ls a { text-decoration: none; }
+  .ls a:hover .ti { color: var(--red); }
+  .ls .n, .ls .y, .ls .pt { color: var(--dim); }
+  .st { white-space: nowrap; }
+  .st.live { color: var(--green); }
+  .st.live::before { content: '● '; }
+  .st.repo { color: var(--dim); }
+  .st.repo::before { content: '○ '; }
+  .ls-key { margin: 14px 0 0; font: 400 11.5px/1.4 var(--mono); color: var(--faint); }
   @media (max-width: 760px) {
-    .contact { grid-template-columns: 1fr; }
+    .ls li { grid-template-columns: 28px minmax(0, 1fr) auto; }
+    .ls .pt, .ls .y { display: none; }
   }
-  @media (max-width: 640px) {
-    .scroll-hint { display: inline; }
+
+  /* ---------- methods ---------- */
+  .after { margin-top: 22px; }
+  .after p { font-size: 14.5px; margin: 0; }
+  #methods :global(.matrix) { font-family: var(--mono); font-size: 12.5px; }
+  #methods :global(.matrix tbody th) { font-family: var(--sans); font-size: 14px; }
+  #methods :global(.matrix th:first-child) { background: transparent; }
+  @media (max-width: 760px) { #methods :global(.matrix th:first-child) { background: var(--bg); } }
+  #methods :global(.matrix .dot) { border-radius: 0; width: 8px; height: 8px; }
+
+  /* ---------- tree ---------- */
+  .tree { list-style: none; margin: 0; padding: 0; font: 400 13px/1.55 var(--mono); }
+  .tree li { display: grid; grid-template-columns: 34px minmax(0, 260px) minmax(0, 1fr); gap: 10px; padding: 5px 0; }
+  .g { color: var(--faint); }
+  .tree a { text-decoration-color: var(--edge-hi); }
+  .tree a:hover { color: var(--red); text-decoration-color: var(--red); }
+  .s { color: var(--dim); font: 400 14.5px/1.5 var(--sans); }
+  .tt { color: var(--ink); }
+  .rep { font: 400 12.5px var(--mono); white-space: nowrap; }
+  @media (max-width: 760px) {
+    .tree li { grid-template-columns: 26px minmax(0, 1fr); }
+    .s { grid-column: 2; }
   }
+
+  /* ---------- contact ---------- */
+  .contact { margin-top: 4px; }
+  .contact a { font-size: 13.5px; padding: 12px 14px; }
+
+  .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font: 400 12px/1.6 var(--mono); color: var(--faint); padding: 0 0 72px; }
+  .foot a { color: var(--dim); text-decoration: none; }
+  .foot a:hover { color: var(--red); }
 </style>

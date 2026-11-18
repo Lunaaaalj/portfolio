@@ -161,6 +161,21 @@ Design record for Angel Eduardo Luna's portfolio site, written from the shipped 
 
 The frontmatter is normative. Where the prose and the frontmatter disagree, the frontmatter wins.
 
+## Migration in progress: Terminal Brutalism (branch `terminal-brutalism`, November 2026)
+
+The site is moving, page by page, to a second world. **The home page is migrated; the featured project pages and 404 still use the Loss-Surface Engraving below**, and the frontmatter still describes the engraving. This section is the record for the new world until the migration is finished and the document is rewritten around it.
+
+**North star: "The model reads the page."** Behind the page, a 2-layer, 4-head character-level transformer (63,794 parameters, `scripts/network/train.py`, trained on the site's own text, validation loss 1.885 nats/char) reads the section in view, one character a second. It is drawn as a radial firing graph, oversized and off centre so the rim runs off the screen ("eclipse"): residual stream (48), MLP 0 (192), MLP 1 (192), and the 50 output characters on the rim, with the model's guess in red. With each character, the eight most active units per layer fire along their two strongest direct-path weights (LayerNorm gain folded in); connections new since the last character flash, layer after layer from the centre out (140 ms apart, 520 ms decay, glow on the blurred canvas), and persisting ones flash faintly. A gradient veil (`destination-out`) makes the wheel recede behind the reading column. Scrolling turns the wheel. A statusline reports the characters read, the guess and the surprise (nll).
+
+- **Why this is not the rejected "dark neural-net particle portfolio":** that was a generic node field with no meaning. Here every mark is the forward pass of a real model trained on this site, the colophon says exactly what is drawn, and the palette is monochrome with one red.
+- **Tokens** (`src/styles/terminal.css`): `bg` #0A0A0B / #EDECE7, `ink` #ECEBE6 / #111110, `dim` #9B9A93 / #55544E, `faint` #807F79 / #6A6963 (raised from the mock for AA), `red` #FF4F64 / #D0142C, `blue` #7AA6FF / #1F4FD1, `green` #5FD394 / #0D7A42; dark first. Every text token is at least 4.5:1 on its ground. The engraving token names are aliased onto these so the figure components render unchanged.
+- **One red:** the model's guess, focus rings, hover on hard buttons, the top step of a data ramp, the reading marker. Green means only "live". Blue is for data in figures.
+- **Type:** IBM Plex Mono for the name, headings, bars, labels and data; IBM Plex Sans for running text. STIX is not used on migrated pages.
+- **Windows:** each section is a glass panel (`backdrop-filter`) with a 1px edge, hard corner ticks and a terminal bar (`cat summary.txt`, `ls -l ./work`, `tree ./further`, `man ael(1)`). The window being read inverts its bar and shows a red "reading" marker.
+- **Keys:** `j`/`k` next and previous window, digits for the sections in the top bar, `t` theme, `p` pause the network.
+- **Performance:** the weights (~340 KB) are a separate chunk loaded at idle; the text never waits for them. Reduced motion draws one still frame.
+- **Background studies** that led here (dream log, attribution circuit, spike raster, tunnel, ripple field and others) were explored as throwaway galleries and are not part of the build.
+
 ## Overview
 
 **Creative North Star: "The Loss-Surface Engraving"**

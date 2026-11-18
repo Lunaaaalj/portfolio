@@ -7,7 +7,7 @@
 
 import model from '../../../data/geostats-model.json';
 import type { Ctx, Scene } from '../engine';
-import { ease, easeInOut, fmt, label, lerp, rgba, seg } from '../draw';
+import { ease, easeInOut, fmt, label, lerp, rgba, seg, SANS } from '../draw';
 import { spring } from '../tiledraw';
 import { N, X, Y, drawColumns, drawRoads, px, py, rampClasses, type View } from './table';
 
@@ -97,7 +97,7 @@ export default function springs(): Scene {
           const [x, y] = tip(q), lx = x + side * 16, ly = Math.max(wide ? 76 : 66, y - h * 0.09);
           const a = `${fmt(H.n[q])} ${H.n[q] === 1 ? 'report' : 'reports'} in five years`;
           g.fillStyle = rgba(c.plate, 0.9 * shown);
-          g.font = '500 12px "IBM Plex Sans", system-ui, sans-serif';
+          g.font = `500 12px ${SANS}`;
           const tw = g.measureText(a).width, tx = side > 0 ? lx : lx - tw;
           g.fillRect(tx - 5, ly - 14, tw + 10, heat > 0 ? 34 : 19);
           g.globalAlpha = shown; g.strokeStyle = c.ink; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.lineTo(lx, ly + 3); g.stroke(); g.globalAlpha = 1;

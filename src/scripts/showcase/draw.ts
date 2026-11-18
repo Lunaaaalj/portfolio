@@ -8,7 +8,28 @@ export interface Colors {
   accent: string; survey: string; hazard: string; genus: string[]; ramp: string[];
 }
 
+/** True on pages migrated to the terminal world (Terminal.astro sets data-world on <html>). */
+export const terminal = typeof document !== 'undefined' && document.documentElement.dataset.world === 'terminal';
+
+/** Mixes two hex colours into a hex colour (canvas helpers here parse hex only). */
+function hexMix(a: string, b: string, t: number): string {
+  const n = (h: string) => { const v = parseInt(h.replace('#', ''), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; };
+  const x = n(a), y = n(b);
+  return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
 export function readColors(): Colors {
+  if (terminal) {
+    // Monochrome ink on the ground; the engraving's names map onto it. `plate` and `paper` are
+    // the opaque ground (label patches must hide what is under them), `rule` a quiet hairline.
+    const ink = token('--ink'), bg = token('--bg');
+    return {
+      ink, graphite: token('--dim'), rule: hexMix(ink, bg, 0.82), contour: token('--faint'),
+      plate: bg, paper: bg, accent: token('--red'), survey: token('--blue'), hazard: token('--red'),
+      genus: [1, 2, 3, 4].map((k) => token(`--genus-${k}`)),
+      ramp: [1, 2, 3, 4, 5].map((k) => token(`--ramp-${k}`)),
+    };
+  }
   return {
     ink: token('--ink'), graphite: token('--graphite'), rule: token('--rule'), contour: token('--contour'),
     plate: token('--plate'), paper: token('--paper'), accent: token('--accent'), survey: token('--survey'),
@@ -18,9 +39,17 @@ export function readColors(): Colors {
   };
 }
 
-export const SANS = '"IBM Plex Sans", system-ui, sans-serif';
-export const COND = '"IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif';
-export const SERIF = '"STIX Two Text Variable", "STIX Two Text", Georgia, serif';
+const MONO = '"IBM Plex Mono", ui-monospace, Menlo, monospace';
+export const SANS = terminal ? MONO : '"IBM Plex Sans", system-ui, sans-serif';
+export const COND = terminal ? MONO : '"IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif';
+export const SERIF = terminal ? MONO : '"STIX Two Text Variable", "STIX Two Text", Georgia, serif';
+
+/** A phosphor glow for the one mark that matters in a scene: call before drawing it, reset after. */
+export function glow(g: CanvasRenderingContext2D, color: string, blur: number) {
+  if (!terminal) return;
+  g.shadowColor = color; g.shadowBlur = blur;
+}
+export function unglow(g: CanvasRenderingContext2D) { g.shadowBlur = 0; g.shadowColor = 'transparent'; }
 
 export const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -81,6 +110,12 @@ export function dot(g: CanvasRenderingContext2D, color: string, x: number, y: nu
  *  path's bounds [x, y, w, h] (the whole canvas if omitted). */
 export function hatch(g: CanvasRenderingContext2D, path: Path2D, deg: number, gap: number, color: string, width = 1, bounds?: number[]) {
   const [bx, by, bw, bh] = bounds ?? [0, 0, g.canvas.width, g.canvas.height];
+  if (terminal) {
+    // The terminal's fill is a lattice of dots, staggered, not engraved lines
+    g.save(); g.clip(path); g.fillStyle = color;
+    for (let r = 0, y = by; y < by + bh; y += gap, r++) for (let x = bx + (r % 2 ? gap / 2 : 0); x < bx + bw; x += gap) g.fillRect(x, y, 1.4, 1.4);
+    g.restore(); return;
+  }
   g.save(); g.clip(path);
   const t = (deg * Math.PI) / 180, cx = Math.cos(t), sy = Math.sin(t);
   const mx = bx + bw / 2, my = by + bh / 2, D = Math.hypot(bw, bh) / 2 + gap;
@@ -96,7 +131,8 @@ export function label(g: CanvasRenderingContext2D, text: string, x: number, y: n
   size?: number; weight?: number; color: string; align?: CanvasTextAlign; base?: CanvasTextBaseline; font?: string; a?: number;
 }) {
   g.globalAlpha = o.a ?? 1;
-  g.font = `${o.weight ?? 400} ${o.size ?? 12}px ${o.font ?? SANS}`;
+  // Plex Mono is about a fifth wider than Plex Sans: a little smaller keeps every label where it was drawn
+  g.font = `${o.weight ?? 400} ${(o.size ?? 12) * (terminal ? 0.92 : 1)}px ${o.font ?? SANS}`;
   g.fillStyle = o.color; g.textAlign = o.align ?? 'left'; g.textBaseline = o.base ?? 'alphabetic';
   g.fillText(text, x, y);
   g.globalAlpha = 1;

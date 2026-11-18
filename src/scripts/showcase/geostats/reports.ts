@@ -7,7 +7,7 @@
 
 import story from '../../../data/geostats-story.json';
 import type { Scene } from '../engine';
-import { SANS, clamp, ease, easeInOut, fmt, label, lerp, rgba, seg } from '../draw';
+import { SANS, clamp, ease, easeInOut, fmt, glow, unglow, label, lerp, rgba, seg, terminal } from '../draw';
 import { arrive, cityGrains, frameCity, type Grain } from './city';
 
 const NATIONAL_GRAIN = 1000;
@@ -97,8 +97,11 @@ export default function reports(): Scene {
           // The busiest crossing: nodes are sorted by reports, so it is the first. Its pile is
           // redrawn in ink, and its label sits on a patch of plate, clear of the grains.
           const x = CX(nodes.x[0]), base = CY(nodes.y[0]), top = base - nodes.g[0] * grainH - 3;
-          g.fillStyle = c.ink; g.globalAlpha = mark;
+          // In the terminal the pile is the page's one red, with a phosphor glow
+          g.fillStyle = terminal ? c.hazard : c.ink; g.globalAlpha = mark;
+          glow(g, c.hazard, 14 * mark);
           for (let k = 0; k < nodes.g[0]; k++) g.fillRect(x - grainW / 2, base - k * grainH, grainW, grainH - 0.2);
+          unglow(g);
           const name = 'Fray Luis de León × Fidel Velázquez', sub = `${fmt(facts.cruceMayor[2] as number)} reports, San Nicolás`;
           g.font = `500 12px ${SANS}`;
           const tw = g.measureText(name).width, right = x + 34 + tw < w - 16, lx = x + (right ? 34 : -34), ly = Math.max(84, top - 34);

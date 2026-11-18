@@ -12,12 +12,12 @@ import '../styles/terminal.css';
 import Network from '../components/Network.astro';
 
 interface Section { id: string; label: string }
-interface Props { title: string; description: string; sections: Section[]; who?: string; path?: string }
-const { title, description, sections, who = 'ael', path = '~/portfolio' } = Astro.props;
+interface Props { title: string; description: string; sections: Section[]; who?: string; path?: string; home?: string; preloadMath?: boolean }
+const { title, description, sections, who = 'ael', path = '~/portfolio', home = '#top', preloadMath = false } = Astro.props;
 const abs = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-world="terminal">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,6 +25,7 @@ const abs = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
     <meta name="description" content={description} />
     <meta name="color-scheme" content="dark light" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {preloadMath && <link rel="preload" href="/fonts/STIXTwoMath-Regular.woff2" as="font" type="font/woff2" crossorigin />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -45,7 +46,7 @@ const abs = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
     <Network />
 
     <header class="bar">
-      <a class="who" href="#top"><span class="blk" aria-hidden="true"></span>{who}<span class="path"> {path}</span></a>
+      <a class="who" href={home}><span class="blk" aria-hidden="true"></span>{who}<span class="path"> {path}</span></a>
       <nav aria-label="Sections">
         {sections.map((s, i) => <a href={`#${s.id}`} data-key={i + 1}><b aria-hidden="true">{i + 1}</b> {s.label}</a>)}
       </nav>

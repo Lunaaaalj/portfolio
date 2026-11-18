@@ -7,7 +7,7 @@
 // The pipeline and the model are shown as scroll scenes (src/scripts/showcase/geostats); the text
 // after them carries the results and the formulation. Scene data comes from
 // scripts/extract-geostats-story.py.
-import Project from '../layouts/Project.astro';
+import TerminalProject from '../layouts/TerminalProject.astro';
 import TeX from '../components/TeX.astro';
 import HexMapFigure from '../components/HexMapFigure.astro';
 import Scene from '../components/Scene.astro';
@@ -16,20 +16,21 @@ import model from '../data/geostats-model.json';
 
 const fmt = (n: number) => n.toLocaleString('en-GB');
 const f = story.facts;
+const abstract = 'A data pipeline and a hierarchical Bayesian model that turn the 379,294 traffic incidents recorded by INEGI in the 18 municipalities of the Monterrey metropolitan area between 2019 and 2024 into a forecast for each one-kilometre cell. Risk is concentrated and persistent: 5% of the cells hold 43% of incidents, and the 2019 ranking of cells correlates 0.83 with that of 2024. The dominant source of error is how each municipality reports, not the statistics.';
+const sections = [
+  { id: 'readme', label: 'readme' }, { id: 'figures', label: 'figures' }, { id: 'map', label: 'map' },
+  { id: 'results', label: 'results' }, { id: 'formulation', label: 'formulation' }, { id: 'method', label: 'method' }, { id: 'links', label: 'links' },
+];
 ---
-<Project
-  slug="geostats"
-  abstract="A data pipeline and a hierarchical Bayesian model that turn the 379,294 traffic incidents recorded by INEGI in the 18 municipalities of the Monterrey metropolitan area between 2019 and 2024 into a forecast for each one-kilometre cell. Risk is concentrated and persistent: 5% of the cells hold 43% of incidents, and the 2019 ranking of cells correlates 0.83 with that of 2024. The dominant source of error is how each municipality reports, not the statistics."
->
-  <script is:inline>
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('sx-live');
-  </script>
-  <div class="r intro">
-    <p class="m skip">The pipeline and the model are told in figures that play as the page scrolls. <a href="#results-h">Skip to the results</a></p>
-  </div>
 
-  <div class="showcase">
-    <Scene name="reports" fig={1} title="Reports, not crashes" source={`INEGI’s ATUS, to scale: one grain is 1,000 reports, then ${story.grain}`} length={3.8}>
+<TerminalProject slug="geostats" abstract={abstract} sections={sections}>
+  <p slot="intro" class="skip">Nine figures play as the page scrolls. <a href="#results">skip to the results →</a></p>
+
+  <div slot="figures" class="showcase" id="figures">
+    <script is:inline>
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('sx-live');
+    </script>
+    <Scene terminal name="reports" fig={1} title="Reports, not crashes" source={`INEGI’s ATUS, to scale: one grain is 1,000 reports, then ${story.grain}`} length={3.8}>
       <div class="beat" data-at="0 0.31">
         <p>Nothing here is a crash. Each grain stands for reports: forms filled in by each municipality’s traffic police and gathered by INEGI, {fmt(f.nacional)} of them from 2019 to 2024.</p>
       </div>
@@ -46,7 +47,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="sieve" fig={2} title="The sieve" source="The project’s grid, to scale; column height is reports, 2019–2024" length={3.6}>
+    <Scene terminal name="sieve" fig={2} title="The sieve" source="The project’s grid, to scale; column height is reports, 2019–2024" length={3.6}>
       <div class="beat" data-at="0 0.24">
         <p>The obvious unit is the census tract, and here it fails. Tract boundaries run along the avenues, and {f.cercaVia}% of the reports stand within 100 m of a main road: on a line, a report belongs to either side.</p>
         <p class="small">Tracts also differ in size, and have from 1 to 20 neighbours.</p>
@@ -64,7 +65,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="sealed" fig={3} title="The sealed year" source="Yearly counts per cell, to scale" length={3.4}>
+    <Scene terminal name="sealed" fig={3} title="The sealed year" source="Yearly counts per cell, to scale" length={3.4}>
       <div class="beat" data-at="0 0.3">
         <p>Each column opens into six drawers, one a year. A year without reports is a drawer holding zero, not a missing row: this cell in Santa Catarina held nothing in 2020 or 2021.</p>
       </div>
@@ -81,7 +82,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="die" fig={4} title="A die that will not hold still" source="Computed in this page, seed 42; real rows and fit from the project’s model" length={3.6}>
+    <Scene terminal name="die" fig={4} title="A die that will not hold still" source="Computed in this page, seed 42; real rows and fit from the project’s model" length={3.6}>
       <div class="beat" data-at="0 0.35">
         <p>One row: this cell in {model.die.municipality} in 2023, where the model expects {Math.round(model.die.mu)} reports and {model.die.y} were recorded.</p>
         <p>The first guess is a Poisson die, its loading fixed. Replayed ten thousand times, the count stays close to {Math.round(model.die.mu)}.</p>
@@ -100,7 +101,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="platforms" fig={5} title="Platforms and columns" source="Posterior medians of the project’s model, on a log scale" length={4.2}>
+    <Scene terminal name="platforms" fig={5} title="Platforms and columns" source="Posterior medians of the project’s model, on a log scale" length={4.2}>
       <div class="beat" data-at="0 0.18">
         <p>The model writes each expected count as a sum. On a log scale, a sum is a stack, so the columns are redrawn in those units.</p>
         <p class="eqline"><TeX tex={String.raw`\log \mu_{ia} = \beta_0 + m_{j(i),a} + u_i`} /></p>
@@ -120,7 +121,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="springs" fig={6} title="Springs and heat" source="32 real cells. Relaxation at the posterior means; the tremor is real posterior draws" length={4}>
+    <Scene terminal name="springs" fig={6} title="Springs and heat" source="32 real cells. Relaxation at the posterior means; the tremor is real posterior draws" length={4}>
       <div class="beat" data-at="0 0.22">
         <p>Close up, each column is tied by a cable to what its own five rows say. The cable’s thickness is how much they say: a few reports, or thousands.</p>
       </div>
@@ -138,7 +139,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="puck" fig={7} title="A puck on the posterior" source="Two of about 2,300 dimensions. Surface fitted to the project’s 8,000 draws; flights computed in this page, seed 42" length={3.8} controls>
+    <Scene terminal name="puck" fig={7} title="A puck on the posterior" source="Two of about 2,300 dimensions. Surface fitted to the project’s 8,000 draws; flights computed in this page, seed 42" length={3.8} controls>
       <div class="beat" data-at="0 0.3">
         <p>Everything so far is one surface over some 2,300 unknowns. The line that crosses this site descends such a surface and stops at the bottom. That gives a point. The model needs the whole basin.</p>
       </div>
@@ -152,7 +153,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="opening" fig={8} title="Opening 2024" source="Intervals fixed before 2024 was seen; coverage tallied cell by cell" length={3.8}>
+    <Scene terminal name="opening" fig={8} title="Opening 2024" source="Intervals fixed before 2024 was seen; coverage tallied cell by cell" length={3.8}>
       <div class="beat" data-at="0 0.34">
         <p>The seal is broken once. The model has never seen these {fmt(story.facts.celdas)} rows, and every interval was fixed before they were opened.</p>
       </div>
@@ -168,7 +169,7 @@ const f = story.facts;
       </div>
     </Scene>
 
-    <Scene name="history" fig={9} title="History decides where" source="Forecast from the project; choices computed in this page on the recorded 2024" length={3.4}>
+    <Scene terminal name="history" fig={9} title="History decides where" source="Forecast from the project; choices computed in this page on the recorded 2024" length={3.4}>
       <div class="beat" data-at="0 0.32">
         <p>The forecast for 2027 is 73,577 reports, with a margin of 3%. It holds only if no municipality changes how it reports, so its intervals are a floor.</p>
       </div>
@@ -182,81 +183,84 @@ const f = story.facts;
     </Scene>
   </div>
 
-  <section class="fig-section" aria-label="Figure 10, the map to explore">
-    <HexMapFigure />
+  <section class="win" id="map" data-feed="map" aria-label="Figure 10, the map to explore">
+    <div class="win-bar"><span>fig-10</span><span class="t">map.explore</span><span class="rule"></span><span class="reading">reading</span><span class="opt">2,241 cells</span></div>
+    <div class="win-body"><HexMapFigure /></div>
   </section>
 
-  <section aria-labelledby="results-h">
-    <div class="r"><h2 class="m" id="results-h">Results</h2></div>
-    <div class="r">
-      <div class="m">
-        <table class="data">
-          <caption class="vh">Validation on 2024, cell-by-year scale.</caption>
-          <thead>
-            <tr><th scope="col">Model</th><th scope="col" class="n">MAE</th><th scope="col" class="n">CRPS</th><th scope="col" class="n">90% coverage</th><th scope="col" class="n">PAI 5%</th></tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">Mean, 2019–2023</th><td class="n">9.59</td><td class="n">8.04</td><td class="n">63%</td><td class="n">8.41</td></tr>
-            <tr><th scope="row">Mean, 2022–2023</th><td class="n">8.15</td><td class="n">6.56</td><td class="n">68%</td><td class="n">8.38</td></tr>
-            <tr><th scope="row">Negative binomial, recent history</th><td class="n">8.18</td><td class="n">6.93</td><td class="n">90%</td><td class="n">8.38</td></tr>
-            <tr class="best"><th scope="row">Hierarchical, CAR and municipality</th><td class="n">8.19</td><td class="n">6.17</td><td class="n">87%</td><td class="n">8.42</td></tr>
-          </tbody>
-        </table>
-        <p class="table-note">Validation on 2024, from the project’s technical report.</p>
+  <section class="win" id="results" data-feed="results" aria-labelledby="results-h">
+    <div class="win-bar"><span>less</span><span class="t">results.md</span><span class="rule"></span><span class="reading">reading</span><span class="opt">validation on 2024</span></div>
+    <div class="win-body">
+      <h2 id="results-h">Results</h2>
+      <div class="r">
+        <div>
+          <div class="tablewrap">
+            <table class="data">
+              <caption class="vh">Validation on 2024, cell-by-year scale.</caption>
+              <thead>
+                <tr><th scope="col">Model</th><th scope="col" class="n">MAE</th><th scope="col" class="n">CRPS</th><th scope="col" class="n">90% coverage</th><th scope="col" class="n">PAI 5%</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Mean, 2019–2023</th><td class="n">9.59</td><td class="n">8.04</td><td class="n">63%</td><td class="n">8.41</td></tr>
+                <tr><th scope="row">Mean, 2022–2023</th><td class="n">8.15</td><td class="n">6.56</td><td class="n">68%</td><td class="n">8.38</td></tr>
+                <tr><th scope="row">Negative binomial, recent history</th><td class="n">8.18</td><td class="n">6.93</td><td class="n">90%</td><td class="n">8.38</td></tr>
+                <tr class="best"><th scope="row">Hierarchical, CAR and municipality</th><td class="n">8.19</td><td class="n">6.17</td><td class="n">87%</td><td class="n">8.42</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note"># validation on 2024, from the project’s technical report</p>
+        </div>
+        <aside class="note"><p>The hierarchical model predicted 70,815 incidents for 2024 against 71,249 recorded in the grid’s cells: 0.6% off the metropolitan total.</p></aside>
       </div>
-      <aside class="note"><p>The hierarchical model predicted 70,815 incidents for 2024 against 71,249 recorded in the grid’s cells: 0.6% off the metropolitan total.</p></aside>
-    </div>
-    <div class="r after-table">
-      <div class="m prose">
-        <p>
-          The hierarchical model ties the best baseline on absolute error and beats it on CRPS by 6%: its centre points
-          where a well-chosen average already points, but its distribution is better calibrated. The baseline’s 90%
-          interval covers 68% of cells; the model’s covers 87%. Spatial dependence net of the municipality is strong, <TeX tex={String.raw`\alpha = 0.85`} /> (94% interval 0.81 to 0.88). The central forecast for 2027 is 73,577
-          incidents, with a margin of 3%.
-        </p>
-        <p>
-          The PAI of 8.4 did not move in any model, from the first spatial analysis to the hierarchical one: choosing
-          5% of cells from the 2019–2023 data captures 42% of 2024’s incidents by counting alone. Where incidents happen
-          is decided by history; changing that would need covariates that vary by cell, such as road exposure, land use
-          or population.
-        </p>
+      <div class="r">
+        <div class="prose">
+          <p>
+            The hierarchical model ties the best baseline on absolute error and beats it on CRPS by 6%: its centre points
+            where a well-chosen average already points, but its distribution is better calibrated. The baseline’s 90%
+            interval covers 68% of cells; the model’s covers 87%. Spatial dependence net of the municipality is strong, <TeX tex={String.raw`\alpha = 0.85`} /> (94% interval 0.81 to 0.88). The central forecast for 2027 is 73,577
+            incidents, with a margin of 3%.
+          </p>
+          <p>
+            The PAI of 8.4 did not move in any model, from the first spatial analysis to the hierarchical one: choosing
+            5% of cells from the 2019–2023 data captures 42% of 2024’s incidents by counting alone. Where incidents happen
+            is decided by history; changing that would need covariates that vary by cell, such as road exposure, land use
+            or population.
+          </p>
+          <h3>where</h3>
+          <p>
+            The structure is strong. The Gini coefficient of counts per cell is 0.756, and Moran’s <TeX tex="I" /> on <TeX tex={String.raw`\log(1+n)`} /> is 0.648. Local statistics are corrected for multiple testing
+            (Benjamini–Hochberg): significant LISA cells fall from 682 to 287, and what survives is a compact core over
+            the consolidated urban area with no isolated hot spots. Risk follows corridors, not corners.
+          </p>
+          <h3>who bears it</h3>
+          <p>
+            The human cost is the exception, but a heavy one. 92.9% of incidents cause material damage only; the rest
+            left 25,642 people injured and 1,167 dead, and 64.4% of those deaths occurred at intersections in four
+            municipalities: Monterrey, Apodaca, Guadalupe and García. Where incidents are most frequent is not where they
+            are most severe: central cells average 498 incidents and 4.7% leave casualties, peripheral cells 29 and
+            8.4%. A ranking by count alone puts the periphery last.
+          </p>
+          <h3>limits</h3>
+          <p>
+            The dominant source of error is administrative, not statistical. Municipalities change how they report from
+            one year to the next: Santa Catarina recorded 77 incidents in 2021 and 1,795 in 2022; Guadalupe, 8,032 in
+            2020 and 2,721 in 2024. The municipal effect therefore measures reporting, not risk, and no model can
+            anticipate a change of reporting regime from earlier data. The forecasts are conditional on no such change,
+            and their intervals are a floor on the real uncertainty.
+          </p>
+        </div>
+        <aside class="note">
+          <p>Toggle 2021 and 2022 in Fig. 10 and watch Santa Catarina, west of the centre, appear: the city did not change in a year; its reporting did.</p>
+        </aside>
       </div>
-    </div>
-    <div class="r">
-      <div class="m prose">
-        <h3>Where</h3>
-        <p>
-          The structure is strong. The Gini coefficient of counts per cell is 0.756, and Moran’s <TeX tex="I" /> on <TeX tex={String.raw`\log(1+n)`} /> is 0.648. Local statistics are corrected for multiple testing
-          (Benjamini–Hochberg): significant LISA cells fall from 682 to 287, and what survives is a compact core over
-          the consolidated urban area with no isolated hot spots. Risk follows corridors, not corners.
-        </p>
-        <h3>Who bears it</h3>
-        <p>
-          The human cost is the exception, but a heavy one. 92.9% of incidents cause material damage only; the rest
-          left 25,642 people injured and 1,167 dead, and 64.4% of those deaths occurred at intersections in four
-          municipalities: Monterrey, Apodaca, Guadalupe and García. Where incidents are most frequent is not where they
-          are most severe: central cells average 498 incidents and 4.7% leave casualties, peripheral cells 29 and
-          8.4%. A ranking by count alone puts the periphery last.
-        </p>
-        <h3>Limits</h3>
-        <p>
-          The dominant source of error is administrative, not statistical. Municipalities change how they report from
-          one year to the next: Santa Catarina recorded 77 incidents in 2021 and 1,795 in 2022; Guadalupe, 8,032 in
-          2020 and 2,721 in 2024. The municipal effect therefore measures reporting, not risk, and no model can
-          anticipate a change of reporting regime from earlier data. The forecasts are conditional on no such change,
-          and their intervals are a floor on the real uncertainty.
-        </p>
-      </div>
-      <aside class="note">
-        <p>Toggle 2021 and 2022 in Fig. 10 and watch Santa Catarina, west of the centre, appear: the city did not change in a year; its reporting did.</p>
-      </aside>
     </div>
   </section>
 
-  <section aria-labelledby="form-h">
-    <div class="r"><h2 class="m" id="form-h">Formulation</h2></div>
-    <div class="r">
-      <div class="m prose">
+  <section class="win" id="formulation" data-feed="formulation" aria-labelledby="form-h">
+    <div class="win-bar"><span>man</span><span class="t">formulation(1)</span><span class="rule"></span><span class="reading">reading</span><span class="opt">3 equations</span></div>
+    <div class="win-body">
+      <h2 id="form-h">Formulation</h2>
+      <div class="prose">
         <p>
           The original question, how many incidents and in which census tracts, was reformulated before any data was
           touched. If counts per unit are independent Poisson, the total and its distribution across units come from
@@ -268,31 +272,29 @@ const f = story.facts;
           cell.
         </p>
       </div>
-    </div>
-    <div class="r">
-      <div class="m">
-        <p class="eq-label">Likelihood</p>
-        <div class="eq"><TeX display tex={String.raw`Y_{ia} \sim \mathrm{NB}(\mu_{ia},\,\theta), \qquad \log \mu_{ia} = \beta_0 + m_{j(i),a} + u_i`} /><span class="eqn">(1)</span></div>
+      <div class="r">
+        <div>
+          <p class="eq-label">likelihood</p>
+          <div class="eq"><TeX display tex={String.raw`Y_{ia} \sim \mathrm{NB}(\mu_{ia},\,\theta), \qquad \log \mu_{ia} = \beta_0 + m_{j(i),a} + u_i`} /><span class="eqn">(1)</span></div>
+        </div>
+        <aside class="note"><p>The municipal term absorbs how much each municipality reports; the cell term absorbs where, within the municipality, incidents concentrate.</p></aside>
       </div>
-      <aside class="note"><p>The municipal term absorbs how much each municipality reports; the cell term absorbs where, within the municipality, incidents concentrate.</p></aside>
-    </div>
-    <div class="r">
-      <div class="m">
-        <p class="eq-label">Municipal level</p>
-        <div class="eq"><TeX display tex={String.raw`m_{j,2019} = \sigma_m z_j, \qquad m_{j,a} = m_{j,a-1} + \sigma_{rw}\,\varepsilon_{j,a}, \quad \varepsilon_{j,a} \sim t_3`} /><span class="eqn">(2)</span></div>
+      <div class="r">
+        <div>
+          <p class="eq-label">municipal level</p>
+          <div class="eq"><TeX display tex={String.raw`m_{j,2019} = \sigma_m z_j, \qquad m_{j,a} = m_{j,a-1} + \sigma_{rw}\,\varepsilon_{j,a}, \quad \varepsilon_{j,a} \sim t_3`} /><span class="eqn">(2)</span></div>
+        </div>
+        <aside class="note"><p>A random walk with heavy-tailed steps: most municipalities move little from year to year, and a few jump. The <TeX tex="z_j" /> sum to zero, which identifies <span class="nowrap"><TeX tex={String.raw`\beta_0`} />.</span></p></aside>
       </div>
-      <aside class="note"><p>A random walk with heavy-tailed steps: most municipalities move little from year to year, and a few jump. The <TeX tex="z_j" /> sum to zero, which identifies <span class="nowrap"><TeX tex={String.raw`\beta_0`} />.</span></p></aside>
-    </div>
-    <div class="r">
-      <div class="m">
-        <p class="eq-label">Cell level</p>
-        <div class="eq"><TeX display tex={String.raw`\mathbf{u} \sim \mathcal{N}\left(\mathbf{0},\ \sigma_u^2\,(D - \alpha A)^{-1}\right)`} /><span class="eqn">(3)</span></div>
+      <div class="r">
+        <div>
+          <p class="eq-label">cell level</p>
+          <div class="eq"><TeX display tex={String.raw`\mathbf{u} \sim \mathcal{N}\left(\mathbf{0},\ \sigma_u^2\,(D - \alpha A)^{-1}\right)`} /><span class="eqn">(3)</span></div>
+        </div>
+        <aside class="note"><p>Each cell borrows strength from its six neighbours: <TeX tex="A" /> is the adjacency of the hexagons, <TeX tex="D" /> their number of neighbours, and <TeX tex={String.raw`\alpha`} /> how strongly neighbours resemble each other.</p></aside>
       </div>
-      <aside class="note"><p>Each cell borrows strength from its six neighbours: <TeX tex="A" /> is the adjacency of the hexagons, <TeX tex="D" /> their number of neighbours, and <TeX tex={String.raw`\alpha`} /> how strongly neighbours resemble each other.</p></aside>
-    </div>
-    <div class="r">
-      <div class="m prose">
-        <p>
+      <div class="prose">
+        <p style="margin-top:22px">
           A BYM2 spatial term was tried first, in both parameterisations, and did not identify: with five years of
           counts per cell the data fix each <TeX tex="u_i" /> almost completely, and only the priors can split it into
           spatial and independent parts. The proper CAR prior has a single variance and a single <span class="nowrap"><TeX tex={String.raw`\alpha`} />,</span> and is identified by strong data.
@@ -301,39 +303,40 @@ const f = story.facts;
     </div>
   </section>
 
-  <section aria-labelledby="method-h">
-    <div class="r"><h2 class="m" id="method-h">Method</h2></div>
-    <div class="r">
-      <div class="m prose">
-        <p>
-          The model is fitted in PyMC on an annual cell-by-year panel of 11,205 rows, with four NUTS chains (nutpie),
-          1,000 warm-up iterations and 2,000 draws, in four minutes. There are no divergences; over the 11,205 identified
-          quantities <span class="nowrap"><TeX tex={String.raw`\log \mu_{ia}`} />,</span> the largest <TeX tex={String.raw`\hat{R}`} /> is 1.005
-          and the smallest effective sample size 2,441. With alternative priors the hyperparameters change only in the
-          third decimal.
-        </p>
-        <p>
-          Validation is out of sample: the model is trained on 2019–2023 and asked for 2024, which it has not seen, and
-          compared with three baselines on mean absolute error, continuous ranked probability score (CRPS), the coverage
-          of the 90% interval, and the predictive accuracy index (PAI) of the top 5% of cells.
-        </p>
+  <section class="win" id="method" data-feed="method" aria-labelledby="method-h">
+    <div class="win-bar"><span>cat</span><span class="t">method.md</span><span class="rule"></span><span class="reading">reading</span></div>
+    <div class="win-body">
+      <h2 id="method-h">Method</h2>
+      <div class="r">
+        <div class="prose">
+          <p>
+            The model is fitted in PyMC on an annual cell-by-year panel of 11,205 rows, with four NUTS chains (nutpie),
+            1,000 warm-up iterations and 2,000 draws, in four minutes. There are no divergences; over the 11,205 identified
+            quantities <span class="nowrap"><TeX tex={String.raw`\log \mu_{ia}`} />,</span> the largest <TeX tex={String.raw`\hat{R}`} /> is 1.005
+            and the smallest effective sample size 2,441. With alternative priors the hyperparameters change only in the
+            third decimal.
+          </p>
+          <p>
+            Validation is out of sample: the model is trained on 2019–2023 and asked for 2024, which it has not seen, and
+            compared with three baselines on mean absolute error, continuous ranked probability score (CRPS), the coverage
+            of the 90% interval, and the predictive accuracy index (PAI) of the top 5% of cells.
+          </p>
+        </div>
+        <aside class="note">
+          <p>The project was developed for the Semana de la Movilidad by Angel Eduardo Luna, Jenaro Alcaraz, Roberto Pérez, Damián Yul Reynoso and Mateo Rodolfo Flores.</p>
+          <p>CRPS scores the whole forecast distribution, not just its centre. Coverage asks whether a 90% interval contains the truth 90% of the time.</p>
+        </aside>
       </div>
-      <aside class="note">
-        <p>The project was developed for the Semana de la Movilidad by Angel Eduardo Luna, Jenaro Alcaraz, Roberto Pérez, Damián Yul Reynoso and Mateo Rodolfo Flores.</p>
-        <p>CRPS scores the whole forecast distribution, not just its centre. Coverage asks whether a 90% interval contains the truth 90% of the time.</p>
-      </aside>
     </div>
   </section>
-</Project>
+</TerminalProject>
 
 <style>
-  .intro { margin-top: 28px; }
-  .skip { margin: 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
-  .showcase { margin-top: 48px; border-bottom: 1px solid var(--rule); }
-  .fig-section { margin-top: 56px; }
-  .after-table { margin-top: 28px; }
-  .table-note { margin: 8px 0 0; font: 400 14px/1.45 var(--sans); color: var(--graphite); }
-  .best th, .best td { font-weight: 600; color: var(--ink); }
+  .skip { margin: 22px 0 0; font: 400 13px/1.6 var(--mono); color: var(--dim); }
+  .skip a { color: var(--ink); }
+  .skip a:hover { color: var(--red); }
+  /* The scenes are wide terminal windows: wider than the reading column, inset from the screen edges */
+  .showcase { --inset: clamp(16px, 3vw, 40px); padding: 0 var(--inset); margin: 0 0 56px; }
 </style>
 
 <script>

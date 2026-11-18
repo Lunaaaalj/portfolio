@@ -8,7 +8,7 @@
 
 import model from '../../../data/geostats-model.json';
 import type { Ctx, Scene } from '../engine';
-import { fmt, label, rgba } from '../draw';
+import { fmt, glow, unglow, label, rgba } from '../draw';
 import { rng } from '../../../lib/tile';
 
 const [ma, ms] = model.pair.mean;
@@ -144,7 +144,7 @@ export default function puck(): Scene {
         for (let q = 0; q <= ch.at; q++) { const [x, y] = ch.path[q]; q ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)); }
         g.stroke();
         const [hx, hy] = ch.path[Math.min(ch.at, ch.path.length - 1)];
-        g.fillStyle = c.accent; g.beginPath(); g.arc(X(hx), Y(hy), 3.5, 0, Math.PI * 2); g.fill();
+        glow(g, c.accent, 12); g.fillStyle = c.accent; g.beginPath(); g.arc(X(hx), Y(hy), 3.5, 0, Math.PI * 2); g.fill(); unglow(g);
       }
       g.restore();
 

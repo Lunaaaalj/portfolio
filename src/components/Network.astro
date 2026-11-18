@@ -14,7 +14,7 @@
     const W = (await import('../data/network-weights.json')).default as unknown as Weights;
     const model = load(W);
     const q = (k: string) => document.querySelector<HTMLElement>(`[data-sl="${k}"]`);
-    const column = document.querySelector<HTMLElement>('main.col');
+    const column = document.querySelector<HTMLElement>('main.col, main > .col');
     const feeds = [...document.querySelectorAll<HTMLElement>('[data-feed]')];
     if (!column || !feeds.length) return;
     const net = mountNetwork({

@@ -9,6 +9,7 @@
 
 import { onThemeChange, reducedMotion } from '../palette';
 import { readColors, type Colors } from './draw';
+import { makeTyper, type Typer } from './typing';
 
 export interface Ctx {
   el: HTMLElement; art: HTMLElement; canvas: HTMLCanvasElement; g: CanvasRenderingContext2D;
@@ -31,7 +32,12 @@ export interface Scene {
   draw(ctx: Ctx, p: number): boolean | void;
 }
 
-type Entry = { ctx: Ctx; scene: Scene; beats: [HTMLElement, number, number][]; p: number; near: boolean; wants: boolean; ready: boolean };
+type Entry = {
+  ctx: Ctx; scene: Scene; beats: [HTMLElement, number, number][]; p: number; near: boolean; wants: boolean; ready: boolean;
+  stage: HTMLElement | null; stick: number; pbar: HTMLElement | null; pshown: string;
+  /** terminal scenes: a typer per caption, and whether the stage was pinned on the last frame */
+  typers: (Typer | null)[] | null; was: boolean;
+};
 
 export function mountScenes(registry: Record<string, () => Scene>) {
   const live = !reducedMotion.matches;
@@ -45,31 +51,67 @@ export function mountScenes(registry: Record<string, () => Scene>) {
     const art = el.querySelector<HTMLElement>('.scene-art')!;
     const canvas = art.querySelector('canvas')!;
     const out = el.querySelector<HTMLElement>('.scene-readout');
-    let last = '';
+    const tm = el.classList.contains('tm');
+    let last = '', pending = '', lastAt = 0, timer = 0;
+    const apply = () => { timer = 0; lastAt = performance.now(); if (out && pending !== last) { out.textContent = pending; last = pending; } };
     const ctx: Ctx = {
       el, art, canvas, g: canvas.getContext('2d')!, w: 0, h: 0, dpr: 1, c: colors, live, dt: 0, pinned: false,
-      readout: (t) => { if (out && t !== last) { out.textContent = t; last = t; } },
+      // The terminal's readout refreshes at about 12 Hz, in steps, like a screen being redrawn; the
+      // last value always lands (a trailing update)
+      readout: (t) => {
+        pending = t;
+        if (!out) return;
+        const wait = tm && live ? 80 - (performance.now() - lastAt) : 0;
+        if (wait <= 0) apply();
+        else if (!timer) timer = window.setTimeout(apply, wait);
+      },
     };
     const beats = [...el.querySelectorAll<HTMLElement>('.beat')].map((b) => {
       const [a, z] = (b.dataset.at ?? '0 1').split(' ').map(Number);
       return [b, a, z] as [HTMLElement, number, number];
     });
-    entries.push({ ctx, scene: make(), beats, p: -1, near: !live, wants: false, ready: false });
+    entries.push({
+      ctx, scene: make(), beats, p: -1, near: !live, wants: false, ready: false,
+      stage: el.querySelector<HTMLElement>('.stage'), stick: 0, pbar: el.querySelector<HTMLElement>('.pbar'), pshown: '',
+      typers: tm && live ? beats.map(([b]) => makeTyper(b)) : null, was: false,
+    });
+    const st = entries[entries.length - 1].stage;
+    st?.addEventListener('animationend', () => st.classList.remove('flick'));
   }
 
   const progress = (e: Entry) => {
     if (!live) return 1;
-    const r = e.ctx.el.getBoundingClientRect(), vh = innerHeight;
-    e.ctx.pinned = r.top <= 1 && r.bottom >= vh - 1;
-    return Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)));
+    // The stage sticks `stick` px from the top (0 on the engraving pages, below the bar on the
+    // terminal ones) and is `H` tall: it travels the track's height minus its own
+    const r = e.ctx.el.getBoundingClientRect(), H = e.stage?.offsetHeight ?? innerHeight;
+    e.ctx.pinned = r.top <= e.stick + 1 && r.bottom >= e.stick + H - 1;
+    return Math.min(1, Math.max(0, (e.stick - r.top) / Math.max(1, r.height - H)));
   };
 
   const draw = (e: Entry, force = false) => {
     if (!e.ready) return;
     const p = progress(e);
+    // Entering a terminal scene: the stage flickers once, like a screen changing mode
+    if (e.typers && e.stage && e.ctx.pinned && !e.was) { e.stage.classList.remove('flick'); void e.stage.offsetWidth; e.stage.classList.add('flick'); }
+    e.was = e.ctx.pinned;
     if (!force && p === e.p && !e.wants) return;
     e.p = p;
-    for (const [b, a, z] of e.beats) b.classList.toggle('is-on', !live || (p >= a && (p < z || (z >= 1 && p >= 1))));
+    if (e.pbar) {
+      const n = Math.round(p * 20), s = `${n}/${Math.round(p * 100)}`;
+      if (s !== e.pshown) {
+        e.pshown = s;
+        e.pbar.innerHTML = `[<span class="on">${'█'.repeat(n)}</span><i>${'░'.repeat(20 - n)}</i>] ${String(Math.round(p * 100)).padStart(3, ' ')}%`;
+      }
+    }
+    // A stage the network reads (data-feed) is marked by the network; otherwise by being pinned
+    if (!e.ctx.el.hasAttribute('data-feed')) e.stage?.classList.toggle('is-read', !live || e.ctx.pinned);
+    e.beats.forEach(([b, a, z], k) => {
+      const on = !live || (p >= a && (p < z || (z >= 1 && p >= 1)));
+      const was = b.classList.contains('is-on');
+      b.classList.toggle('is-on', on);
+      const ty = e.typers?.[k];
+      if (ty && on !== was) { if (on && e.ctx.pinned) ty.start(); else ty.finish(); }
+    });
     e.ctx.g.setTransform(e.ctx.dpr, 0, 0, e.ctx.dpr, 0, 0);
     e.ctx.g.clearRect(0, 0, e.ctx.w, e.ctx.h);
     const again = !!e.scene.draw(e.ctx, p);
@@ -81,6 +123,7 @@ export function mountScenes(registry: Record<string, () => Scene>) {
     const dpr = Math.min(2, devicePixelRatio || 1);
     if (!r.width || !r.height) return;
     ctx.w = r.width; ctx.h = r.height; ctx.dpr = dpr;
+    e.stick = e.stage ? parseFloat(getComputedStyle(e.stage).top) || 0 : 0;
     ctx.canvas.width = Math.round(r.width * dpr); ctx.canvas.height = Math.round(r.height * dpr);
     if (!e.ready) { e.scene.setup?.(ctx); e.ready = true; }
     e.scene.layout?.(ctx);

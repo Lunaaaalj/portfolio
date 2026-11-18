@@ -48,7 +48,14 @@ export function mountNetwork(o: Options) {
   // ---- what the model reads: the page's text, folded into its 50-character vocabulary
   const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[’‘]/g, "'")
     .replace(/[–—−]/g, '-').replace(/\s+/g, ' ').split('').map((c) => (VOC.includes(c) ? c : ' ')).join('').replace(/ {2,}/g, ' ');
-  const feeds = o.feeds.map((el) => ({ el, name: el.dataset.feed ?? '', text: norm((el.querySelector<HTMLElement>('.win-body') ?? el).innerText).trim() + ' ', p: 0 }));
+  // A window is read by what it shows; a scene by every caption (the hidden ones included) and its title
+  const readable = (el: HTMLElement) => {
+    const body = el.querySelector<HTMLElement>('.win-body');
+    if (body) return body.innerText;
+    const copy = el.querySelector<HTMLElement>('.scene-copy');
+    return copy ? copy.textContent ?? '' : el.innerText;
+  };
+  const feeds = o.feeds.map((el) => ({ el, name: el.dataset.feed ?? '', text: norm(readable(el)).trim() + ' ', p: 0 }));
   let active = feeds[0];
   let ctx = active.text.slice(0, T); active.p = ctx.length;
   let R = F.run(ctx), step = 0, lastNll = 0, ema: number | null = null, paused = false, lastStep = performance.now();

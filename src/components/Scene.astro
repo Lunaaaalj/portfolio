@@ -4,26 +4,35 @@
 // and `.beat` paragraphs, each shown over its interval of progress (`data-at="from to"`).
 // `source` says what the drawing is: computed in the browser, transcribed from the report, or
 // illustrative. The readout carries live numbers; `controls` adds pause and replay.
-interface Props { name: string; fig: number; title: string; source: string; length?: number; controls?: boolean }
-const { name, fig, title, source, length = 3, controls = false } = Astro.props;
+interface Props { name: string; fig: number; title: string; source: string; length?: number; controls?: boolean; terminal?: boolean }
+const { name, fig, title, source, length = 3, controls = false, terminal = false } = Astro.props;
 const id = `scene-${name}`;
 ---
-<div class="scene wide" data-scene={name} style={`--len: ${length}`}>
-  <figure class="stage" aria-labelledby={`${id}-h`}>
-    <figcaption class="scene-copy">
-      <p class="scene-fig">Fig. {fig}<span>{source}</span></p>
-      <h2 class="scene-h" id={`${id}-h`}>{title}</h2>
-      <div class="beats"><slot /></div>
-    </figcaption>
-    <div class="scene-art">
-      <canvas aria-hidden="true"></canvas>
-      <p class="scene-readout" aria-hidden="true"></p>
-      {controls && (
-        <div class="scene-controls">
-          <button type="button" class="scene-btn" data-act="pause" aria-pressed="false">Pause</button>
-          <button type="button" class="scene-btn" data-act="replay">Replay</button>
-        </div>
-      )}
+<div class:list={['scene', 'wide', { tm: terminal }]} data-scene={name} data-feed={terminal ? `fig-${String(fig).padStart(2, '0')}` : undefined} style={`--len: ${length}`}>
+  <figure class:list={['stage', { win: terminal }]} aria-labelledby={`${id}-h`}>
+    {terminal && (
+      <div class="win-bar">
+        <span>fig-{String(fig).padStart(2, '0')}</span><span class="t">{name}.sim</span><span class="rule"></span>
+        <span class="pbar" aria-hidden="true"></span><span class="reading">reading</span>
+      </div>
+    )}
+    <div class="s-body">
+      <figcaption class="scene-copy">
+        <p class="scene-fig"><b class="fn">Fig. {fig}</b><span>{source}</span></p>
+        <h2 class="scene-h" id={`${id}-h`}>{title}</h2>
+        <div class="beats"><slot /></div>
+      </figcaption>
+      <div class="scene-art">
+        <canvas aria-hidden="true"></canvas>
+        <p class="scene-readout" aria-hidden="true"></p>
+        {terminal && (<><i class="reg a"></i><i class="reg b"></i></>)}
+        {controls && (
+          <div class="scene-controls">
+            <button type="button" class="scene-btn" data-act="pause" aria-pressed="false">Pause</button>
+            <button type="button" class="scene-btn" data-act="replay">Replay</button>
+          </div>
+        )}
+      </div>
     </div>
   </figure>
 </div>
@@ -47,6 +56,8 @@ const id = `scene-${name}`;
   :global(.sx-live) .scene { height: calc(var(--len) * 100vh); height: calc(var(--len) * 100svh); }
   :global(.sx-live) .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 
+  .s-body { display: contents; }
+  .fn { font-weight: inherit; }
   .scene-copy {
     padding: 72px 40px 48px var(--inset);
     display: flex; flex-direction: column; justify-content: center;
@@ -115,4 +126,91 @@ const id = `scene-${name}`;
     .beats :global(.beat p) { font-size: 14px; line-height: 1.45; }
   }
   @media print { .scene { display: none; } }
+</style>
+
+<!-- The terminal rendering of a scene (`terminal` prop): a pinned glass window with a bar and an ASCII
+     progress meter, mono headings, `#` and `//` comment marks, a lattice for ground. These rules only
+     match `.tm`, so the engraving pages (ozone) are untouched. -->
+<style is:global>
+  /* z-index 2: above the network's canvases (0 and 1), as the reading column is */
+  .scene.tm { width: auto; margin-left: 0; z-index: 2; }
+  .scene.tm .stage {
+    display: flex; flex-direction: column; margin: 0; border: 1px solid var(--edge); background: color-mix(in srgb, var(--bg) 91%, transparent); overflow: visible;
+  }
+  .scene.tm .s-body {
+    display: grid; grid-template-columns: minmax(300px, 27rem) minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden;
+  }
+  .sx-live .scene.tm .stage { top: 52px; height: calc(100svh - 90px); overflow: visible; }
+  .scene.tm .win-bar { flex: none; white-space: nowrap; }
+  .scene.tm .pbar { color: var(--ink); letter-spacing: -.02em; }
+  .scene.tm .pbar i { font-style: normal; color: var(--faint); }
+  .scene.tm .pbar .on { color: var(--red); }
+  /* the network marks the scene it is reading (data-feed on the track); the stage follows */
+  .scene.tm.is-read > .stage { border-color: var(--edge-hi); }
+  .scene.tm.is-read > .stage > .win-bar { background: var(--ink); color: var(--bg); border-bottom-color: var(--ink); }
+  .scene.tm.is-read > .stage > .win-bar .t { color: var(--bg); }
+  .scene.tm.is-read > .stage > .win-bar .reading { display: inline; }
+  .scene.tm.is-read .pbar { color: var(--bg); }
+  .scene.tm.is-read .pbar i { color: var(--faint); }
+  html:not(.sx-live) .scene.tm .pbar { display: none; }
+
+  .scene.tm .scene-copy { padding: 28px 28px 24px; border-right: 1px solid var(--edge); }
+  .scene.tm .scene-fig { font: 400 12px/1.5 var(--mono); color: var(--dim); margin: 0 0 14px; }
+  .scene.tm .scene-fig .fn { color: var(--red); font-weight: 600; }
+  .scene.tm .scene-fig span { color: var(--faint); }
+  .scene.tm .scene-fig span::before { content: '# '; }
+  .scene.tm .scene-h { font: 500 clamp(26px, 2.9vw, 38px)/1.05 var(--mono); letter-spacing: -.045em; max-width: none; margin: 0 0 24px; }
+  .scene.tm .scene-h::before { content: '## '; color: var(--faint); }
+  .scene.tm .beats .beat p { font: 400 18px/1.5 var(--sans); max-width: 34ch; }
+  .scene.tm .beats .beat p.small { font: 400 14px/1.5 var(--sans); color: var(--dim); max-width: 42ch; }
+  .scene.tm .beats .beat p.small::before { content: '// '; font-family: var(--mono); color: var(--faint); }
+  .scene.tm .beats .beat .eqline { font-size: 17px; color: var(--ink); }
+  .scene.tm .beats .beat .statement { font: 500 clamp(30px, 3.4vw, 52px)/1 var(--mono); letter-spacing: -.05em; max-width: 11ch; }
+
+  .scene.tm .scene-art {
+    background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 11%, transparent) 1px, transparent 1.4px);
+    background-size: 24px 24px;
+  }
+  .scene.tm .scene-readout { font: 400 12px/1.55 var(--mono); color: var(--dim); right: 16px; top: 14px; }
+  .scene.tm .scene-readout::first-line { color: var(--ink); font-weight: 600; }
+  .scene.tm .reg { position: absolute; width: 11px; height: 11px; border: 0 solid var(--faint); pointer-events: none; }
+  .scene.tm .reg.a { left: 8px; bottom: 8px; border-left-width: 1px; border-bottom-width: 1px; }
+  .scene.tm .reg.b { right: 8px; bottom: 8px; border-right-width: 1px; border-bottom-width: 1px; }
+  .scene.tm .scene-controls { right: 16px; bottom: 22px; }
+  .scene.tm .scene-btn { font: 500 12px/1 var(--mono); border-radius: 0; border: 1px solid var(--edge-hi); background: var(--glass-hi); padding: 8px 11px; }
+  .scene.tm .scene-btn:hover { background: var(--red); border-color: var(--red); color: var(--bg); }
+  .scene.tm .scene-btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* Phase 3: captions type themselves (typing.ts), so they switch instantly; the stage flickers once on entry */
+  .sx-live .scene.tm .beats .beat, .sx-live .scene.tm .beats .beat.is-on { transition: none; transform: none; filter: none; }
+  .scene.tm .tw-r { visibility: hidden; }
+  .scene.tm .tw-t.cur::after {
+    content: ''; display: inline-block; width: .55em; height: 1em; margin-right: -.55em; background: var(--red);
+    vertical-align: -.14em; animation: tw-blink .9s steps(1) infinite;
+  }
+  @keyframes tw-blink { 50% { opacity: 0; } }
+  .scene.tm .stage.flick { animation: tm-flick .24s steps(1, end); }
+  @keyframes tm-flick { 0% { opacity: .35; } 20% { opacity: 1; } 38% { opacity: .6; } 56% { opacity: 1; } 72% { opacity: .85; } 100% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .scene.tm .stage.flick, .scene.tm .tw-t.cur::after { animation: none; } }
+
+  html:not(.sx-live) .scene.tm .stage { height: auto; }
+  html:not(.sx-live) .scene.tm .scene-art { min-height: 60vh; }
+  html:not(.sx-live) .scene.tm { margin-bottom: 28px; }
+
+  @media (max-width: 899px) {
+    .scene.tm .s-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+    .scene.tm .scene-art { grid-row: 1; min-height: 56vh; }
+    .sx-live .scene.tm .scene-art { min-height: 0; }
+    .scene.tm .scene-copy { grid-row: 2; padding: 12px 16px 16px; border-right: 0; border-top: 1px solid var(--edge); justify-content: flex-start; }
+    .scene.tm .scene-fig { margin-bottom: 6px; }
+    .scene.tm .scene-fig span { display: inline; }
+    .scene.tm .scene-fig span::before { content: ' · # '; }
+    .scene.tm .scene-h { font-size: 20px; margin-bottom: 8px; }
+    .scene.tm .beats .beat p { font-size: 15px; max-width: 60ch; }
+    .scene.tm .beats .beat p.small { display: none; }
+    .scene.tm .beats .beat .statement { font-size: 32px; max-width: none; }
+    .scene.tm .scene-readout { right: 12px; top: 10px; }
+    .scene.tm .win-bar .opt { display: none; }
+  }
+  @media (max-width: 899px) and (max-height: 700px) { .scene.tm .beats .beat p { font-size: 14px; } }
 </style>
